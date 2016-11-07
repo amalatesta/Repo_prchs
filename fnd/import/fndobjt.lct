@@ -1,0 +1,89 @@
+#
+# $Header: fndobjt.lct 120.0 2005/05/07 16:18:32 appldev noship $
+#
+# fndobjt.lct - Control file for FND_OBJECT_TABLESPACES  
+#
+# Entities
+#   FND_OBJECT_TABLESPACES
+#
+# PARAMETERS: APPLICATION_SHORT_NAME, 
+#             OBJECT_NAME
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOADSO bin &phase=con+80 checkfile:~PROD:~PATH:~FILE &ui_apps UPLOAD &fullpath_fnd_patch/115/import_fndobjt.lct &fullpath_~PROD_~PATH_~FILE" 
+
+DEFINE FND_OBJECT_TABLESPACES
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50) 
+  KEY   OBJECT_NAME             VARCHAR2(128)
+  KEY   OBJECT_TYPE             VARCHAR2(18)
+  BASE  TABLESPACE_TYPE         VARCHAR2(30)
+  BASE  CUSTOM_TABLESPACE_TYPE  VARCHAR2(30)
+  BASE  OBJECT_SOURCE           VARCHAR2(30)
+  BASE  ORACLE_USERNAME         VARCHAR2(30)
+  BASE  CUSTOM_FLAG             VARCHAR2(3)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(11) 
+  BASE  LAST_UPDATED_BY         VARCHAR2(4000) 
+END FND_OBJECT_TABLESPACES 
+
+DOWNLOAD FND_OBJECT_TABLESPACES
+         "select 
+          a.APPLICATION_SHORT_NAME,
+          m.OBJECT_NAME,  
+          m.OBJECT_TYPE,
+          m.TABLESPACE_TYPE,
+          m.CUSTOM_TABLESPACE_TYPE,
+          m.OBJECT_SOURCE,
+          m.ORACLE_USERNAME,
+          m.CUSTOM_FLAG,
+          TO_CHAR(m.LAST_UPDATE_DATE, 'YYYY/MM/DD') last_update_date,
+          fnd_load_util.owner_name(m.LAST_UPDATED_BY) OWNER
+    from  FND_OBJECT_TABLESPACES m, FND_APPLICATION a
+   where  a.application_id = m.application_id
+     and  (:APPLICATION_SHORT_NAME IS NULL
+          or (:APPLICATION_SHORT_NAME IS NOT NULL 
+              and a.application_short_name like :APPLICATION_SHORT_NAME))
+     and  (:OBJECT_NAME IS NULL
+          or (:OBJECT_NAME IS NOT NULL 
+              and m.object_name like :OBJECT_NAME)) " 
+
+
+UPLOAD  FND_OBJECT_TABLESPACES
+# BEGIN
+  " begin  
+      declare  
+        cursor c1 is
+        select application_id
+        from   fnd_application
+        where  application_short_name = :APPLICATION_SHORT_NAME;
+        app_id   number := 0;
+      begin          
+        OPEN c1;
+        FETCH c1 INTO app_id;
+        CLOSE c1;
+
+        if app_id IS NOT NULL then
+          if (:UPLOAD_MODE = 'NLS') then
+            return;
+          else  
+            if (:UPLOAD_MODE = 'REPLACE' and :CUSTOM_MODE = 'FORCE') then
+              delete from FND_OBJECT_TABLESPACES
+              where application_id = app_id;
+            end if;
+
+            FND_OBJECT_TABLESPACES_PKG.LOAD_ROW(  
+              P_APPLICATION_ID   => app_id,
+              P_OBJECT_NAME      => :OBJECT_NAME,
+  	      P_OBJECT_TYPE      =>  :OBJECT_TYPE,
+	      P_TABLESPACE_TYPE  => :TABLESPACE_TYPE,
+	      P_CUSTOM_TABLESPACE_TYPE  => :CUSTOM_TABLESPACE_TYPE,
+	      P_OBJECT_SOURCE    =>  :OBJECT_SOURCE,
+              P_ORACLE_USERNAME  =>  :ORACLE_USERNAME,
+              P_CUSTOM_FLAG      =>  :CUSTOM_FLAG,
+              P_LAST_UPDATED_BY  => :LAST_UPDATED_BY,
+              P_CUSTOM_MODE      => :CUSTOM_MODE,
+              P_LAST_UPDATE_DATE => :LAST_UPDATE_DATE);
+     
+          end if;
+        end if;
+      end;  
+    end; 

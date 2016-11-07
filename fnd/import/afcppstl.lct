@@ -1,0 +1,216 @@
+#
+# $Header: afcppstl.lct 120.0 2005/05/07 16:12:36 appldev ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+#
+#    STYLE
+#       - PRINTER_STYLE_NAME
+#
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcppstl.lct @~PROD:~PATH/~FILE" 
+DEFINE STYLE
+  KEY   PRINTER_STYLE_NAME VARCHAR2(30)
+  CTX   OWNER          	VARCHAR2(7)
+  BASE  WIDTH		VARCHAR2(50)
+  BASE  LENGTH		VARCHAR2(50)
+  BASE  ORIENTATION	VARCHAR2(255)
+  BASE  SRW_DRIVER	VARCHAR2(255)
+  BASE  HEADER_FLAG	VARCHAR2(1)
+  BASE  DESCRIPTION     VARCHAR2(255)
+  BASE  SEQUENCE        VARCHAR2(50)
+  TRANS USER_PRINTER_STYLE_NAME VARCHAR2(80)
+  BASE  LAST_UPDATE_DATE  VARCHAR2(10)
+END STYLE
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD STYLE
+  "select PRINTER_STYLE_NAME,  
+          decode(LAST_UPDATED_BY, 1, 'SEED', 'CUSTOM') OWNER,  
+	  WIDTH,
+	  LENGTH,
+	  ORIENTATION,
+	  SRW_DRIVER,
+	  HEADER_FLAG,
+	  DESCRIPTION,
+          SEQUENCE,
+	  USER_PRINTER_STYLE_NAME, 
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   fnd_printer_styles_vl
+          where ((:PRINTER_STYLE_NAME is null) or
+                 ((:PRINTER_STYLE_NAME is not null) and
+                  (PRINTER_STYLE_NAME like :PRINTER_STYLE_NAME)))  "
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD STYLE 
+  " begin  
+     declare
+      user_id  number := 0;
+      s_count  number := 0;
+      seq_count number := 0;
+      pri_seq  number := 0;
+      use_seq  number;
+      f_luby number;  -- entity owner in file
+      f_ludate date;  -- entity update date in file
+      db_luby number; -- entity owner in db
+      db_ludate date; -- entity update date in db
+      cursor c1 is select sequence from fnd_printer_styles order by sequence ;
+
+     begin
+
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+       
+      use_seq := :SEQUENCE;
+
+      select count(*) 
+        into seq_count
+        from fnd_printer_styles
+       where sequence = :SEQUENCE;
+
+      if (:UPLOAD_MODE = 'NLS') then
+
+        begin
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+           into db_luby, db_ludate
+          from fnd_printer_styles_tl
+           where PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME
+           and userenv('LANG') in (language, source_lang);
+
+        if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                       db_ludate, :CUSTOM_MODE)) then
+
+          update fnd_printer_styles_tl set
+          source_lang=userenv('LANG'),
+          USER_PRINTER_STYLE_NAME =
+		nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+          last_updated_by   = f_luby,
+          last_update_date  = f_ludate,
+          last_update_login = 0
+          where 
+          userenv('LANG') in (language, source_lang)
+          and  PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+         end if;
+        exception
+         when no_data_found then
+          null;
+        end;
+      else
+         begin
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+           into db_luby, db_ludate
+          from fnd_printer_styles
+           where PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+
+        if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                       db_ludate, :CUSTOM_MODE)) then
+
+           update fnd_printer_styles_tl set
+                  user_printer_style_name = 
+                      nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+                  last_updated_by = f_luby,
+                  last_update_date = f_ludate,
+                  last_update_login = 0
+            where userenv('LANG') in (language, source_lang)
+              and PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+
+           update fnd_printer_styles set
+                  width = :WIDTH,
+                  length = :LENGTH,
+                  description = nvl(:DESCRIPTION, DESCRIPTION),
+                  orientation = nvl(:ORIENTATION, ORIENTATION),
+                  srw_driver  = nvl(:SRW_DRIVER, SRW_DRIVER),
+                  header_flag = nvl(:HEADER_FLAG, HEADER_FLAG),
+                  last_updated_by = f_luby,
+                  last_update_date = f_ludate,
+                  last_update_login = 0
+            where PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+          end if;
+         exception
+          when no_data_found then 
+-- if seq is already used then get first available number
+	   if ( seq_count > 0 ) or not(:SEQUENCE is not NULL) then
+               for c1_rec in c1 loop
+                  if ( (c1_rec.sequence - pri_seq) > 1 ) then
+                      use_seq := pri_seq + 1;
+		      exit;
+		  else
+ 		      pri_seq := c1_rec.sequence;
+                  end if;
+               end loop;
+	   end if;
+
+	   insert into fnd_printer_styles_tl
+                  (printer_style_name, user_printer_style_name, language,
+                   source_lang, last_update_date, last_updated_by, 
+                   created_by, creation_date, last_update_login)
+            select :PRINTER_STYLE_NAME,:USER_PRINTER_STYLE_NAME,l.language_code,
+                   USERENV('LANG'), f_ludate, f_luby, f_luby, f_ludate, 0
+              from fnd_languages l
+             where l.installed_flag in ('I','B')
+               and not exists
+                   (select null 
+                      from fnd_printer_styles_tl t
+                     where t.printer_style_name = :PRINTER_STYLE_NAME
+                       and t.language = l.language_code); 
+
+           insert into fnd_printer_styles
+                  (printer_style_name, sequence, width, length, description,
+                   orientation, srw_driver, header_flag,
+                   last_update_date, last_updated_by, created_by,
+                   creation_date, last_update_login)
+            select :PRINTER_STYLE_NAME, use_seq, :WIDTH, :LENGTH, 
+                   :DESCRIPTION, :ORIENTATION, :SRW_DRIVER, :HEADER_FLAG,
+                   f_ludate, f_luby, f_luby, f_ludate, 0
+              from dual;
+       end;
+      end if;
+     end;
+    end; "
+

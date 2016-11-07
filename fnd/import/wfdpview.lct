@@ -1,0 +1,30 @@
+# $Header: wfdpview.lct 120.0 2005/05/07 16:19:33 appldev noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+54 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/wfdpview.lct @~PROD:~PATH/~FILE"
+
+DEFINE DIRECTORYPARTVIEWS
+   KEY   ORIG_SYSTEM     VARCHAR2(30)
+   BASE  PARTITION_ID    NUMBER
+   BASE  ROLE_VIEW       VARCHAR2(30)
+   BASE  USER_ROLE_VIEW  VARCHAR2(30)
+   BASE  ROLE_TL_VIEW    VARCHAR2(30)
+END DIRECTORYPARTVIEWS
+
+# --- End Entity Definitions ---
+
+DOWNLOAD DIRECTORYPARTVIEWS
+   "select ORIG_SYSTEM, PARTITION_ID, ROLE_VIEW, USER_ROLE_VIEW,
+           ROLE_TL_VIEW
+    from   WF_DIRECTORY_PARTITIONS
+    where  ORIG_SYSTEM = :TARGET_ORIGSYS"
+
+UPLOAD DIRECTORYPARTVIEWS
+     "begin
+        wf_directory_partitions_pkg.Update_View_Names (
+             :ORIG_SYSTEM,
+             :PARTITION_ID,
+             :ROLE_VIEW,
+             :USER_ROLE_VIEW,
+             :ROLE_TL_VIEW);
+    end;"

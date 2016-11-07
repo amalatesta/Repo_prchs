@@ -1,0 +1,161 @@
+#
+# $Header: afplist.lct 120.1.12000000.1 2007/01/18 12:41:29 appldev ship $
+#
+# afplist.lct - Form Customizations Property List Loader Configuration
+#
+# Entities -
+#
+#   PROP_LIST
+#
+# Parameters -
+#       (1) FIELD_TYPE=VALUE     (WHILE DOWNLOAD ONLY)
+#       (2) PROPERTY_NAME=VALUE  (WHILE DOWNLOAD ONLY)
+#
+
+#
+# To download all form customizations property list rows use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/afplist.lct <name of file>.ldt PROP_LIST 
+#
+# To download just certain rows use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/afplist.lct <name of file>.ldt PROP_LIST FIELD_TYPE="<any field type>" PROPERTY_NAME="<any property name>"
+#
+#   Note that the values of field_type and property_name are case sensitive.
+#   Possible values of field_type include BLOCK, CANVAS, GLOBAL, ITEM, LOV, PARAMETER, RADIO BUTTON, TAB, VIEW, WINDOW
+#   Possible values of property_name include ALTERABLE, HEIGHT, PROMPT, X_POS 
+#
+# To upload the form customizations property list use this command -
+#   FNDLOAD username/password@database 0 Y UPLOAD $FND_TOP/patch/115/import/afplist.lct <name of file>.ldt
+#
+
+#
+# -- DEFINE SECTION --
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afplist.lct @~PROD:~PATH/~FILE" 
+DEFINE PROP_LIST
+
+  KEY   FIELD_TYPE 	   VARCHAR2(30)
+  KEY   PROPERTY_NAME	   VARCHAR2(80)
+  BASE  ARGUMENT_TYPE 	   VARCHAR2(30)
+  BASE  PROPERTY_ID 	   VARCHAR2(50) ## The number stored in this column is portable
+  BASE  OWNER              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE   VARCHAR2(11)
+  BASE  SPEL_NAME          VARCHAR2(80)
+  BASE  SET_ALLOWED        VARCHAR2(1)
+
+
+END PROP_LIST 
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD PROP_LIST 
+  "select FIELD_TYPE,  
+          PROPERTY_NAME,  
+          ARGUMENT_TYPE,  
+          PROPERTY_ID,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          SPEL_NAME,
+          SET_ALLOWED
+   from   FND_FORM_CUSTOM_PROP_LIST  
+   where (:FIELD_TYPE is null or (:FIELD_TYPE is not null and FIELD_TYPE like :FIELD_TYPE))
+   and   (:PROPERTY_NAME is null or (:PROPERTY_NAME is not null and PROPERTY_NAME like :PROPERTY_NAME))
+   order by FIELD_TYPE, PROPERTY_NAME"
+
+#
+# -- UPLOAD section -- 
+# 
+
+UPLOAD PROP_LIST 
+   "DECLARE
+      f_luby         number; -- entity owner in file
+      f_ludate       date;   -- entity update date in file
+
+    BEGIN
+
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+    
+    -- Update statement for backward compatibility
+    if :SPEL_NAME is NULL and :SET_ALLOWED is NULL then
+      UPDATE FND_FORM_CUSTOM_PROP_LIST SET
+        argument_type = :ARGUMENT_TYPE,
+        property_id = :PROPERTY_ID,
+        last_update_date  = f_ludate,
+        last_updated_by   = f_luby,
+        last_update_login = 0,
+        spel_name = NULL,
+        set_allowed = NULL
+      WHERE field_type = :FIELD_TYPE
+        AND property_name = :PROPERTY_NAME;
+
+      if SQL%NOTFOUND then
+        INSERT INTO FND_FORM_CUSTOM_PROP_LIST (
+          field_type,
+          property_name,
+          argument_type,
+          property_id,
+          CREATED_BY,
+          CREATION_DATE,     
+          LAST_UPDATED_BY,
+          LAST_UPDATE_DATE,  
+          LAST_UPDATE_LOGIN,
+          SPEL_NAME,
+          SET_ALLOWED)
+        VALUES (
+          :FIELD_TYPE,
+          :PROPERTY_NAME,
+          :ARGUMENT_TYPE,
+          :PROPERTY_ID, 
+          f_luby,
+          f_ludate,
+          f_luby,
+          f_ludate,
+          0,
+          NULL,
+          NULL);
+      end if;
+    else
+      UPDATE FND_FORM_CUSTOM_PROP_LIST SET
+        argument_type = :ARGUMENT_TYPE,
+        property_id = :PROPERTY_ID,
+        last_update_date  = f_ludate,
+        last_updated_by   = f_luby,
+        last_update_login = 0,
+        spel_name = :SPEL_NAME,
+        set_allowed = :SET_ALLOWED
+      WHERE field_type = :FIELD_TYPE
+        AND property_name = :PROPERTY_NAME;
+
+      if SQL%NOTFOUND then
+        INSERT INTO FND_FORM_CUSTOM_PROP_LIST (
+          field_type,
+          property_name,
+          argument_type,
+          property_id,
+          CREATED_BY,
+          CREATION_DATE,     
+          LAST_UPDATED_BY,
+          LAST_UPDATE_DATE,  
+          LAST_UPDATE_LOGIN,
+          SPEL_NAME,
+          SET_ALLOWED)
+        VALUES (
+          :FIELD_TYPE,
+          :PROPERTY_NAME,
+          :ARGUMENT_TYPE,
+          :PROPERTY_ID, 
+          f_luby,
+          f_ludate,
+          f_luby,
+          f_ludate,
+          0,
+          :SPEL_NAME,
+          :SET_ALLOWED);
+      end if;
+    end if;
+  END;" 

@@ -1,0 +1,887 @@
+
+# $Header: afscprof.lct 120.13.12010000.1 2008/07/25 13:40:35 appldev ship $
+#
+# afscprof.lct -  Profile Options Loader Configuration
+#
+# Entity -
+#
+#    PROFILE				- FND_PROFILE_OPTIONS
+#       FND_PROFILE_OPTION_VALUES	- and their values
+#
+# Parameters -
+#    1) PROFILE_NAME		- Value of PROFILE_OPTION_NAME
+#    2) APPLICATION_SHORT_NAME	- APPLICATION_SHORT_NAME like FND, ICX
+#    3) LEV			- Level ID like RESPONSIBILITY, APPLICATION
+#    4) LEV_NAME		- Value of RESPONSIBILITY_KEY when LEV is 
+#                                 mentioned as RESPONSIBILITY and Value of 
+#                                 APPLICATION_SHORT_NAME when LEV is APPLICATION
+#    5) CATEGORY_OPTIONS        - Y / N
+#      i) When CATEGORY_OPTIONS=Y is specified, lct will download categories and
+#         it's options along with the profiles and it's values (which is again
+#         controlled by PROFILE_VALUES parameter) in the following format
+#         where data is driven by profile :
+#           +--FND_PROFILE_CATS                  -- Profile Category Structure
+#               |                                  - FND_PROFILE_CATS
+#               |                                  - FND_PROFILE_CATS_TL
+#
+#           +--PROFILE                           -- Profile Structure
+#               |                                  - FND_PROFILE_OPTIONS
+#               |                                  - FND_PROFILE_OPTIONS_TL
+#               +--FND_PROFILE_CATEGORY_OPTIONS  -- Profile Category Options
+#               |  |                               - FND_PROFILE_CAT_OPTIONS
+#               +--FND_PROFILE_OPTION_VALUES     -- Profile Values
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#               +--FND_PROFILE_OPTION_VALUE2     -- Profile Values for Serv+Resp
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg2.ldt PROFILE PROFILE_NAME=HELP_LOCALIZATION_CODE 
+#                   CATEGORY_OPTIONS=Y -- (pulls profiles, category options, 
+#                 profile values and categories in the above structure).
+#
+#     ii) When CATEGORY_OPTIONS=N is specified, lct will NOT download categories
+#         definitions along with the profiles profile->category link and 
+#         profile values (which is again controlled by PROFILE_VALUES parameter)
+#           +--PROFILE                           -- Profile Structure
+#               |                                  - FND_PROFILE_OPTIONS
+#               |                                  - FND_PROFILE_OPTIONS_TL
+#               +--FND_PROFILE_CATEGORY_OPTIONS  -- Profile Category Options
+#               |  |                               - FND_PROFILE_CAT_OPTIONS
+#               +--FND_PROFILE_OPTION_VALUES     -- Profile Values
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#               +--FND_PROFILE_OPTION_VALUE2     -- Profile Values for Serv+Resp
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg3.ldt PROFILE PROFILE_NAME=HELP_LOCALIZATION_CODE 
+#                   CATEGORY_OPTIONS=N -- no diff between testchg1.ldt and 
+#                   testchg3.ldt. (Just pulls profiles and it's values)
+#
+#   iii) When this parameter is not specified, by default it behaves as if 
+#        CATEGORY_OPTIONS=N is passed. 
+#        The resultant ldt is same as mentioned in Case ii.
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg1.ldt PROFILE PROFILE_NAME=HELP_LOCALIZATION_CODE 
+#                   -- Same as testchg3.ldt (pulls profiles and it's values).
+# Entity -
+#
+#    FND_PROFILE_CATS			- FND_PROFILE_CATS
+#       FND_PROFILE_CAT_OPTIONS 	- and their profile options
+#
+# Parameters -
+#    1) NAME			- Value of PROFILE_OPTION_NAME
+#    2) CATG_APPLICATION_SHORT_NAME	- APPLICATION_SHORT_NAME like FND, ICX
+#    3) PROFILE_OPTION_NAME	- Value of PROFILE_OPTION_NAME
+#    4) PROFILE_OPTIONS        - Y / N
+#      i) When PROFILE_OPTIONS=Y is specified, lct will download profiles and
+#         it's values (which is again controlled by PROFILE_VALUES parameter) 
+#         along with the categories and it's options in the following format
+#         where data is driven by category :
+#           +--PROFILE                           -- Profile Structure
+#               |                                  - FND_PROFILE_OPTIONS
+#               |                                  - FND_PROFILE_OPTIONS_TL
+#               +--FND_PROFILE_OPTION_VALUES     -- Profile Values
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#               +--FND_PROFILE_OPTION_VALUE2     -- Profile Values for Serv+Resp
+#               |   |                              - FND_PROFILE_OPTION_VALUES
+#
+#           +--FND_PROFILE_CATS                  -- Profile Category Structure
+#               |                                  - FND_PROFILE_CATS
+#               |                                  - FND_PROFILE_CATS_TL
+#               +--FND_PROFILE_CAT_OPTIONS       -- Profile Category Options
+#               |  |                               - FND_PROFILE_CAT_OPTIONS
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg5.ldt FND_PROFILE_CATS NAME=FND_IHELP_TEST1 
+#                   PROFILE_OPTIONS=Y -- (pulls categories, it's options, 
+#                   corresponding profile options and it's values).
+#
+#     ii) When PROFILE_OPTIONS=N is specified, lct will NOT download profiles
+#         and it's values along with the categories and options. Data is
+#         downloaded in the following format :
+#           +--FND_PROFILE_CATS                  -- Profile Category Structure
+#               |                                  - FND_PROFILE_CATS
+#               |                                  - FND_PROFILE_CATS_TL
+#               +--FND_PROFILE_CAT_OPTIONS       -- Profile Category Options
+#               |  |                               - FND_PROFILE_CAT_OPTIONS
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg6.ldt FND_PROFILE_CATS NAME=FND_IHELP_TEST1 
+#                   PROFILE_OPTIONS=N. (Just pulls categories and it's options 
+#                   w/o profile options and values)
+#
+#   iii) When this parameter is not specified, by default it behaves as if 
+#        PROFILE_OPTIONS=Y is passed. This is to provide backward compatiabilit
+#        The resultant ldt is same as mentioned in Case i where data is 
+#        is downloaded for categories, options, profile's and it's values (which
+#        is again controlled by PROFILE_VALUES param).
+#
+#         Example :
+#                   FNDLOAD apps/r12b1apps@fnd12dev 0 Y DOWNLOAD afscprof.lct 
+#                   testchg4.ldt FND_PROFILE_CATS NAME=FND_IHELP_TEST1 
+#                   This is same as testchg5.ldt (pulls categories, it's options
+#                   , corresponding profile options and it's values)
+#
+#     
+# Common Parameter -
+#    1) PROFILE_VALUES - "Y" or "N"
+#
+#     This is a common parameter which can be used while downloading 'PROFILE'
+#     and can also be used while downloading 'FND_PROFILE_CATS'. But this 
+#     parameter should be used only while downloading.
+#     This parameter behaves as follow:
+#     i) When PROFILE_VALUES=Y is specified, lct will download profile values
+#        along with the profiles for ALL the profiles included in the category.
+#    ii) When PROFILE_VALUES=N is specified, lct will NOT download 
+#        profile values for any of it's profiles.
+#   iii) When this parameter is not specified, and
+#       a) When downloading 'PROFILE' entity, it downloads profile values along
+#          with the profiles to make it backward compatible.
+#       b) When downloading 'FND_PROFILE_CATS' entity, it doesn't download 
+#          profile values. It just downloads Categories, options and the 
+#          corresponding profiles.
+#
+# To download Profiles (Add parameters of 'PROFILE' entity as required :
+#   FNDLOAD <appsUser>/<appsPwd> 0 Y DOWNLOAD afscprof.lct <ldt> PROFILE PROFILE_NAME=<Name Of Profile Option> APPLICATION_SHORT_NAME=<Name Of Application Short Name> LEV=<RESPONSIBILITY/APPLICATION> LEV_NAME=<Based upon the value of LEV either value of RESPONSIBILITY_KEY or value of APPLICATION_SHORT_NAME>
+#
+#   When entity 'PROFILE' is downloaded, it will download Profiles and it's 
+#   Values in a single ldt.
+#
+# To download Categories (Add parameters of 'FND_PROFILE_CATS' entity as required :
+#   FNDLOAD <appsUser>/<appsPwd> 0 Y DOWNLOAD afscprof.lct <ldt> FND_PROFILE_CATS NAME=<Name of Category Code> CATG_APPLICATION_SHORT_NAME=<Name Of Application Short Name> PROFILE_OPTION_NAME=<Name of Profile Option Name>
+#
+#   When entity 'FND_PROFILE_CATS' is downloaded, it will download Categories,
+#   it's options, the corresponding profiles and it's values (based upon the 
+#   parameter PROFILE_VALUES passed while downloading) into a single ldt.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afscprof.lct @~PROD:~PATH/~FILE"
+
+DEFINE PROFILE
+  KEY   PROFILE_NAME 			VARCHAR2(80)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  CTX   APPLICATION_SHORT_NAME 		VARCHAR2(50)
+  TRANS USER_PROFILE_OPTION_NAME 	VARCHAR2(240)
+  TRANS DESCRIPTION 			VARCHAR2(240)
+  BASE  USER_CHANGEABLE_FLAG 		VARCHAR2(1)
+  BASE  USER_VISIBLE_FLAG 		VARCHAR2(1)
+  BASE  READ_ALLOWED_FLAG 		VARCHAR2(1)
+  BASE  WRITE_ALLOWED_FLAG 		VARCHAR2(1)
+  BASE  SITE_ENABLED_FLAG 		VARCHAR2(1)
+  BASE  SITE_UPDATE_ALLOWED_FLAG 	VARCHAR2(1)
+  BASE  APP_ENABLED_FLAG 		VARCHAR2(1)
+  BASE  APP_UPDATE_ALLOWED_FLAG 	VARCHAR2(1)
+  BASE  RESP_ENABLED_FLAG 		VARCHAR2(1)
+  BASE  RESP_UPDATE_ALLOWED_FLAG 	VARCHAR2(1)
+  BASE  USER_ENABLED_FLAG 		VARCHAR2(1)
+  BASE  USER_UPDATE_ALLOWED_FLAG 	VARCHAR2(1)
+  BASE  START_DATE_ACTIVE 		VARCHAR2(10)
+  BASE  END_DATE_ACTIVE 		VARCHAR2(10)
+  BASE  SQL_VALIDATION 			VARCHAR2(2000)
+  BASE  HIERARCHY_TYPE			VARCHAR2(8)
+  BASE  SERVER_ENABLED_FLAG		VARCHAR2(1)
+  BASE  SERVER_UPDATE_ALLOWED_FLAG	VARCHAR2(1)
+  BASE  ORG_ENABLED_FLAG		VARCHAR2(1)
+  BASE  ORG_UPDATE_ALLOWED_FLAG		VARCHAR2(1)
+  BASE  SERVERRESP_ENABLED_FLAG         VARCHAR2(1)
+  BASE  SERVERRESP_UPDATE_ALLOWED_FLAG  VARCHAR2(1)
+
+  DEFINE FND_PROFILE_CATEGORY_OPTIONS
+    KEY CATEGORY			      REFERENCES  FND_PROFILE_CATS AS CATG_NAME, CATG_APPSNAME
+    BASE DISPLAY_SEQUENCE		      VARCHAR2(50)
+    BASE DISPLAY_TYPE			      VARCHAR2(30)
+    CTX OWNER                                 VARCHAR2(4000)
+    BASE LAST_UPDATE_DATE                     VARCHAR2(10)
+  END FND_PROFILE_CATEGORY_OPTIONS
+
+  DEFINE FND_PROFILE_OPTION_VALUES
+    KEY   LEVEL			 	VARCHAR2(50)
+    KEY   LEVEL_VALUE			VARCHAR2(4000)
+    KEY   LEVEL_VALUE_APP		VARCHAR2(50)		
+    CTX   OWNER                         VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    BASE  PROFILE_OPTION_VALUE		VARCHAR2(240)
+
+  END FND_PROFILE_OPTION_VALUES
+
+  DEFINE FND_PROFILE_OPTION_VALUE2
+    KEY   LEVEL			 	VARCHAR2(50)
+    KEY   LEVEL_VALUE			VARCHAR2(4000)
+    KEY   LEVEL_VALUE_APP		VARCHAR2(50)		
+    KEY   LEVEL_VALUE2                  VARCHAR2(30)
+    CTX   OWNER                         VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    BASE  PROFILE_OPTION_VALUE		VARCHAR2(240)
+
+  END FND_PROFILE_OPTION_VALUE2
+
+END PROFILE
+
+DEFINE FND_PROFILE_CATS
+  KEY NAME				VARCHAR2(80)
+  KEY CATG_APPLICATION_SHORT_NAME       VARCHAR2(50)
+  CTX OWNER                             VARCHAR2(4000)
+  BASE ENABLED                          VARCHAR2(1)
+  BASE LAST_UPDATE_DATE                 VARCHAR2(10)
+  TRANS DESCRIPTION                     VARCHAR2(4000)
+  TRANS DISPLAY_NAME                    VARCHAR2(80)
+
+  DEFINE FND_PROFILE_CAT_OPTIONS
+    KEY PROFILE_OPTION_NAME  REFERENCES PROFILE AS PROFILE_OPTION_NAME
+    BASE DISPLAY_SEQUENCE		      VARCHAR2(50)
+    BASE DISPLAY_TYPE			      VARCHAR2(30)
+    CTX OWNER                                 VARCHAR2(4000)
+    BASE LAST_UPDATE_DATE                     VARCHAR2(10)
+    BASE PROF_APPLICATION_SHORT_NAME          VARCHAR2(50)
+  END FND_PROFILE_CAT_OPTIONS
+
+END FND_PROFILE_CATS
+
+
+DOWNLOAD PROFILE
+  "  select  o.PROFILE_OPTION_NAME,  
+             fnd_load_util.owner_name(o.LAST_UPDATED_BY) OWNER,
+	     to_char(o.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+             a.APPLICATION_SHORT_NAME,  
+             o.USER_PROFILE_OPTION_NAME,  
+             o.DESCRIPTION,  
+             o.USER_CHANGEABLE_FLAG,  
+             o.USER_VISIBLE_FLAG,  
+             o.READ_ALLOWED_FLAG,  
+             o.WRITE_ALLOWED_FLAG,  
+             o.SITE_ENABLED_FLAG,  
+             o.SITE_UPDATE_ALLOWED_FLAG,  
+             o.APP_ENABLED_FLAG,  
+             o.APP_UPDATE_ALLOWED_FLAG,  
+             o.RESP_ENABLED_FLAG,  
+             o.RESP_UPDATE_ALLOWED_FLAG,  
+             o.USER_ENABLED_FLAG,  
+             o.USER_UPDATE_ALLOWED_FLAG,  
+       	     TO_CHAR(o.START_DATE_ACTIVE, 'YYYY/MM/DD') START_DATE_ACTIVE,  
+             TO_CHAR(o.END_DATE_ACTIVE, 'YYYY/MM/DD') END_DATE_ACTIVE,  
+             o.SQL_VALIDATION,  
+             o.HIERARCHY_TYPE,
+             o.SERVER_ENABLED_FLAG,
+             o.SERVER_UPDATE_ALLOWED_FLAG,
+             o.ORG_ENABLED_FLAG,
+             o.ORG_UPDATE_ALLOWED_FLAG,
+             o.SERVERRESP_ENABLED_FLAG,
+             o.SERVERRESP_UPDATE_ALLOWED_FLAG
+     from    fnd_profile_options_vl o,  
+             fnd_application a  
+     where   o.application_id = a.application_id  
+     and     (:PROFILE_NAME is null or
+                (:PROFILE_NAME is not null 
+                    and o.profile_option_name like :PROFILE_NAME))
+     and     (:APPLICATION_SHORT_NAME is null or
+                (:APPLICATION_SHORT_NAME is not null 
+                  and a.application_short_name like :APPLICATION_SHORT_NAME)) 
+     and   (:PROFILE_OPTIONS is null or
+              (:PROFILE_OPTIONS is not null
+                   and :PROFILE_OPTIONS = 'Y')) "
+
+  DOWNLOAD FND_PROFILE_OPTION_VALUES
+  "    select TO_CHAR(ov.LEVEL_ID),  
+              decode(ov.LEVEL_ID,  
+   	         10001, '** Site **',  
+      	         10002, pla.application_short_name,  
+                 10003, plr.responsibility_key,  
+                 10004, plu.user_name,  
+                 10005, pln.node_name,
+                 10006, plo.name,
+       	      'Unsupported level - '||ov.LEVEL_ID), 
+              la.application_short_name,  
+              fnd_load_util.owner_name(ov.LAST_UPDATED_BY) OWNER,
+	      to_char(ov.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+              ov.PROFILE_OPTION_VALUE  
+       from   fnd_profile_option_values ov,  
+              fnd_profile_options o,  
+              fnd_application la,  
+              fnd_user plu,  
+              fnd_responsibility plr,  
+              fnd_application pla,  
+              hr_operating_units plo, 
+              fnd_nodes pln
+       where  o.profile_option_id = ov.profile_option_id  
+       and    o.application_id = ov.application_id  
+       and    o.profile_option_name = :PROFILE_NAME  
+       and    la.application_id (+) = ov.level_value_application_id  
+       and    ov.level_value = pla.application_id (+)  
+       and    ov.level_value = plu.user_id (+)  
+       and    ov.level_value = plr.responsibility_id (+)  
+       and    ov.level_value = plo.organization_id (+)
+       and    ov.level_value_application_id = plr.application_id (+) 
+       and    ov.level_value = pln.node_id (+) 
+       and    ov.level_id <> 10007 
+       and    (:LEV is null 
+                or
+                  (:LEV is not null and ov.level_id =  DECODE(:LEV,'RESPONSIBILITY',10003,
+                                                        'APPLICATION',10002, null) 
+                  and (:LEV_NAME is null
+                      or (:LEV_NAME is not null
+                           and :LEV_NAME =  DECODE(
+                                               :LEV,'RESPONSIBILITY',plr.responsibility_key,
+                                                   'APPLICATION',pla.application_short_name,
+                                                               null)
+                         )
+                      )
+                   )
+               ) 
+       and     ov.profile_option_value is not null 
+       and   ((:PROFILE_VALUES is null and :NAME is null and :CATG_APPLICATION_SHORT_NAME is null)
+              or
+              (:PROFILE_VALUES is not null and :PROFILE_VALUES='Y'))
+       "
+
+
+  DOWNLOAD FND_PROFILE_OPTION_VALUE2
+  "    select TO_CHAR(ov.LEVEL_ID),  
+              plr.responsibility_key,
+              la.application_short_name,  
+              pln.node_name,
+              fnd_load_util.owner_name(ov.LAST_UPDATED_BY) OWNER,
+	      to_char(ov.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+              ov.PROFILE_OPTION_VALUE  
+       from   fnd_profile_option_values ov,  
+              fnd_profile_options o,  
+              fnd_application la,  
+              fnd_responsibility plr,  
+              fnd_application pla,  
+              fnd_nodes pln
+       where  o.profile_option_id = ov.profile_option_id  
+       and    o.application_id = ov.application_id  
+       and    o.profile_option_name = :PROFILE_NAME  
+       and    la.application_id (+) = ov.level_value_application_id  
+       and    ov.level_value = pla.application_id (+)  
+       and    ov.level_value = plr.responsibility_id (+)  
+       and    ov.level_value_application_id = plr.application_id (+) 
+       and    ov.level_value2 = pln.node_id (+) 
+       and    ov.level_id = 10007 
+       and    ov.profile_option_value is not null 
+       and   ((:PROFILE_VALUES is null and :NAME is null and :CATG_APPLICATION_SHORT_NAME is null)
+              or
+              (:PROFILE_VALUES is not null and :PROFILE_VALUES='Y')) "
+
+DOWNLOAD FND_PROFILE_CATS
+  "  select  P.NAME,
+             A.APPLICATION_SHORT_NAME,
+             fnd_load_util.owner_name(P.LAST_UPDATED_BY) OWNER,
+             P.ENABLED,
+             to_char(P.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+             P.DESCRIPTION,
+	     P.DISPLAY_NAME
+     from    fnd_profile_cats_vl p,
+             fnd_application a
+     where   p.application_id = a.application_id
+     and   (:CATG_APPLICATION_SHORT_NAME is null or
+                (:CATG_APPLICATION_SHORT_NAME is not null
+                    and a.application_short_name like upper(:CATG_APPLICATION_SHORT_NAME))) 
+     and   (:NAME is null or
+                (:NAME is not null
+                    and name like upper(:NAME))) 
+     and   ((:CATEGORY_OPTIONS is not null and :CATEGORY_OPTIONS='Y') or
+           (:CATEGORY_OPTIONS is null and :PROFILE_NAME is null and 
+            :APPLICATION_SHORT_NAME is null)) "
+
+# Bug 5060938. Added new field PROF_APPLICATION_SHORT_NAME in
+# FND_PROFILE_CAT_OPTIONS entity and so doing the corresponding changes
+# in DOWNLOAD and UPLOAD sections.
+
+DOWNLOAD FND_PROFILE_CAT_OPTIONS
+  "  select  P.PROFILE_OPTION_NAME,
+             O.DISPLAY_SEQUENCE,
+             O.DISPLAY_TYPE,
+             fnd_load_util.owner_name(o.LAST_UPDATED_BY) OWNER,
+             to_char(o.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+             profapp.application_short_name
+     from    fnd_profile_cat_options o,
+             fnd_profile_options p,
+             fnd_application a,
+             fnd_application profapp
+       where o.profile_option_application_id = p.application_id
+       and   o.profile_option_id = p.profile_option_id 
+       and   o.application_id = a.application_id
+       and   (:PROFILE_OPTION_NAME is null or
+                (:PROFILE_OPTION_NAME is not null
+                    and p.profile_option_name like :PROFILE_OPTION_NAME)) 
+       and   o.category_name = upper(:NAME)
+       and   a.application_short_name = upper(:CATG_APPLICATION_SHORT_NAME) 
+       and   o.profile_option_application_id = profapp.application_id
+       and   :CATEGORY_OPTIONS is null "
+
+DOWNLOAD FND_PROFILE_CATEGORY_OPTIONS
+  "  select  C.NAME,
+             A.APPLICATION_SHORT_NAME,
+             O.DISPLAY_SEQUENCE,
+             O.DISPLAY_TYPE,
+             fnd_load_util.owner_name(o.LAST_UPDATED_BY) OWNER,
+             to_char(o.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+     from    fnd_profile_cat_options o,
+             fnd_profile_cats c,
+             fnd_profile_options p,
+             fnd_application a
+       where o.category_name = c.name
+       and   o.application_id = c.application_id
+       and   o.application_id = a.application_id
+       and   o.profile_option_id = p.profile_option_id
+       and   o.profile_option_application_id = p.application_id
+       and   p.profile_option_name = upper(:PROFILE_NAME)
+       and   (:CATG_NAME is null or
+                (:CATG_NAME is not null
+                    and c.name like :CATG_NAME)) 
+       and   (:CATG_APPSNAME is null or
+                (:CATG_APPSNAME is not null
+                    and a.application_short_name like :CATG_APPSNAME)) 
+       and   (:PROFILE_OPTIONS is null and :NAME is null and 
+                :CATG_APPLICATION_SHORT_NAME is null) "
+
+#     The Category->Options link information is now available with both
+#     PROFILE and FND_PROFILE_CATS entity while downloading them.
+#     If the ldt extracts both the entities then the link information will be 
+#     avilable with 
+#     a)PROFILE entity if data is driven by PROFILE
+#     b)FND_PROFILE_CATS entity if data is driven by CATEGORY
+
+UPLOAD PROFILE
+  BEGIN
+  "begin 
+    if (:UPLOAD_MODE = 'NLS') then  
+      fnd_profile_options_pkg.TRANSLATE_ROW (  
+        :PROFILE_NAME,  
+        :OWNER,  
+        :USER_PROFILE_OPTION_NAME,  
+        :DESCRIPTION,
+        :CUSTOM_MODE,
+        :LAST_UPDATE_DATE);  
+    else
+      fnd_profile_options_pkg.LOAD_ROW (
+        :PROFILE_NAME,
+        :OWNER,
+        :APPLICATION_SHORT_NAME,
+        :USER_PROFILE_OPTION_NAME,
+        :DESCRIPTION,
+        :USER_CHANGEABLE_FLAG,
+        :USER_VISIBLE_FLAG,
+        :READ_ALLOWED_FLAG,
+        :WRITE_ALLOWED_FLAG,
+        :SITE_ENABLED_FLAG,
+        :SITE_UPDATE_ALLOWED_FLAG,
+        :APP_ENABLED_FLAG,
+        :APP_UPDATE_ALLOWED_FLAG,
+        :RESP_ENABLED_FLAG,
+        :RESP_UPDATE_ALLOWED_FLAG,
+        :USER_ENABLED_FLAG,
+        :USER_UPDATE_ALLOWED_FLAG,
+        :START_DATE_ACTIVE,
+        :END_DATE_ACTIVE,
+        :SQL_VALIDATION,
+        :HIERARCHY_TYPE,
+        :CUSTOM_MODE,
+        :LAST_UPDATE_DATE,
+        :SERVER_ENABLED_FLAG,
+        :SERVER_UPDATE_ALLOWED_FLAG,
+        :ORG_ENABLED_FLAG,
+        :ORG_UPDATE_ALLOWED_FLAG,
+        :SERVERRESP_ENABLED_FLAG,
+        :SERVERRESP_UPDATE_ALLOWED_FLAG
+      );
+    end if;
+  end;"
+
+UPLOAD FND_PROFILE_CATEGORY_OPTIONS
+"begin
+  if (:UPLOAD_MODE = 'NLS') then
+     null;
+   else
+     fnd_profile_cat_options_pkg.LOAD_ROW(
+     :PROFILE_NAME,
+     :CATG_NAME,
+     :DISPLAY_SEQUENCE,
+     :DISPLAY_TYPE,
+     :OWNER,
+     :CUSTOM_MODE,
+     :LAST_UPDATE_DATE,
+     :CATG_APPSNAME,
+     :APPLICATION_SHORT_NAME);
+   end if;
+end;"
+
+UPLOAD FND_PROFILE_OPTION_VALUES
+  "declare 
+     app_id    number := 0;  
+     profo_id  number := 0;  
+     levval_id number := 0;  
+     lapp_id   number := null;
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+     found     varchar2(1);
+   begin  
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+     
+     if (:LEVEL = '10007') then  
+       fnd_message.set_name('FND', 'FND_INVALID_ENTITY_LEVEL');
+       fnd_message.set_token('LEVEL', :LEVEL);
+       fnd_message.set_token('ENTITY', 'FND_PROFILE_OPTION_VALUES');
+       return;
+     end if;
+
+     if (:LEVEL = '10001') then  
+       levval_id := 0;  
+     elsif (:LEVEL = '10002') then  
+      begin
+       select application_id into levval_id  
+       from   fnd_application  
+       where  application_short_name = :LEVEL_VALUE;  
+
+      exception
+        when no_data_found then
+          return;
+      end;
+     elsif (:LEVEL = '10003') then  
+       select application_id into lapp_id  
+       from   fnd_application  
+       where  application_short_name = :LEVEL_VALUE_APP;  
+     
+       select responsibility_id into levval_id  
+       from   fnd_responsibility  
+       where  application_id = lapp_id  
+       and    responsibility_key = :LEVEL_VALUE;  
+     elsif (:LEVEL = '10005') then
+       select server_id into levval_id
+       from fnd_nodes
+       where node_name = :LEVEL_VALUE;
+     elsif (:LEVEL = '10006') then
+       select organization_id into levval_id  
+       from hr_operating_units
+       where name = :LEVEL_VALUE;
+     else  
+       begin
+       select user_id into levval_id  
+       from   fnd_user  
+       where  user_name = :LEVEL_VALUE;  
+       exception
+         when no_data_found then
+           fnd_message.set_name('FND', 'FND_INVALID_USER');
+           fnd_message.set_token('USER_NAME', :LEVEL_VALUE);
+           return;
+       end;
+     end if;  
+
+     select profile_option_id, application_id  
+     into   profo_id, app_id 
+     from   fnd_profile_options  
+     where  profile_option_name = :PROFILE_NAME;  
+       
+     f_luby := fnd_load_util.owner_id(:OWNER);
+     f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+     begin
+       --
+       -- Profile Values updated by SYSADMIN(0) are considered as customized 
+       -- and the only way to overwrite such rows is by using custom_mode=FORCE
+       --
+
+      if (:LEVEL = '10003') then
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+         into db_luby, db_ludate
+       from   FND_PROFILE_OPTION_VALUES
+       where  PROFILE_OPTION_ID = profo_id
+       and    APPLICATION_ID = app_id
+       and    LEVEL_ID = 10003 
+       and    LEVEL_VALUE_APPLICATION_ID = lapp_id  
+       and    LEVEL_VALUE = levval_id;
+      else 
+       -- Check for incorrect rows.
+       -- If found, delete them and record error message.
+       declare
+            l_count number;
+       begin
+            select count(*) into l_count
+            from   FND_PROFILE_OPTION_VALUES
+            where  PROFILE_OPTION_ID = profo_id
+            and    APPLICATION_ID = app_id
+            and    LEVEL_ID = to_number(:LEVEL)
+            and    LEVEL_VALUE = levval_id
+            and    LEVEL_VALUE_APPLICATION_ID is not null;  
+
+            if l_count > 0  then
+              fnd_message.set_name('FND', 'FND_PROFILES_INVALID_VALUES');
+              fnd_message.set_token('LEVEL', :LEVEL);
+              fnd_message.set_token('PROFNAME', :PROFILE_NAME);
+
+              delete from FND_PROFILE_OPTION_VALUES
+              where  PROFILE_OPTION_ID = profo_id
+              and    APPLICATION_ID = app_id
+              and    LEVEL_ID = to_number(:LEVEL)
+              and    LEVEL_VALUE = levval_id
+              and    LEVEL_VALUE_APPLICATION_ID is not null;  
+
+            end if;
+       end;
+
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+         into db_luby, db_ludate
+       from   FND_PROFILE_OPTION_VALUES
+       where  PROFILE_OPTION_ID = profo_id
+       and    APPLICATION_ID = app_id
+       and    LEVEL_ID = to_number(:LEVEL) 
+       and    LEVEL_VALUE = levval_id
+       and    LEVEL_VALUE_APPLICATION_ID is null;  
+      end if;
+  
+      --
+      -- if a row is last updated(db_luby) by sysadmin, do not
+      -- perform upload. BUG 3871740.
+      --
+       if (db_luby = 0) then
+         db_luby := -1;
+       end if;
+
+       if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                       db_ludate, :CUSTOM_MODE)) then
+             if (:PROFILE_OPTION_VALUE is null) then
+                delete from FND_PROFILE_OPTION_VALUES
+                where application_id = app_id  
+                   and profile_option_id = profo_id  
+                   and level_id = to_number(:LEVEL)  
+                   and nvl(level_value_application_id, 1) =  
+                           decode(:LEVEL, '10003', lapp_id, 1)  
+                   and level_value = levval_id;
+             else
+                 update fnd_profile_option_values 
+                 set   profile_option_value = :PROFILE_OPTION_VALUE,  
+                       last_update_date = f_ludate,
+                       last_updated_by = f_luby,  
+                       last_update_login = 0  
+                 where application_id = app_id  
+                   and profile_option_id = profo_id  
+                   and level_id = to_number(:LEVEL)  
+                   and nvl(level_value_application_id, 1) =  
+                           decode(:LEVEL, '10003', lapp_id, 1)  
+                   and level_value = levval_id;
+             end if;
+       end if;
+     exception
+       when no_data_found then
+         if (:PROFILE_OPTION_VALUE is null) then
+             return;
+         end if;
+
+         insert into fnd_profile_option_values (
+           application_id,
+           profile_option_id,
+           level_id,
+           level_value,
+           last_update_date,
+           last_updated_by,
+           creation_date,
+           created_by,
+           last_update_login,
+           profile_option_value,
+           level_value_application_id )
+         values (
+           app_id,
+           profo_id,
+           to_number(:LEVEL),
+           levval_id,
+           f_ludate,
+           f_luby,
+           f_ludate,
+           f_luby,
+           0,
+           :PROFILE_OPTION_VALUE,
+           decode(:LEVEL, '10003', lapp_id, null));
+     end;
+   end;"
+
+UPLOAD FND_PROFILE_OPTION_VALUE2
+  "declare 
+     app_id    number := 0;  
+     profo_id  number := 0;  
+     levval_id number := 0;  
+     levval2_id number := 0;  
+     lapp_id   number := null;
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+   begin  
+     if (:UPLOAD_MODE = 'NLS') then
+         return;
+     end if;
+     
+     if (:LEVEL <> '10007') then  
+         fnd_message.set_name('FND', 'FND_INVALID_ENTITY_LEVEL');
+         fnd_message.set_token('LEVEL', :LEVEL);
+         fnd_message.set_token('ENTITY', 'FND_PROFILE_OPTION_VALUE2');
+         return;
+     end if;
+
+     if ( nvl(:LEVEL_VALUE, '-1') = '-1' ) then
+          lapp_id := -1;
+          levval_id := -1;
+     else
+          select application_id into lapp_id  
+          from   fnd_application  
+          where  application_short_name = :LEVEL_VALUE_APP;  
+     
+          select responsibility_id into levval_id  
+          from   fnd_responsibility  
+          where  application_id = lapp_id  
+          and    responsibility_key = :LEVEL_VALUE;  
+     end if;
+
+     if ( nvl(:LEVEL_VALUE2, '-1') = '-1' ) then
+          levval2_id := -1;
+      else
+          select node_id into levval2_id
+          from fnd_nodes
+          where node_name = :LEVEL_VALUE2;
+      end if;
+
+     select profile_option_id, application_id  
+     into   profo_id, app_id 
+     from   fnd_profile_options  
+     where  profile_option_name = :PROFILE_NAME;  
+       
+     f_luby := fnd_load_util.owner_id(:OWNER);
+     f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+     begin
+       --
+       -- This section should never perform updates to existing 
+       -- data unless CUSTOM_MODE is equal to FORCE
+       --
+           select LAST_UPDATED_BY, LAST_UPDATE_DATE
+             into db_luby, db_ludate
+           from   FND_PROFILE_OPTION_VALUES
+           where  PROFILE_OPTION_ID = profo_id
+           and    APPLICATION_ID = app_id
+           and    LEVEL_ID = 10007 
+           and    LEVEL_VALUE_APPLICATION_ID = lapp_id  
+           and    LEVEL_VALUE = levval_id
+           and    LEVEL_VALUE2 = levval2_id;
+
+           --
+           -- if a row is last updated(db_luby) by sysadmin, do not
+           -- perform upload. BUG 3871740.
+           --
+           if (db_luby = 0) then
+               db_luby := -1;
+           end if;
+
+           if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                       db_ludate, :CUSTOM_MODE)) then
+                if ( :PROFILE_OPTION_VALUE is null ) then
+                     delete from FND_PROFILE_OPTION_VALUES
+                     where application_id = app_id
+                       and profile_option_id = profo_id
+                       and level_id = to_number(:LEVEL)
+                       and level_value_application_id =  lapp_id
+                       and level_value = levval_id
+                       and level_value2 = levval2_id;
+                else
+                     update fnd_profile_option_values 
+                     set   profile_option_value = :PROFILE_OPTION_VALUE,  
+                           last_update_date = f_ludate,
+                           last_updated_by = f_luby,  
+                           last_update_login = 0  
+                     where application_id = app_id  
+                       and profile_option_id = profo_id  
+                       and level_id = to_number(:LEVEL)  
+                       and level_value_application_id =  lapp_id  
+                       and level_value = levval_id
+                       and level_value2 = levval2_id;
+                end if;
+            end if;
+     exception
+          when no_data_found then
+            if ( :PROFILE_OPTION_VALUE is null ) then
+                 return;
+            end if;
+
+            insert into fnd_profile_option_values (
+              application_id,
+              profile_option_id,
+              level_id,
+              level_value,
+              level_value2,
+              last_update_date,
+              last_updated_by,
+              creation_date,
+              created_by,
+              last_update_login,
+              profile_option_value,
+              level_value_application_id )
+            values (
+              app_id,
+              profo_id,
+              to_number(:LEVEL),
+              levval_id,
+              levval2_id,
+              f_ludate,
+              f_luby,
+              f_ludate,
+              f_luby,
+              0,
+              :PROFILE_OPTION_VALUE,
+              lapp_id);
+     end;
+   end;"
+
+UPLOAD FND_PROFILE_CATS
+BEGIN
+"begin
+  if (:UPLOAD_MODE = 'NLS') then
+     fnd_profile_cats_pkg.TRANSLATE_ROW(
+     :NAME,
+     :CATG_APPLICATION_SHORT_NAME,
+     :DESCRIPTION,
+     :DISPLAY_NAME,
+     :CUSTOM_MODE,
+     :OWNER,
+     :LAST_UPDATE_DATE);
+   else
+     fnd_profile_cats_pkg.LOAD_ROW(
+     :NAME,
+     :DESCRIPTION,
+     :DISPLAY_NAME,
+     :ENABLED,
+     :CATG_APPLICATION_SHORT_NAME,
+     :OWNER,
+     :CUSTOM_MODE,
+     :LAST_UPDATE_DATE);
+   end if;
+end;"
+
+# Bug 5060938. Added new param 'PROF_APPLICATION_SHORT_NAME' to LOAD_ROW api.
+
+UPLOAD FND_PROFILE_CAT_OPTIONS
+"begin
+  if (:UPLOAD_MODE = 'NLS') then
+     null;
+   else
+     fnd_profile_cat_options_pkg.LOAD_ROW(
+       :PROFILE_OPTION_NAME,
+       :NAME,
+       :DISPLAY_SEQUENCE,
+       :DISPLAY_TYPE,
+       :OWNER,
+       :CUSTOM_MODE,
+       :LAST_UPDATE_DATE,
+       :CATG_APPLICATION_SHORT_NAME,
+       :PROF_APPLICATION_SHORT_NAME);
+   end if;
+end;"
+
+

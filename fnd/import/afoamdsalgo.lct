@@ -1,0 +1,71 @@
+# $Header: afoamdsalgo.lct 120.1 2005/11/23 15:38:30 yawu noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afoamdsalgo.lct @~PROD:~PATH/~FILE"
+
+DEFINE OAM_DS_ALGOS
+	KEY	  ALGO_ID		    VARCHAR2(50)
+	BASE	START_DATE	  VARCHAR2(11)
+	BASE	END_DATE	    VARCHAR2(11)
+	BASE	USE_ALGO_ID   VARCHAR2(50)
+  BASE  DEFAULT_FOR_DATATYPE_FLAG   VARCHAR2(3)
+  BASE  DATATYPE      VARCHAR2(30)
+  BASE  ALGO_TEXT     VARCHAR2(4000)
+  BASE  WEIGHT_MODIFIER VARCHAR2(15)
+  TRANS DISPLAY_NAME	VARCHAR2(120)
+	TRANS	DESCRIPTION		VARCHAR2(2000)
+	CTX 	OWNER			VARCHAR2(4000)
+	BASE	LAST_UPDATE_DATE	VARCHAR2(11)
+END OAM_DS_ALGOS
+
+# --- End Entity Definitions ---
+
+DOWNLOAD OAM_DS_ALGOS 
+	"SELECT b.algo_id, 
+          b.start_date,
+          b.end_date,
+          b.use_algo_id,
+          b.default_for_datatype_flag,
+          b.datatype,
+          b.algo_text,
+          b.weight_modifier,
+          t.display_name,
+          t.description,
+          fnd_load_util.OWNER_NAME(b.last_updated_by),
+          to_char(b.last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_ds_algos_b b, fnd_oam_ds_algos_tl t 
+	 WHERE  b.algo_id = t.algo_id AND
+            ((:ALGO_ID is null) OR 
+			( (:ALGO_ID is not null) AND
+			  (B.algo_id = :ALGO_ID)))"
+
+
+
+UPLOAD OAM_DS_ALGOS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			FND_OAM_DS_ALGOS_PKG.TRANSLATE_ROW(   
+              X_ALGO_ID => to_number(:ALGO_ID),
+              X_DISPLAY_NAME => :DISPLAY_NAME,
+              x_description => :description,
+              x_owner => :owner,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		else
+			FND_OAM_DS_ALGOS_PKG.LOAD_ROW(
+              X_ALGO_ID => to_number(:ALGO_ID),
+              X_START_DATE => :START_DATE,
+              X_END_DATE => :END_DATE,
+              X_USE_ALGO_ID => :USE_ALGO_ID,
+              X_DEFAULT_FOR_DATATYPE_FLAG => :DEFAULT_FOR_DATATYPE_FLAG,
+              X_DATATYPE => :DATATYPE,
+              X_ALGO_TEXT => :ALGO_TEXT,
+              X_WEIGHT_MODIFIER => :WEIGHT_MODIFIER,
+              X_OWNER   => :OWNER,
+              X_DISPLAY_NAME => :DISPLAY_NAME, 
+              X_DESCRIPTION => :DESCRIPTION,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+	

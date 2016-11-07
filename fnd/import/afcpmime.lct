@@ -1,0 +1,102 @@
+#
+# $Header: afcpmime.lct 120.1 2005/07/11 12:38:52 ddhulla ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+#
+#   MIME_TYPE 
+#
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+56 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcpmime.lct @~PROD:~PATH/~FILE"
+DEFINE MIME_TYPE
+  KEY   FILE_FORMAT_CODE	VARCHAR2(30)
+  BASE  MIME_TYPE               VARCHAR2(80)
+  CTX   OWNER			VARCHAR2(4000)
+  TRANS DESCRIPTION             VARCHAR2(240)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+  BASE  ALLOW_CLIENT_ENCODING   VARCHAR2(1)
+END MIME_TYPE
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD MIME_TYPE
+  "select FILE_FORMAT_CODE,  
+          MIME_TYPE,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,  
+          DESCRIPTION , 
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+		  ALLOW_CLIENT_ENCODING 
+   from   fnd_mime_types_vl
+   where  ((:FILE_FORMAT_CODE  is null) or
+           ((:FILE_FORMAT_CODE is not null) and
+            (FILE_FORMAT_CODE like :FILE_FORMAT_CODE))) "
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD MIME_TYPE
+ " 
+   begin
+
+    if (:UPLOAD_MODE = 'NLS') then
+      fnd_mime_types_pkg.TRANSLATE_ROW (
+	X_FILE_FORMAT_CODE =>	:FILE_FORMAT_CODE, 
+	X_MIME_TYPE =>		:MIME_TYPE,
+	X_OWNER =>		:OWNER, 
+	X_DESCRIPTION =>	:DESCRIPTION,
+        X_LAST_UPDATE_DATE=>    :LAST_UPDATE_DATE,
+        X_CUSTOM_MODE=>		:CUSTOM_MODE); 
+    else
+        fnd_mime_types_pkg.LOAD_ROW (  
+          X_FILE_FORMAT_CODE =>	:FILE_FORMAT_CODE,
+	  X_MIME_TYPE =>	:MIME_TYPE,
+  	  X_OWNER =>		:OWNER,
+	  X_DESCRIPTION =>	:DESCRIPTION,
+          X_LAST_UPDATE_DATE=>  :LAST_UPDATE_DATE,
+          X_CUSTOM_MODE=> 	:CUSTOM_MODE,
+		  		  X_ALLOW_CLIENT_ENCODING => :ALLOW_CLIENT_ENCODING);
+
+      end if;
+       
+   end; "
+

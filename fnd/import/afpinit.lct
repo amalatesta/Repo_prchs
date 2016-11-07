@@ -1,0 +1,108 @@
+#
+# $Header: afpinit.lct 120.0 2005/05/07 16:16:00 appldev ship $
+#
+# afpinit.lct -  Product Initialilzation Info
+#
+# Entities
+#    FND_PRODUCT_INITIALIZATION
+#      FND_PRODUCT_INIT_DEPENDENCY
+#      FND_PRODUCT_INIT_CONDITION
+#
+# Download Parameters
+#   APPLICATION_SHORT_NAME
+#
+# *** NOTE ***
+# There is a confusing reversal of attribute names in the
+# FND_PRODUCT_INIT_DEPENDENCY entity:
+#   a. APPLICATION_SHORT_NAME (the key) = The DEPENDENT application
+#   b. PRODUCT_DEPENDENCY = The APPLICATION with the dependency
+# When applications are downloaded, they include as child entities other
+# applications that depend on that application, NOT the applications that
+# the application being downloaded depends on.  This is the reverse of the
+# parameters you would pass if calling the fnd_product_init apis directly.
+#
+# For example:
+#   BEGIN FND_PRODUCT_INITIALIZATION "A"
+#   ...
+#     BEGIN FND_PRODUCT_INIT_DEPENDENCY
+#       PRODUCT_DEPENDENCY = "B"
+#       ...
+# means that application B has a dependency on A.  When choosing a 
+# responsibility owned by application B, the init code for application A
+# must be run.  
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afpinit.lct @~PROD:~PATH/~FILE"
+DEFINE FND_PRODUCT_INITIALIZATION
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(80)
+  CTX   INIT_FUNCTION_NAME      VARCHAR2(240)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+  DEFINE FND_PRODUCT_INIT_DEPENDENCY
+    CTX   PRODUCT_DEPENDENCY    VARCHAR2(80)
+    CTX   OWNER                 VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE      VARCHAR2(10)
+  END FND_PRODUCT_INIT_DEPENDENCY
+  DEFINE FND_PRODUCT_INIT_CONDITION
+    CTX   RE_INIT_CONDITION     VARCHAR2(8)
+    CTX   OWNER                 VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE      VARCHAR2(10)
+  END FND_PRODUCT_INIT_CONDITION
+END FND_PRODUCT_INITIALIZATION
+
+DOWNLOAD FND_PRODUCT_INITIALIZATION
+  "select APPLICATION_SHORT_NAME,
+          INIT_FUNCTION_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from FND_PRODUCT_INITIALIZATION
+   where :APPLICATION_SHORT_NAME is null 
+   or    (:APPLICATION_SHORT_NAME is not null 
+          and APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)"
+          
+DOWNLOAD FND_PRODUCT_INIT_DEPENDENCY
+  "select APPLICATION_SHORT_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from FND_PRODUCT_INIT_DEPENDENCY
+   where PRODUCT_DEPENDENCY = :APPLICATION_SHORT_NAME"
+
+DOWNLOAD FND_PRODUCT_INIT_CONDITION
+  "select RE_INIT_CONDITION,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from FND_PRODUCT_INIT_CONDITION
+   where APPLICATION_SHORT_NAME = :APPLICATION_SHORT_NAME"
+
+UPLOAD FND_PRODUCT_INITIALIZATION 
+  BEGIN
+    "begin 
+      Fnd_Product_Initialization_Pkg.Register(
+            x_apps_name => :APPLICATION_SHORT_NAME,
+            x_init_function => :INIT_FUNCTION_NAME,
+            x_owner => :OWNER,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_custom_mode => :CUSTOM_MODE);
+    end; "
+
+UPLOAD FND_PRODUCT_INIT_DEPENDENCY
+   "begin
+     Fnd_Product_Initialization_Pkg.AddDependency(
+            x_apps_name => :PRODUCT_DEPENDENCY,
+            x_dependency => :APPLICATION_SHORT_NAME,
+            x_owner => :OWNER,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_custom_mode => :CUSTOM_MODE);
+    end; "
+            
+UPLOAD FND_PRODUCT_INIT_CONDITION
+   "begin
+     Fnd_Product_Initialization_Pkg.AddInitCondition(
+            x_apps_name => :APPLICATION_SHORT_NAME,
+            x_condition => :RE_INIT_CONDITION,
+            x_owner => :OWNER,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_custom_mode => :CUSTOM_MODE);
+    end; "
+            
+

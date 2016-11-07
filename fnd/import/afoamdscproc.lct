@@ -1,0 +1,58 @@
+# $Header: afoamdscproc.lct 120.0 2005/11/23 19:05:46 ilawler noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afoamdscproc.lct @~PROD:~PATH/~FILE"
+
+DEFINE OAM_DSCFG_PROC
+        KEY     PROC_ID                 VARCHAR2(50)
+        BASE    PROC_TYPE               VARCHAR2(30)
+        BASE    STAGE                   VARCHAR2(30)
+        BASE    START_DATE              VARCHAR2(11)
+        BASE    END_DATE                VARCHAR2(11)
+        BASE    PRIORITY                VARCHAR2(50)
+        BASE    ERROR_IS_FATAL_FLAG     VARCHAR2(3)
+        BASE    LOCATION                VARCHAR2(2000)
+        BASE    EXECUTABLE              VARCHAR2(2000)
+        CTX     OWNER                   VARCHAR2(4000)
+        BASE    LAST_UPDATE_DATE        VARCHAR2(11)
+END OAM_DSCFG_PROC
+
+# --- End Entity Definitions ---
+
+DOWNLOAD OAM_DSCFG_PROC 
+        "SELECT b.proc_id,
+          b.proc_type,
+          b.stage,
+          TO_CHAR(b.start_date, 'YYYY/MM/DD'),
+          TO_CHAR(b.end_date, 'YYYY/MM/DD'),
+          b.priority,
+          b.error_is_fatal_flag,
+          b.location,
+          b.executable,
+          fnd_load_util.OWNER_NAME(b.last_updated_by),
+          to_char(b.last_update_date, 'YYYY/MM/DD')
+         FROM fnd_oam_dscfg_procs b
+         WHERE ((:PROC_ID is null) OR 
+                ((:PROC_ID is not null) AND
+                 (b.proc_id = :PROC_ID)))"
+
+UPLOAD OAM_DSCFG_PROC
+        "begin
+           if (:UPLOAD_MODE = 'NLS') then
+             null;
+           else
+             FND_OAM_DSCFG_PROCS_PKG.LOAD_ROW(
+                X_PROC_ID               => to_number(:PROC_ID),
+                X_PROC_TYPE             => :PROC_TYPE,
+                X_STAGE                 => :STAGE,
+                X_START_DATE            => :START_DATE,
+                X_END_DATE              => :END_DATE,
+                X_PRIORITY              => :PRIORITY,
+                X_ERROR_IS_FATAL_FLAG   => :ERROR_IS_FATAL_FLAG,
+                X_LOCATION              => :LOCATION,
+                X_EXECUTABLE            => :EXECUTABLE,
+                X_OWNER                 => :OWNER,
+                x_custom_mode           => :CUSTOM_MODE,
+                x_last_update_date      => :LAST_UPDATE_DATE);
+           end if;
+         end;"

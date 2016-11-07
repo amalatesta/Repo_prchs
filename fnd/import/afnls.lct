@@ -1,0 +1,514 @@
+#
+# $Header: afnls.lct 120.1.12010000.1 2008/07/25 13:40:20 appldev ship $
+#
+# aflookup.lct - Standard Lookups Loader Configuration
+#
+# Entities
+#   FND_CURRENCY
+#   FND_LANGUAGE
+#   FND_TERRITORY
+#   FND_NATURAL_LANGUAGE
+#   FND_ISO_LANGUAGE
+#
+# Optional Parameters:  
+# While downloading:
+#   FND_CURRENCY, pass CURR_CODE to specify which currencies 
+#   FND_LANGUAGE, pass LANG_CODE to specify which languages
+#   FND_TERRITORY, pass TERR_CODE to specify which territories
+#   FND_NATURAL_LANGUAGE, pass LANG_CODE to specify which languages
+#   FND_ISO_LANGUAGE, pass LANG_CODE to specify which languages
+# 
+#  Note: This loader file has not been complete; right now it only
+#  works in UPLOAD_MODE='NLS' or DOWNLOAD mode and does not upload
+#  regular data. 
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afnls.lct @~PROD:~PATH/~FILE" 
+DEFINE FND_CURRENCY
+  KEY   CURRENCY_CODE                      VARCHAR2(15)
+  TRANS NAME                               VARCHAR2(80)
+  TRANS DESCRIPTION                        VARCHAR2(240)
+  BASE  ENABLED_FLAG                       VARCHAR2(1)
+  BASE  CURRENCY_FLAG                      VARCHAR2(1)
+  BASE  ISSUING_TERRITORY_CODE             VARCHAR2(6)
+  BASE  PRECISION                          NUMBER
+  BASE  EXTENDED_PRECISION                 NUMBER  
+  BASE  SYMBOL                             VARCHAR2(12)
+  BASE  START_DATE_ACTIVE                  VARCHAR2(10)
+  BASE  END_DATE_ACTIVE                    VARCHAR2(10)
+  BASE  MINIMUM_ACCOUNTABLE_UNIT           NUMBER 
+  BASE  ISO_FLAG                           VARCHAR2(1)
+  BASE  DERIVE_EFFECTIVE                   VARCHAR2(10)
+  BASE  DERIVE_TYPE                        VARCHAR2(8)
+  BASE  DERIVE_FACTOR                      NUMBER  
+  BASE  CONTEXT                            VARCHAR2(80)
+  BASE  ATTRIBUTE1                         VARCHAR2(150) 
+  BASE  ATTRIBUTE2                         VARCHAR2(150) 
+  BASE  ATTRIBUTE3                         VARCHAR2(150) 
+  BASE  ATTRIBUTE4                         VARCHAR2(150) 
+  BASE  ATTRIBUTE5                         VARCHAR2(150) 
+  BASE  ATTRIBUTE6                         VARCHAR2(150) 
+  BASE  ATTRIBUTE7                         VARCHAR2(150) 
+  BASE  ATTRIBUTE8                         VARCHAR2(150) 
+  BASE  ATTRIBUTE9                         VARCHAR2(150) 
+  BASE  ATTRIBUTE10                        VARCHAR2(150) 
+  BASE  ATTRIBUTE11                        VARCHAR2(150) 
+  BASE  ATTRIBUTE12                        VARCHAR2(150) 
+  BASE  ATTRIBUTE13                        VARCHAR2(150) 
+  BASE  ATTRIBUTE14                        VARCHAR2(150) 
+  BASE  ATTRIBUTE15                        VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE_CATEGORY          VARCHAR2(150)
+  BASE  GLOBAL_ATTRIBUTE1                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE2                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE3                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE4                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE5                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE6                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE7                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE8                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE9                  VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE10                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE11                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE12                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE13                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE14                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE15                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE16                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE17                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE18                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE19                 VARCHAR2(150) 
+  BASE  GLOBAL_ATTRIBUTE20                 VARCHAR2(150) 
+  CTX   OWNER                              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                   VARCHAR2(10)
+END FND_CURRENCY
+
+DEFINE FND_LANGUAGE
+  KEY   LANGUAGE_CODE                      VARCHAR2(4)
+  TRANS DESCRIPTION                        VARCHAR2(255)
+  BASE  LANGUAGE_ID                        NUMBER
+  BASE  NLS_LANGUAGE                       VARCHAR2(30)
+  BASE  NLS_TERRITORY                      VARCHAR2(30)
+  BASE  ISO_LANGUAGE                       VARCHAR2(6)
+  BASE  ISO_TERRITORY                      VARCHAR2(6)
+  BASE  NLS_CODESET                        VARCHAR2(30)
+  BASE  INSTALLED_FLAG                     VARCHAR2(1)
+  BASE  LOCAL_DATE_LANGUAGE                VARCHAR2(30)
+  BASE  UTF8_DATE_LANGUAGE                 VARCHAR2(30)
+  BASE  ISO_LANGUAGE_3                     VARCHAR2(6)
+  CTX   OWNER                              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+END FND_LANGUAGE
+
+DEFINE FND_TERRITORY
+  KEY   TERRITORY_CODE                     VARCHAR2(2)
+  TRANS TERRITORY_SHORT_NAME               VARCHAR2(80)
+  TRANS DESCRIPTION                        VARCHAR2(240)
+  BASE  EU_CODE                            VARCHAR2(6)
+  BASE  ISO_NUMERIC_CODE                   VARCHAR2(6)
+  BASE  ALTERNATE_TERRITORY_CODE           VARCHAR2(30)
+  BASE  NLS_TERRITORY                      VARCHAR2(30)
+  BASE  ADDRESS_STYLE                      VARCHAR2(30)
+  BASE  ADDRESS_VALIDATION                 VARCHAR2(30)
+  BASE  BANK_INFO_STYLE                    VARCHAR2(30)
+  BASE  BANK_INFO_VALIDATION               VARCHAR2(30)
+  CTX   OWNER                              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                   VARCHAR2(10)
+  BASE  OBSOLETE_FLAG                      VARCHAR2(1)
+  BASE  ISO_TERRITORY_CODE                 VARCHAR2(6) 
+END FND_TERRITORY
+
+DEFINE FND_NATURAL_LANGUAGE
+  KEY   LANGUAGE_CODE                      VARCHAR2(30)
+  TRANS NAME                               VARCHAR2(80)
+  TRANS DESCRIPTION                        VARCHAR2(240)
+  BASE  ISO_LANGUAGE_3                     VARCHAR2(6)
+  BASE  ISO_TERRITORY                      VARCHAR2(2)
+  BASE  ENABLED_FLAG                       VARCHAR2(1)
+  CTX   OWNER                              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                   VARCHAR2(10)
+END FND_NATURAL_LANGUAGE
+
+DEFINE FND_ISO_LANGUAGE
+  KEY   ISO_LANGUAGE_3                     VARCHAR2(30)
+  TRANS NAME                               VARCHAR2(80)
+  TRANS DESCRIPTION                        VARCHAR2(240)
+  BASE  ISO_LANGUAGE_2                     VARCHAR2(2)
+  BASE  PRIVATE_USE_FLAG                   VARCHAR2(1)
+  CTX   OWNER                              VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                   VARCHAR2(10)
+END FND_ISO_LANGUAGE
+
+DOWNLOAD FND_CURRENCY
+  "select c.CURRENCY_CODE,
+          c.NAME, 
+          c.DESCRIPTION,
+          c.ENABLED_FLAG,
+          c.CURRENCY_FLAG,
+          nvl(c.ISSUING_TERRITORY_CODE, substrb(fnd_load_util.null_value,1,6)) ISSUING_TERRITORY_CODE,
+          nvl(to_char(c.PRECISION),substrb(fnd_load_util.null_value,1,6)) PRECISION,
+          nvl(to_char(c.EXTENDED_PRECISION),substrb(fnd_load_util.null_value,1,6)) EXTENDED_PRECISION,
+          nvl(c.SYMBOL,substrb(fnd_load_util.null_value,1,6)) SYMBOL,
+          nvl(to_char(c.START_DATE_ACTIVE, 'YYYY/MM/DD'),substrb(fnd_load_util.null_value,1,6)) START_DATE_ACTIVE,
+          nvl(to_char(c.END_DATE_ACTIVE, 'YYYY/MM/DD'),substrb(fnd_load_util.null_value,1,6)) END_DATE_ACTIVE,
+          nvl(to_char(c.MINIMUM_ACCOUNTABLE_UNIT),substrb(fnd_load_util.null_value,1,6)) MINIMUM_ACCOUNTABLE_UNIT, 
+          c.ISO_FLAG,
+          nvl(to_char(c.DERIVE_EFFECTIVE, 'YYYY/MM/DD'),substrb(fnd_load_util.null_value,1,6)) DERIVE_EFFECTIVE,
+          nvl(c.DERIVE_TYPE,substrb(fnd_load_util.null_value,1,6)) DERIVE_TYPE,
+          nvl(to_char(c.DERIVE_FACTOR),substrb(fnd_load_util.null_value,1,6)) DERIVE_FACTOR,
+          nvl(c.CONTEXT,substrb(fnd_load_util.null_value,1,6)) CONTEXT,
+          nvl(c.ATTRIBUTE1,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE1,
+          nvl(c.ATTRIBUTE2,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE2,
+          nvl(c.ATTRIBUTE3,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE3,
+          nvl(c.ATTRIBUTE4,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE4,
+          nvl(c.ATTRIBUTE5,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE5,
+          nvl(c.ATTRIBUTE6,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE6,
+          nvl(c.ATTRIBUTE7,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE7,
+          nvl(c.ATTRIBUTE8,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE8,
+          nvl(c.ATTRIBUTE9,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE9,
+          nvl(c.ATTRIBUTE10,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE10,
+          nvl(c.ATTRIBUTE11,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE11,
+          nvl(c.ATTRIBUTE12,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE12,
+          nvl(c.ATTRIBUTE13,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE13,
+          nvl(c.ATTRIBUTE14,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE14,
+          nvl(c.ATTRIBUTE15,substrb(fnd_load_util.null_value,1,6)) ATTRIBUTE15,
+          nvl(c.GLOBAL_ATTRIBUTE_CATEGORY,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE_CATEGORY,
+          nvl(c.GLOBAL_ATTRIBUTE1,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE1,
+          nvl(c.GLOBAL_ATTRIBUTE2,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE2,
+          nvl(c.GLOBAL_ATTRIBUTE3,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE3,
+          nvl(c.GLOBAL_ATTRIBUTE4,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE4,
+          nvl(c.GLOBAL_ATTRIBUTE5,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE5,
+          nvl(c.GLOBAL_ATTRIBUTE6,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE6,
+          nvl(c.GLOBAL_ATTRIBUTE7,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE7,
+          nvl(c.GLOBAL_ATTRIBUTE8,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE8,
+          nvl(c.GLOBAL_ATTRIBUTE9,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE9,
+          nvl(c.GLOBAL_ATTRIBUTE10,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE10,
+          nvl(c.GLOBAL_ATTRIBUTE11,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE11,
+          nvl(c.GLOBAL_ATTRIBUTE12,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE12,
+          nvl(c.GLOBAL_ATTRIBUTE13,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE13,
+          nvl(c.GLOBAL_ATTRIBUTE14,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE14,
+          nvl(c.GLOBAL_ATTRIBUTE15,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE15,
+          nvl(c.GLOBAL_ATTRIBUTE16,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE16,
+          nvl(c.GLOBAL_ATTRIBUTE17,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE17,
+          nvl(c.GLOBAL_ATTRIBUTE18,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE18,
+          nvl(c.GLOBAL_ATTRIBUTE19,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE19,
+          nvl(c.GLOBAL_ATTRIBUTE20,substrb(fnd_load_util.null_value,1,6)) GLOBAL_ATTRIBUTE20,
+          fnd_load_util.owner_name(c.LAST_UPDATED_BY) OWNER,
+          to_char(c.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_CURRENCIES_VL c  
+   where ((:CURR_CODE is NULL) or
+             ((:CURR_CODE is not NULL) AND (CURRENCY_CODE like :CURR_CODE)))
+  "
+DOWNLOAD FND_LANGUAGE
+  "select l.LANGUAGE_CODE,
+          l.DESCRIPTION, 
+          nvl(to_char(l.LANGUAGE_ID),substrb(fnd_load_util.null_value,1,6)) LANGUAGE_ID,
+          l.NLS_LANGUAGE, 
+          l.NLS_TERRITORY, 
+          nvl(l.ISO_LANGUAGE,substrb(fnd_load_util.null_value,1,6)) ISO_LANGUAGE,
+          nvl(l.ISO_TERRITORY,substrb(fnd_load_util.null_value,1,6)) ISO_TERRITORY, 
+          nvl(l.NLS_CODESET,substrb(fnd_load_util.null_value,1,6)) NLS_CODESET, 
+          l.INSTALLED_FLAG, 
+          nvl(l.LOCAL_DATE_LANGUAGE,substrb(fnd_load_util.null_value,1,6)) LOCAL_DATE_LANGUAGE, 
+          nvl(l.UTF8_DATE_LANGUAGE,substrb(fnd_load_util.null_value,1,6)) UTF8_DATE_LANGUAGE, 
+          nvl(l.ISO_LANGUAGE_3,substrb(fnd_load_util.null_value,1,6)) ISO_LANGUAGE_3,
+          fnd_load_util.owner_name(l.LAST_UPDATED_BY) OWNER,
+          to_char(l.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_LANGUAGES_VL l  
+   where  ((:LANG_CODE is NULL) or
+             ((:LANG_CODE is not NULL) AND (LANGUAGE_CODE like :LANG_CODE)))
+  "
+
+DOWNLOAD FND_TERRITORY
+  "select t.TERRITORY_CODE,
+          t.TERRITORY_SHORT_NAME,
+          t.DESCRIPTION,
+          nvl(t.EU_CODE,substrb(fnd_load_util.null_value,1,6)) EU_CODE,
+          nvl(t.ISO_NUMERIC_CODE,substrb(fnd_load_util.null_value,1,6)) ISO_NUMERIC_CODE,
+          nvl(t.ALTERNATE_TERRITORY_CODE,substrb(fnd_load_util.null_value,1,6)) ALTERNATE_TERRITORY_CODE, 
+          nvl(t.NLS_TERRITORY,substrb(fnd_load_util.null_value,1,6)) NLS_TERRITORY,
+          nvl(t.ADDRESS_STYLE,substrb(fnd_load_util.null_value,1,6)) ADDRESS_STYLE,
+          nvl(t.ADDRESS_VALIDATION,substrb(fnd_load_util.null_value,1,6)) ADDRESS_VALIDATION,
+          nvl(t.BANK_INFO_STYLE,substrb(fnd_load_util.null_value,1,6)) BANK_INFO_STYLE,
+          nvl(t.BANK_INFO_VALIDATION,substrb(fnd_load_util.null_value,1,6)) BANK_INFO_VALIDATION,
+          fnd_load_util.owner_name(t.LAST_UPDATED_BY) OWNER,
+          to_char(t.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,  
+          t.OBSOLETE_FLAG,
+          nvl(t.ISO_TERRITORY_CODE,substrb(fnd_load_util.null_value,1,6)) ISO_TERRITORY_CODE
+   from   FND_TERRITORIES_VL t  
+   where  ((:TERR_CODE is NULL) or
+             ((:TERR_CODE is not NULL) AND (TERRITORY_CODE like :TERR_CODE)))
+  "
+
+DOWNLOAD FND_NATURAL_LANGUAGE
+  "select t.LANGUAGE_CODE,
+          t.NAME,
+          t.DESCRIPTION,
+          t.ISO_LANGUAGE_3,
+          t.ISO_TERRITORY,
+          t.ENABLED_FLAG,
+          fnd_load_util.owner_name(t.LAST_UPDATED_BY) OWNER,
+          to_char(t.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_NATURAL_LANGUAGES_VL t
+   where  ((:LANG_CODE is NULL) or
+             ((:LANG_CODE is not NULL) AND (LANGUAGE_CODE like :LANG_CODE)))
+  "
+
+DOWNLOAD FND_ISO_LANGUAGE
+  "select t.ISO_LANGUAGE_3,
+          t.NAME,
+          t.DESCRIPTION,
+          t.ISO_LANGUAGE_2,
+          t.PRIVATE_USE_FLAG,
+          fnd_load_util.owner_name(t.LAST_UPDATED_BY) OWNER,
+          to_char(t.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_ISO_LANGUAGES_VL t
+   where  ((:LANG_CODE is NULL) or
+             ((:LANG_CODE is not NULL) AND (ISO_LANGUAGE_3 like :LANG_CODE)))
+  "
+
+UPLOAD FND_CURRENCY
+  "
+   declare
+      l_derive_effective date;
+      l_derive_factor number;
+      l_precision number;
+      l_extended_precision number;
+      l_start_date_active date;
+      l_end_date_active date;
+      l_minimum_accountable_unit number;
+
+      begin          
+
+        if (:UPLOAD_MODE = 'NLS') then  
+         fnd_currencies_pkg.TRANSLATE_ROW(  
+           X_CURRENCY_CODE             => :CURRENCY_CODE,
+           X_NAME                      => :NAME,
+           X_DESCRIPTION               => :DESCRIPTION,
+           X_OWNER                     => :OWNER,
+           X_LAST_UPDATE_DATE	       => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE               => :CUSTOM_MODE);
+        else  
+         if (:DERIVE_EFFECTIVE = fnd_currencies_pkg.null_char) then 
+             l_derive_effective:= fnd_currencies_pkg.null_date;
+         else 
+             l_derive_effective:= to_date(:DERIVE_EFFECTIVE, 'YYYY/MM/DD');
+         end if;
+
+         if (:DERIVE_FACTOR = fnd_currencies_pkg.null_char) then
+             l_derive_factor:= fnd_currencies_pkg.null_number;
+         else
+             l_derive_factor:= :DERIVE_FACTOR;
+         end if;
+
+         if (:PRECISION = fnd_currencies_pkg.null_char) then
+            l_precision:= fnd_currencies_pkg.null_number;
+         else
+            l_precision:= :PRECISION;
+         end if;
+
+         if (:EXTENDED_PRECISION = fnd_currencies_pkg.null_char) then
+            l_extended_precision:= fnd_currencies_pkg.null_number;
+         else
+            l_extended_precision:= :EXTENDED_PRECISION;
+         end if;
+
+         if (:START_DATE_ACTIVE = fnd_currencies_pkg.null_char) then
+             l_start_date_active:= fnd_currencies_pkg.null_date;
+         else
+             l_start_date_active:= to_date(:START_DATE_ACTIVE, 'YYYY/MM/DD');
+         end if;
+
+         if (:END_DATE_ACTIVE = fnd_currencies_pkg.null_char) then
+             l_end_date_active:= fnd_currencies_pkg.null_date;
+         else
+             l_end_date_active:= to_date(:END_DATE_ACTIVE, 'YYYY/MM/DD');
+         end if;
+
+        if (:MINIMUM_ACCOUNTABLE_UNIT = fnd_currencies_pkg.null_char) then
+            l_minimum_accountable_unit:= fnd_currencies_pkg.null_number;
+         else
+            l_minimum_accountable_unit := :MINIMUM_ACCOUNTABLE_UNIT;
+         end if;
+
+	    fnd_currencies_pkg.LOAD_ROW(
+		X_CURRENCY_CODE		   => :CURRENCY_CODE,
+		X_DERIVE_EFFECTIVE	   => l_derive_effective,
+		X_DERIVE_TYPE		   => :DERIVE_TYPE,
+	  	X_GLOBAL_ATTRIBUTE1 	   => :GLOBAL_ATTRIBUTE1,
+  		X_GLOBAL_ATTRIBUTE2	   => :GLOBAL_ATTRIBUTE2,
+  		X_GLOBAL_ATTRIBUTE3	   => :GLOBAL_ATTRIBUTE3, 
+  		X_GLOBAL_ATTRIBUTE4 	   => :GLOBAL_ATTRIBUTE4,
+  		X_GLOBAL_ATTRIBUTE5 	   => :GLOBAL_ATTRIBUTE5,
+		X_GLOBAL_ATTRIBUTE6 	   => :GLOBAL_ATTRIBUTE6,
+  		X_GLOBAL_ATTRIBUTE7 	   => :GLOBAL_ATTRIBUTE7,
+  		X_GLOBAL_ATTRIBUTE8	   => :GLOBAL_ATTRIBUTE8,
+  		X_GLOBAL_ATTRIBUTE9	   => :GLOBAL_ATTRIBUTE9, 
+  		X_GLOBAL_ATTRIBUTE10 	   => :GLOBAL_ATTRIBUTE10,
+  		X_GLOBAL_ATTRIBUTE11 	   => :GLOBAL_ATTRIBUTE11,
+		X_GLOBAL_ATTRIBUTE12 	   => :GLOBAL_ATTRIBUTE12,
+  		X_GLOBAL_ATTRIBUTE13 	   => :GLOBAL_ATTRIBUTE13,
+  		X_GLOBAL_ATTRIBUTE14 	   => :GLOBAL_ATTRIBUTE14,
+	  	X_GLOBAL_ATTRIBUTE15 	   => :GLOBAL_ATTRIBUTE15,
+  		X_GLOBAL_ATTRIBUTE16 	   => :GLOBAL_ATTRIBUTE16,
+  		X_GLOBAL_ATTRIBUTE17 	   => :GLOBAL_ATTRIBUTE17,
+  		X_GLOBAL_ATTRIBUTE18 	   => :GLOBAL_ATTRIBUTE18,
+	  	X_GLOBAL_ATTRIBUTE19 	   => :GLOBAL_ATTRIBUTE19,
+  		X_GLOBAL_ATTRIBUTE20 	   => :GLOBAL_ATTRIBUTE20,
+  		X_DERIVE_FACTOR 	   => l_derive_factor,
+  		X_ENABLED_FLAG 		   => :ENABLED_FLAG,
+  		X_CURRENCY_FLAG 	   => :CURRENCY_FLAG,
+  		X_ISSUING_TERRITORY_CODE   => :ISSUING_TERRITORY_CODE,
+  		X_PRECISION 		   => l_precision,
+  		X_EXTENDED_PRECISION 	   => l_extended_precision,
+  		X_SYMBOL 		   => :SYMBOL,
+  		X_START_DATE_ACTIVE 	   => l_start_date_active,
+		X_END_DATE_ACTIVE	   => l_end_date_active,
+		X_MINIMUM_ACCOUNTABLE_UNIT => l_minimum_accountable_unit,
+		X_CONTEXT 		   => :CONTEXT,
+		X_ATTRIBUTE1 		   => :ATTRIBUTE1,
+		X_ATTRIBUTE2 		   => :ATTRIBUTE2,
+		X_ATTRIBUTE3 		   => :ATTRIBUTE3,
+		X_ATTRIBUTE4 		   => :ATTRIBUTE4,
+		X_ATTRIBUTE5 		   => :ATTRIBUTE5,
+		X_ATTRIBUTE6 		   => :ATTRIBUTE6,
+		X_ATTRIBUTE7 		   => :ATTRIBUTE7,
+		X_ATTRIBUTE8 		   => :ATTRIBUTE8,
+		X_ATTRIBUTE9 		   => :ATTRIBUTE9,
+		X_ATTRIBUTE10 		   => :ATTRIBUTE10,
+		X_ATTRIBUTE11		   => :ATTRIBUTE11,
+		X_ATTRIBUTE12		   => :ATTRIBUTE12,
+		X_ATTRIBUTE13		   => :ATTRIBUTE13,
+		X_ATTRIBUTE14		   => :ATTRIBUTE14,
+		X_ATTRIBUTE15		   => :ATTRIBUTE15,
+		X_ISO_FLAG                 => :ISO_FLAG ,
+		X_GLOBAL_ATTRIBUTE_CATEGORY=> :GLOBAL_ATTRIBUTE_CATEGORY,
+		X_NAME 			   => :NAME,
+		X_DESCRIPTION 		   => :DESCRIPTION,
+		X_OWNER			   => :OWNER,
+                X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+                X_CUSTOM_MODE               => :CUSTOM_MODE);
+        end if;
+end;
+"
+
+UPLOAD FND_LANGUAGE
+"
+      begin          
+        if (:UPLOAD_MODE = 'NLS') then  
+         fnd_languages_pkg.TRANSLATE_ROW(  
+           X_LANGUAGE_CODE             => :LANGUAGE_CODE,
+           X_DESCRIPTION               => :DESCRIPTION,
+           X_OWNER                     => :OWNER,
+           X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE               => :CUSTOM_MODE);
+        
+        elsif (:UPLOAD_MODE = 'INSTALL') then
+          update FND_LANGUAGES set
+            INSTALLED_FLAG = :INSTALLED_FLAG
+          where LANGUAGE_CODE = :LANGUAGE_CODE;
+
+        else  
+             fnd_languages_pkg.LOAD_ROW(
+                X_LANGUAGE_CODE	=> :LANGUAGE_CODE,
+	        X_DESCRIPTION	=> :DESCRIPTION,
+	        X_LANGUAGE_ID	=> :LANGUAGE_ID,
+                X_NLS_LANGUAGE	=> :NLS_LANGUAGE,
+	        X_NLS_TERRITORY	=> :NLS_TERRITORY,
+	        X_ISO_LANGUAGE	=> :ISO_LANGUAGE,
+	        X_ISO_TERRITORY	=> :ISO_TERRITORY,
+	        X_NLS_CODESET	=> :NLS_CODESET,
+	        X_INSTALLED_FLAG => :INSTALLED_FLAG,
+	        X_LOCAL_DATE_LANGUAGE=> :LOCAL_DATE_LANGUAGE,
+	        X_UTF8_DATE_LANGUAGE => :UTF8_DATE_LANGUAGE,
+	        X_ISO_LANGUAGE_3 => :ISO_LANGUAGE_3,
+	        X_OWNER		=> :OWNER, 
+                X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+                X_CUSTOM_MODE               => :CUSTOM_MODE);
+        end if;
+    end; 
+"
+
+UPLOAD FND_TERRITORY
+  "
+      begin          
+        if (:UPLOAD_MODE = 'NLS') then  
+         fnd_territories_pkg.TRANSLATE_ROW(  
+           X_TERRITORY_CODE             => :TERRITORY_CODE,
+           X_TERRITORY_SHORT_NAME       => :TERRITORY_SHORT_NAME,
+           X_DESCRIPTION                => :DESCRIPTION,
+           X_OWNER                      => :OWNER,
+           X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE               => :CUSTOM_MODE);
+        
+        else  
+            fnd_territories_pkg.LOAD_ROW(
+	     	X_TERRITORY_CODE 	=> :TERRITORY_CODE,
+	     	X_EU_CODE		=> :EU_CODE,
+	     	X_ISO_NUMERIC_CODE	=> :ISO_NUMERIC_CODE,
+		X_ALTERNATE_TERRITORY_CODE => :ALTERNATE_TERRITORY_CODE,
+		X_NLS_TERRITORY		=> :NLS_TERRITORY,
+		X_ADDRESS_STYLE		=> :ADDRESS_STYLE,
+		X_ADDRESS_VALIDATION	=> :ADDRESS_VALIDATION,
+		X_BANK_INFO_STYLE	=> :BANK_INFO_STYLE,
+		X_BANK_INFO_VALIDATION	=> :BANK_INFO_VALIDATION,
+		X_TERRITORY_SHORT_NAME	=> :TERRITORY_SHORT_NAME,
+		X_DESCRIPTION		=> :DESCRIPTION,
+		X_OWNER			=> :OWNER,
+                X_LAST_UPDATE_DATE      => :LAST_UPDATE_DATE,
+                X_CUSTOM_MODE           => :CUSTOM_MODE,
+		X_OBSOLETE_FLAG		=> :OBSOLETE_FLAG,
+                X_ISO_TERRITORY_CODE    => :ISO_TERRITORY_CODE);
+          end if;
+    end; 
+"
+
+UPLOAD FND_NATURAL_LANGUAGE
+  "
+      begin
+        if (:UPLOAD_MODE = 'NLS') then
+         fnd_natural_languages_pkg.TRANSLATE_ROW(
+           X_LANGUAGE_CODE             => :LANGUAGE_CODE,
+           X_NAME                      => :NAME,
+           X_DESCRIPTION               => :DESCRIPTION,
+           X_OWNER                     => :OWNER,
+           X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE               => :CUSTOM_MODE);
+
+        else
+            fnd_natural_languages_pkg.LOAD_ROW(
+                X_LANGUAGE_CODE         => :LANGUAGE_CODE,
+                X_ISO_LANGUAGE_3        => :ISO_LANGUAGE_3,
+                X_ISO_TERRITORY         => :ISO_TERRITORY,
+                X_ENABLED_FLAG          => :ENABLED_FLAG,
+                X_NAME                  => :NAME,
+                X_DESCRIPTION           => :DESCRIPTION,
+                X_OWNER                 => :OWNER,
+                X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+                X_CUSTOM_MODE               => :CUSTOM_MODE);
+          end if;
+    end;
+"
+
+UPLOAD FND_ISO_LANGUAGE
+  "
+      begin
+        if (:UPLOAD_MODE = 'NLS') then
+         fnd_iso_languages_pkg.TRANSLATE_ROW(
+           X_ISO_LANGUAGE_3            => :ISO_LANGUAGE_3,
+           X_NAME                      => :NAME,
+           X_DESCRIPTION               => :DESCRIPTION,
+           X_OWNER                     => :OWNER,
+           X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE               => :CUSTOM_MODE);
+
+        else
+            fnd_iso_languages_pkg.LOAD_ROW(
+                X_ISO_LANGUAGE_3        => :ISO_LANGUAGE_3,
+                X_ISO_LANGUAGE_2        => :ISO_LANGUAGE_2,
+                X_PRIVATE_USE_FLAG      => :PRIVATE_USE_FLAG,
+                X_NAME                  => :NAME,
+                X_DESCRIPTION           => :DESCRIPTION,
+                X_OWNER                 => :OWNER,
+                X_LAST_UPDATE_DATE          => :LAST_UPDATE_DATE,
+                X_CUSTOM_MODE               => :CUSTOM_MODE);
+          end if;
+    end;
+"

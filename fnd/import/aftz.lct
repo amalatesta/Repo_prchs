@@ -1,0 +1,88 @@
+# $Header: aftz.lct 120.1.12000000.1 2007/01/18 12:41:43 appldev ship $
+#
+# FILENAME
+#    aftz.lct -  FND Timezones
+#
+# DESCRIPTION
+#    Loader DOWNLOAD/UPLOAD configuration file for FND Timezones
+#
+# NOTES
+#    A -1 is used to identify seed data using last_updated_by
+#    column
+#
+# Entities
+#    FND_TIMEZONES
+#
+# History
+#    13-Feb-02     K Baird   MLS file required for translation of
+#                                seed data
+#    03-JUN-02     K Doherty Converted lct to use table handlers
+#    05-JUN-02     K Doherty Changed the entity name per MLS standards
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/aftz.lct @~PROD:~PATH/~FILE"
+
+DEFINE FND_TIMEZONES
+ KEY   TIMEZONE_CODE                      VARCHAR2(50)
+ TRANS NAME                               VARCHAR2(80)
+ CTX   OWNER				  VARCHAR2(4000)
+ BASE  ENABLED_FLAG			  VARCHAR2(1)
+ BASE  GMT_OFFSET                         NUMBER
+ BASE  DAYLIGHT_SAVINGS_FLAG              VARCHAR2(1)
+ BASE  ACTIVE_TIMEZONE_CODE               VARCHAR2(50)
+ BASE  UPGRADE_TZ_ID                      NUMBER
+ BASE  LAST_UPDATE_DATE                   VARCHAR2(10)
+END FND_TIMEZONES
+
+DOWNLOAD FND_TIMEZONES
+"select  
+   t.TIMEZONE_CODE                      
+ , t.NAME                            
+ , fnd_load_util.owner_name(t.LAST_UPDATED_BY) OWNER
+ , t.ENABLED_FLAG            
+ , t.GMT_OFFSET             
+ , t.DAYLIGHT_SAVINGS_FLAG      
+ , t.ACTIVE_TIMEZONE_CODE  
+ , t.UPGRADE_TZ_ID                 
+ , to_char(t.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+  from FND_TIMEZONES_VL T  
+  where ((:TIMEZONE_CODE IS NULL)  
+        or ((:TIMEZONE_CODE IS NOT NULL) AND (t.TIMEZONE_CODE like :TIMEZONE_CODE))) " 
+
+UPLOAD FND_TIMEZONES
+    " begin  
+          if (:UPLOAD_MODE = 'NLS') then  
+             FND_TIMEZONES_PKG.TRANSLATE_ROW (   
+                 x_timezone_code  	=> :TIMEZONE_CODE,  
+                 x_name 		=> :NAME,
+ 		 x_owner		=> :OWNER, 
+                 x_last_update_date	=> :LAST_UPDATE_DATE,
+                 x_custom_mode		=> :CUSTOM_MODE);
+          else  
+    
+              Fnd_Timezones_Pkg.Load_Row(
+              x_timezone_code 		=> :TIMEZONE_CODE,
+              x_enabled_flag		=> :ENABLED_FLAG,
+              x_gmt_offset		=> :GMT_OFFSET,
+              x_daylight_savings_flag   => :DAYLIGHT_SAVINGS_FLAG,
+              x_active_timezone_code    => :ACTIVE_TIMEZONE_CODE,
+              x_upgrade_tz_id		=> :UPGRADE_TZ_ID,
+              x_name 			=> :NAME,
+              x_last_update_date	=> :LAST_UPDATE_DATE,
+	      x_owner			=> :OWNER,
+              x_custom_mode		=> :CUSTOM_MODE);
+
+          end if;
+     end; " 
+
+
+
+
+
+
+
+
+
+
+
+
+

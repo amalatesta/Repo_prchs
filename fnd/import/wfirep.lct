@@ -1,0 +1,571 @@
+#
+# $Header: wfirep.lct 120.7 2006/09/19 23:59:13 mfisher noship $
+#
+# wfirep.lct - Integration Repository Loader Configuration
+#
+# Entities -
+#
+#   IREP_OBJECT
+#	PARENTS
+#	OBJECT_CATEGORY
+#	OBJ_CHILD_ANNOTATIONS
+#	TYPE_MEMBERS
+#	USES_TABLE
+#	USES_MAP
+#       CLASS_DATASOURCES
+#       OBJ_KEY_SET
+#	IREP_METHOD
+#	    METHOD_CATEGORY
+#	    METHOD_CHILD_ANNOTATIONS
+#           PARAMS
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+# Note: The dbdrv comment needs to have all &irep_* tags substituted by the
+# parser.
+COMMENT = "dbdrv: sql fnd patch/115/sql afdlfsub.sql none none none sqlplus &phase=dat+10 checkfile:~PROD:~PATH:~FILE &un_apps &pw_apps &irep_prod &irep_path &irep_ildt_fn &irep_rev FND FNDDLFLD NORMAL ARU2ILDT 50"
+
+DEFINE IREP_OBJECT
+  KEY   OBJECT_NAME             VARCHAR2(430)
+  KEY   DEST_TABLE              VARCHAR2(1)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  API_NAME                VARCHAR2(400)
+  BASE  OBJ_TYPE                VARCHAR2(30)
+  BASE  PRODUCT                 VARCHAR2(8)
+  BASE  IMP_NAME                VARCHAR2(400)
+  BASE  COMPATABILITY           VARCHAR2(1)
+  BASE  SCOPE                   VARCHAR2(30)
+  BASE  LIFECYCLE               VARCHAR2(30)
+  BASE  SOURCE_FILE_PRODUCT     VARCHAR2(8)
+  BASE  SOURCE_FILE_PATH        VARCHAR2(100)
+  BASE  SOURCE_FILE_NAME        VARCHAR2(36)
+  BASE  SOURCE_FILE_VERSION     VARCHAR2(150)
+  BASE  DESCRIPTION             VARCHAR2(32000)
+  BASE  STANDARD                VARCHAR2(30)
+  BASE  STANDARD_VERSION        VARCHAR2(30)
+  BASE  STANDARD_SPEC           VARCHAR2(240)
+  TRANS DISPNAME                VARCHAR2(240)
+  TRANS SHORTDISC               VARCHAR2(2000)
+  BASE  TIMESTAMP               VARCHAR2(11)
+  BASE  OI_FLAG                 VARCHAR2(1)
+  BASE  MAPCODE                 VARCHAR2(255)
+  BASE  PARSER_VERSION          VARCHAR2(80)
+  BASE  SDO_DEF_CLASS           VARCHAR2(400)
+  BASE  SDO_CLASS_NAME          VARCHAR2(400)
+  BASE  SDO_IS_FILTER           VARCHAR2(1)
+  BASE  SDO_FILTER_REQUIRED     VARCHAR2(1)  
+  BASE  SDO_IS_EXPRESSION       VARCHAR2(1)  
+  BASE  SB_INTERFACE_CLASS      VARCHAR2(400)
+  BASE  CRAWL_CRAWLABLE 	VARCHAR2(1)
+  BASE  CRAWL_VISIBILITY_LEVEL  VARCHAR2(8)
+  BASE  CRAWL_SEARCH_PLUGIN 	VARCHAR2(4000)
+  BASE  CRAWL_UI_FUNCTION       VARCHAR2(240)
+  BASE  CRAWL_CHANGE_EVENT_NAME VARCHAR2(4000)
+  BASE  CRAWL_CHANGE_NTF  	VARCHAR2(1)
+  BASE  CRAWL_DRIVING_TABLE     VARCHAR2(30)
+  BASE  CRAWL_OBJ_ATTR_0	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_1	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_2	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_3	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_4	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_5	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_6	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_7	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_8	VARCHAR2(2000)
+  BASE  CRAWL_OBJ_ATTR_9	VARCHAR2(2000)
+
+  DEFINE PARENTS
+    KEY   PARENT_NAME           VARCHAR2(430)
+  END PARENTS
+
+  DEFINE OBJECT_CATEGORY
+    KEY   TYPE                  VARCHAR2(30)
+    KEY   CODE                  VARCHAR2(30)
+    BASE  SEQUENCE              VARCHAR2(50)
+  END OBJECT_CATEGORY
+
+  DEFINE OBJ_CHILD_ANNOTATIONS
+    KEY   CHILD_FLAG            VARCHAR2(1)
+    KEY   VALUE                 VARCHAR2(500)
+  END OBJ_CHILD_ANNOTATIONS
+
+  DEFINE TYPE_MEMBERS
+    KEY   SEQUENCE              VARCHAR2(50)
+    KEY   INNERTYPE_SEQUENCE    VARCHAR2(50)
+    BASE  MEMBER_NAME           VARCHAR2(240)
+    BASE  TYPE                  VARCHAR2(430)
+    BASE  PRECISION             VARCHAR2(50)
+    BASE  SIZE                  VARCHAR2(50)
+    BASE  SCALE                 VARCHAR2(50)
+    BASE  NULL_ALLOWED          VARCHAR2(1)
+    BASE  DESCRIPTION           VARCHAR2(4000)
+    BASE  ATTR_SET              VARCHAR2(240)
+    BASE  PRIMARY_KEY           VARCHAR2(1)
+    BASE  TRANSLATABLE          VARCHAR2(1)
+    BASE  COMPOSITE             VARCHAR2(1)
+    BASE  DOMAIN_NAME           VARCHAR2(240)
+    BASE  MEMBER_TYPE_NAME      VARCHAR2(240)
+    BASE  SEARCH_CRITERIA_TYPE  VARCHAR2(30)
+    BASE  ATTACHMENT            VARCHAR2(1)
+    BASE  MIME_TYPE             VARCHAR2(120)
+    BASE  DOMAIN_IMPLEMENTATION VARCHAR2(400)
+    BASE  IS_SORTABLE           VARCHAR2(1) 
+    BASE  CRAWL_IS_DATE_BASED 	VARCHAR2(1)
+    BASE  CRAWL_MEMBER_VIS_LVL  VARCHAR2(8)
+    BASE  CRAWL_IS_DISPLAYED  	VARCHAR2(1)
+    BASE  CRAWL_UI_FPARAM_NAME 	VARCHAR2(240)
+    BASE  CRAWL_INDEXED 	VARCHAR2(1)
+    BASE  CRAWL_STORED 		VARCHAR2(1)
+    BASE  CRAWL_IS_SECURE 	VARCHAR2(1)
+    BASE  CRAWL_IS_TITLE 	VARCHAR2(1)
+    BASE  CRAWL_WEIGHT		VARCHAR2(50)
+    BASE  CRAWL_MBR_ATTR_0	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_1	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_2	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_3	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_4	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_5	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_6	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_7	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_8	VARCHAR2(2000)
+    BASE  CRAWL_MBR_ATTR_9	VARCHAR2(2000)
+  END TYPE_MEMBERS
+
+  DEFINE USES_TABLE
+    KEY   TABLE_NAME            VARCHAR2(30)
+    BASE  UT_SEQ                VARCHAR2(50)
+    BASE  UT_DIRECTION          VARCHAR2(1)
+  END USES_TABLE
+
+  DEFINE USES_MAP
+    KEY   MAP_NAME              VARCHAR2(30)
+    BASE  UM_SEQ                VARCHAR2(50)
+  END USES_MAP
+
+  DEFINE CLASS_DATASOURCES
+    KEY   DATASOURCE_NAME       VARCHAR2(120)
+    BASE  DEF_CLASS             VARCHAR2(400)
+    BASE  QUERYABLE             VARCHAR2(1)
+    BASE  UPDATEABLE            VARCHAR2(1)
+    BASE  INSERTABLE            VARCHAR2(1)
+    BASE  MERGEABLE             VARCHAR2(1)
+    BASE  DELETEABLE             VARCHAR2(1)
+    BASE  PROCESS_QNAME         VARCHAR2(120)
+    BASE  QUERY_QNAME           VARCHAR2(120)
+  END CLASS_DATASOURCES
+
+  DEFINE OBJ_KEY_SET
+    KEY   KEY_SET_NAME          VARCHAR2(120)
+    KEY   KEY_SET_SEQUENCE      VARCHAR2(50)
+    BASE  KEY1_MBR_NAME         VARCHAR2(240)
+    BASE  KEY2_MBR_NAME         VARCHAR2(240)
+    BASE  KEY3_MBR_NAME         VARCHAR2(240)
+    BASE  KEY4_MBR_NAME         VARCHAR2(240)
+    BASE  KEY5_MBR_NAME         VARCHAR2(240)
+    BASE  ALT1_MBR_NAME         VARCHAR2(240)
+    BASE  ALT2_MBR_NAME         VARCHAR2(240)
+    BASE  ALT3_MBR_NAME         VARCHAR2(240)
+    BASE  ALT4_MBR_NAME         VARCHAR2(240)
+    BASE  ALT5_MBR_NAME         VARCHAR2(240)
+  END OBJ_KEY_SET
+
+  DEFINE IREP_METHOD
+    KEY   FUNCTION_NAME         VARCHAR2(480)
+    BASE  METHOD_NAME           VARCHAR2(80)
+    KEY   OVERLOAD_SEQ          VARCHAR2(50)
+    BASE  SCOPE                 VARCHAR2(30)
+    BASE  LIFECYCLE             VARCHAR2(30)
+    BASE  DESCRIPTION           VARCHAR2(32000)
+    BASE  COMPATABILITY         VARCHAR2(1)
+    BASE  SYNCHRO               VARCHAR2(1)
+    BASE  DIRECTION             VARCHAR2(1)
+    BASE  CTX_DEPENDENCE        VARCHAR2(8)
+    TRANS USER_FN_NAME          VARCHAR2(80)
+    TRANS SHORT_DESCRIPTION     VARCHAR2(240)
+    BASE  PRIMARY_FLAG          VARCHAR2(1)
+    BASE  INDIRECT_OP_FLAG      VARCHAR2(1)
+
+    DEFINE METHOD_CATEGORY
+      KEY   TYPE                VARCHAR2(30)
+      KEY   CODE                VARCHAR2(30)
+      BASE  SEQUENCE            VARCHAR2(50)
+    END METHOD_CATEGORY
+
+    DEFINE METHOD_CHILD_ANNOTATIONS
+      KEY   CHILD_FLAG          VARCHAR2(1)
+      KEY   VALUE               VARCHAR2(500)
+    END METHOD_CHILD_ANNOTATIONS
+
+    DEFINE PARAMS
+      KEY   SEQUENCE            VARCHAR2(50)
+      KEY   INNERTYPE_SEQUENCE  VARCHAR2(50)
+      BASE  NAME                VARCHAR2(240)
+      BASE  DIRECTION           VARCHAR2(1)
+      BASE  OPTIONAL            VARCHAR2(1)
+      BASE  TYPE                VARCHAR2(430)
+      BASE  PRECISION           VARCHAR2(50)
+      BASE  SIZE                VARCHAR2(50)
+      BASE  SCALE               VARCHAR2(50)
+      BASE  NULL_ALLOWED        VARCHAR2(1)
+      BASE  DESCRIPTION         VARCHAR2(4000)
+      BASE  DEFAULT_VALUE       VARCHAR2(255)
+      BASE  DISPLAYED           VARCHAR2(1)
+      BASE  ATTRIBUTE_SET       VARCHAR2(240)
+    END PARAMS
+
+  END IREP_METHOD
+
+END IREP_OBJECT
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#       to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD IREP_OBJECT
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD PARENTS
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD OBJECT_CATEGORY
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD OBJ_CHILD_ANNOTATIONS
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD TYPE_MEMBERS
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD USES_TABLE
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD USES_MAP
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD CLASS_DATASOURCES
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD OBJ_KEY_SET
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD IREP_METHOD
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD METHOD_CATEGORY
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD METHOD_CHILD_ANNOTATIONS
+  "select
+   'Download not supported.'
+   from dual "
+
+DOWNLOAD PARAMS
+  "select
+   'Download not supported.'
+   from dual "
+
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD IREP_OBJECT
+ BEGIN
+  " begin -- UPLOAD IREP_OBJECT
+    FND_IREP_LOADER_PRIVATE.UPLOAD_IREP_OBJECT(
+		       P_UPLOAD_MODE => :UPLOAD_MODE,
+                       P_OBJECT_NAME => :OBJECT_NAME,
+                       P_DEST_TABLE => :DEST_TABLE,
+                       P_OWNER => :OWNER,
+                       P_API_NAME => :API_NAME,
+                       P_OBJ_TYPE => :OBJ_TYPE,
+                       P_PRODUCT => :PRODUCT,
+                       P_IMP_NAME => :IMP_NAME,
+                       P_COMPATABILITY => :COMPATABILITY,
+                       P_SCOPE => :SCOPE,
+                       P_LIFECYCLE => :LIFECYCLE,
+                       P_SOURCE_FILE_PRODUCT => :SOURCE_FILE_PRODUCT,
+                       P_SOURCE_FILE_PATH => :SOURCE_FILE_PATH,
+                       P_SOURCE_FILE_NAME => :SOURCE_FILE_NAME,
+                       P_SOURCE_FILE_VERSION => :SOURCE_FILE_VERSION,
+                       P_DESCRIPTION => :DESCRIPTION,
+                       P_STANDARD => :STANDARD,
+                       P_STANDARD_VERSION => :STANDARD_VERSION,
+                       P_STANDARD_SPEC => :STANDARD_SPEC,
+                       P_DISPNAME => :DISPNAME,
+                       P_SHORTDISC => :SHORTDISC,
+                       P_TIMESTAMP => :TIMESTAMP,
+                       P_OI_FLAG => :OI_FLAG,
+                       P_MAPCODE => :MAPCODE,
+                       P_PARSER_VERSION => :PARSER_VERSION,
+                       P_SDO_DEF_CLASS => :SDO_DEF_CLASS,
+                       P_SDO_CLASS_NAME => :SDO_CLASS_NAME,
+                       P_SDO_IS_FILTER => :SDO_IS_FILTER,
+                       P_SDO_FILTER_REQUIRED => :SDO_FILTER_REQUIRED,
+                       P_SDO_IS_EXPRESSION => :SDO_IS_EXPRESSION,
+                       P_SB_INTERFACE_CLASS => :SB_INTERFACE_CLASS,
+		       P_CRAWL_CRAWLABLE => :CRAWL_CRAWLABLE,	
+		       P_CRAWL_VISIBILITY_LEVEL => :CRAWL_VISIBILITY_LEVEL,
+		       P_CRAWL_SEARCH_PLUGIN => :CRAWL_SEARCH_PLUGIN,
+                       P_CRAWL_UI_FUNCTION => :CRAWL_UI_FUNCTION,
+                       P_CRAWL_CHANGE_EVENT_NAME => :CRAWL_CHANGE_EVENT_NAME,
+		       P_CRAWL_CHANGE_NTF => :CRAWL_CHANGE_NTF,
+		       P_CRAWL_DRIVING_TABLE => :CRAWL_DRIVING_TABLE );
+    end; "
+
+
+  UPLOAD PARENTS
+  " begin  -- UPLOAD PARENTS
+    FND_IREP_LOADER_PRIVATE.UPLOAD_PARENTS(
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_PARENT_NAME => :PARENT_NAME);
+    end; "
+
+
+
+
+  UPLOAD OBJECT_CATEGORY
+  " begin -- UPLOAD OBJ_CATEGORY
+    FND_IREP_LOADER_PRIVATE.UPLOAD_OBJECT_CATEGORY( 
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_TYPE => :TYPE,
+                      P_CODE => :CODE,
+                      P_SEQUENCE => :SEQUENCE);
+    end; "
+
+  UPLOAD OBJ_CHILD_ANNOTATIONS
+  " begin -- UPLOAD OBJ_CHILD_ANNOTATIONS
+    FND_IREP_LOADER_PRIVATE.UPLOAD_OBJ_CHILD_ANNOTATIONS( 
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_CHILD_FLAG => :CHILD_FLAG,
+                      P_VALUE => :VALUE);
+    end; "
+
+  UPLOAD TYPE_MEMBERS
+  " begin -- UPLOAD TYPE_MEMBERS
+    FND_IREP_LOADER_PRIVATE.UPLOAD_TYPE_MEMBERS(   
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_SEQUENCE => :SEQUENCE,
+                      P_INNERTYPE_SEQUENCE => :INNERTYPE_SEQUENCE,
+                      P_MEMBER_NAME => :MEMBER_NAME,
+                      P_TYPE => :TYPE,
+                      P_PRECISION => :PRECISION,
+                      P_SIZE => :SIZE,
+                      P_SCALE => :SCALE,
+                      P_NULL_ALLOWED => :NULL_ALLOWED,
+                      P_DESCRIPTION => :DESCRIPTION,
+                      P_ATTR_SET => :ATTR_SET,
+                      P_PRIMARY_KEY => :PRIMARY_KEY,
+                      P_TRANSLATABLE => :TRANSLATABLE,
+                      P_COMPOSITE => :COMPOSITE,
+                      P_DOMAIN_NAME => :DOMAIN_NAME,
+                      P_MEMBER_TYPE_NAME => :MEMBER_TYPE_NAME,
+                      P_SEARCH_CRITERIA_TYPE => :SEARCH_CRITERIA_TYPE,
+                      P_ATTACHMENT => :ATTACHMENT,
+                      P_MIME_TYPE => :MIME_TYPE,
+                      P_DOMAIN_IMPLEMENTATION => :DOMAIN_IMPLEMENTATION,
+                      P_IS_SORTABLE => :IS_SORTABLE,
+		      P_CRAWL_IS_DATE_BASED => :CRAWL_IS_DATE_BASED,
+                      P_CRAWL_MEMBER_VIS_LVL => :CRAWL_MEMBER_VIS_LVL,
+                      P_CRAWL_IS_DISPLAYED => :CRAWL_IS_DISPLAYED,
+                      P_CRAWL_UI_FPARAM_NAME => :CRAWL_UI_FPARAM_NAME,
+                      P_CRAWL_INDEXED => :CRAWL_INDEXED,
+                      P_CRAWL_STORED => :CRAWL_STORED,
+                      P_CRAWL_IS_SECURE => :CRAWL_IS_SECURE,
+                      P_CRAWL_IS_TITLE => :CRAWL_IS_TITLE,
+                      P_CRAWL_WEIGHT => :CRAWL_WEIGHT);
+    end; "
+
+  UPLOAD USES_TABLE
+  " begin -- UPLOAD USES_TABLE
+    FND_IREP_LOADER_PRIVATE.UPLOAD_USES_TABLE( 
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_TABLE_NAME => :TABLE_NAME,
+                      P_UT_SEQ => :UT_SEQ,
+                      P_UT_DIRECTION => :UT_DIRECTION);
+    end; "
+
+  UPLOAD USES_MAP
+  " begin -- UPLOAD USES_MAP
+    FND_IREP_LOADER_PRIVATE.UPLOAD_USES_MAP( 
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_MAP_NAME => :MAP_NAME,
+                      P_UM_SEQ => :UM_SEQ);
+    end; "
+
+  UPLOAD CLASS_DATASOURCES
+  " begin -- UPLOAD CLASS_DATASOURCES 
+    FND_IREP_LOADER_PRIVATE.UPLOAD_CLASS_DATASOURCES(
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_DATASOURCE_NAME => :DATASOURCE_NAME,
+                      P_DEF_CLASS => :DEF_CLASS,
+                      P_QUERYABLE => :QUERYABLE,
+                      P_UPDATEABLE => :UPDATEABLE,
+                      P_INSERTABLE => :INSERTABLE,
+                      P_MERGEABLE => :MERGEABLE,
+                      P_DELETEABLE => :DELETEABLE,
+                      P_PROCESS_QNAME => :PROCESS_QNAME,
+                      P_QUERY_QNAME => :QUERY_QNAME);
+    end; "
+
+  UPLOAD OBJ_KEY_SET
+  " begin -- UPLOAD OBJ_KEY_SET
+    FND_IREP_LOADER_PRIVATE.UPLOAD_OBJ_KEY_SET(
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_KEY_SET_NAME => :KEY_SET_NAME,
+                      P_KEY_SET_SEQUENCE => :KEY_SET_SEQUENCE,
+                      P_KEY1_MBR_NAME => :KEY1_MBR_NAME,
+                      P_KEY2_MBR_NAME => :KEY2_MBR_NAME,
+                      P_KEY3_MBR_NAME => :KEY3_MBR_NAME,
+                      P_KEY4_MBR_NAME => :KEY4_MBR_NAME,
+                      P_KEY5_MBR_NAME => :KEY5_MBR_NAME,
+                      P_ALT1_MBR_NAME => :ALT1_MBR_NAME,
+                      P_ALT2_MBR_NAME => :ALT2_MBR_NAME,
+                      P_ALT3_MBR_NAME => :ALT3_MBR_NAME,
+                      P_ALT4_MBR_NAME => :ALT4_MBR_NAME,
+                      P_ALT5_MBR_NAME => :ALT5_MBR_NAME);
+    end; "
+
+  UPLOAD IREP_METHOD
+  BEGIN
+  " begin -- UPLOAD IREP_METHOD
+    FND_IREP_LOADER_PRIVATE.UPLOAD_IREP_METHOD(
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_FUNCTION_NAME => :FUNCTION_NAME,
+                      P_METHOD_NAME => :METHOD_NAME,
+                      P_OVERLOAD_SEQ => :OVERLOAD_SEQ,
+                      P_SCOPE => :SCOPE,
+                      P_LIFECYCLE => :LIFECYCLE,
+                      P_DESCRIPTION => :DESCRIPTION,
+                      P_COMPATABILITY => :COMPATABILITY,
+                      P_SYNCHRO => :SYNCHRO,
+                      P_DIRECTION => :DIRECTION,
+                      P_CTX_DEPENDENCE => :CTX_DEPENDENCE,
+                      P_USER_FN_NAME => :USER_FN_NAME,
+                      P_SHORT_DESCRIPTION => :SHORT_DESCRIPTION,
+                      P_PRIMARY_FLAG => :PRIMARY_FLAG,
+                      P_INDIRECT_OP_FLAG => :INDIRECT_OP_FLAG);
+    end; "
+
+  UPLOAD METHOD_CATEGORY
+  " begin -- UPLOAD METHOD_CATEGORY
+    FND_IREP_LOADER_PRIVATE.UPLOAD_METHOD_CATEGORY(
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_FUNCTION_NAME => :FUNCTION_NAME,
+                      P_OVERLOAD_SEQ => :OVERLOAD_SEQ,
+                      P_TYPE => :TYPE,
+                      P_CODE => :CODE,
+                      P_SEQUENCE => :SEQUENCE);
+    end; "
+
+  UPLOAD METHOD_CHILD_ANNOTATIONS
+  " begin -- UPLOAD METHOD_CHILD_ANNOTATIONS
+    FND_IREP_LOADER_PRIVATE.UPLOAD_METHOD_CHILD_ANNOTATION(
+		      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_FUNCTION_NAME => :FUNCTION_NAME,
+                      P_OVERLOAD_SEQ => :OVERLOAD_SEQ,
+                      P_CHILD_FLAG => :CHILD_FLAG,
+                      P_VALUE => :VALUE);
+    end; "
+
+  UPLOAD PARAMS
+  " begin -- UPLOAD PARAMS
+    FND_IREP_LOADER_PRIVATE.UPLOAD_PARAMS(
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJECT_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_FUNCTION_NAME => :FUNCTION_NAME,
+                      P_OVERLOAD_SEQ => :OVERLOAD_SEQ,
+                      P_SEQUENCE => :SEQUENCE,
+                      P_INNERTYPE_SEQUENCE => :INNERTYPE_SEQUENCE,
+                      P_NAME => :NAME,
+                      P_DIRECTION => :DIRECTION,
+                      P_OPTIONAL => :OPTIONAL,
+                      P_TYPE => :TYPE,
+                      P_PRECISION => :PRECISION,
+                      P_SIZE => :SIZE,
+                      P_SCALE => :SCALE,
+                      P_NULL_ALLOWED => :NULL_ALLOWED,
+                      P_DESCRIPTION => :DESCRIPTION,
+                      P_DEFAULT_VALUE => :DEFAULT_VALUE,
+                      P_DISPLAYED => :DISPLAYED,
+                      P_ATTRIBUTE_SET => :ATTRIBUTE_SET);
+    end; "

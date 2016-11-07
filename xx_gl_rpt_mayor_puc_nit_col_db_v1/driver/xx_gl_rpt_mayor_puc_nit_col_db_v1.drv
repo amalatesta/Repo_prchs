@@ -1,0 +1,44 @@
+# +=======================================================================+
+# |    Copyright (c) 2016 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_gl_rpt_mayor_puc_nit_col_db_v1.drv                              |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script drivers para reporte SQL                                    |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    03-NOV-2016  1.0  AMalatesta          Created                      |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_gl_rpt_mayor_puc_nit_col_db_v1
+
+  begin patch_info 
+  release  1
+  server   DB
+  language US
+  end patch_info 
+
+  copy xbol /admin/GL/xx_gl_rpt_mayor_puc_nit_col_db_v1/driver xx_gl_rpt_mayor_puc_nit_col_db_v1.drv
+
+  copy xbol /admin/GL/xx_gl_rpt_mayor_puc_nit_col_db_v1/driver buildpatch_db_v1.sh
+
+  copy xbol /admin/GL/xx_gl_rpt_mayor_puc_nit_col_db_v1/driver xxuninstall_db_v1.sql
+
+  copy xbol /admin/GL/xx_gl_rpt_mayor_puc_nit_col_db_v1/import PC_XXGLMYPN_db_v1.ldt
+
+  copy xbol /sql XXGLMYPN.sql
+
+  begin connection apps
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/GL/xx_gl_rpt_mayor_puc_nit_col_db_v1/import/PC_XXGLMYPN_db_v1.ldt
+
+  end connection apps
+
+end patch xx_gl_rpt_mayor_puc_nit_col_db_v1

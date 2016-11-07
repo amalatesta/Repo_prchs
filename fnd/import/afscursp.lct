@@ -1,0 +1,785 @@
+
+# $Header: afscursp.lct 120.4.12010000.3 2009/10/20 15:38:12 jvalenti ship $
+# afscursp.lct -  User/Responsibilities Loader Configuration
+#
+# Entities
+#    FND_USER                 	- Application users
+#      FND_USER_RESP_GROUPS	- User Responsibilities
+#
+#    FND_SECURITY_GROUPS	- Security groups
+#
+#    FND_APPLICATION	        - Applications
+#
+#    FND_RESPONSIBILITY  	- Application Responsibilities
+#      Note: Unless the parameter DATA_GROUP_NAME is specified while
+#      downloading resps, it will only download the 'STANDARD' data group.
+#      Resps for different data groups should be in different .ldt files,
+#      so that the MRC resps don't get uploaded when not intended.
+#
+#      FND_RESP_FUNCTIONS    	- Exclusions
+#
+# Download Parameters:
+#    USER_NAME              - FND_USER USRE_NAME filter
+#    DOWNLOAD_PASSWORD      - download password and related attributes. Affects
+#                             ENCRYPTED_USER_PASSWORD, LAST_LOGON_DATE,
+#                             PASSWORD_DATE, PASSWORD_ACCESSES
+#        Y  - download user password and related attributes
+#        N  - (default) DO NOT download user password and related attributes
+#    SECURITY_GROUP         - FND_USER_RESP_GROUPS SECURITY_GROUP_KEY filter
+#    SECURITY_GROUP_KEY     - FND_SECURITY_GROUPS SECURITY_GROUP_KEY filter
+#    APPLICATION_SHORT_NAME - APPLICATION_SHORT_NAME filter
+#    ORACLE_USERNAME        - FND_ORACLE_USERID ORACLE_USERNAME filter
+#    RESP_KEY               - FND_RESPONSIBILITY RESPONSIBILITY_KEY filter
+#    DATA_GROUP_NAME        - DATA_GROUP_NAME filter
+#    PLSQL_TYPE             - fnd_enabled_plsql plsql_type filter (obsolete)
+#    PLSQL_NAME             - fnd_enabled_plsql plsql_name filter (obsolete)
+#
+# Upload Parameters:
+#    UPLOAD_MODE
+#    CUSTOM_MODE
+#    UPDATE_USER            - update user record on target database
+#                             ENCRYPTED_USER_PASSWORD, LAST_LOGON_DATE,
+#                             PASSWORD_DATE, PASSWORD_ACCESSES
+#        Y  - upload user password/logon information
+#        N  - (default) insert missing users only
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afscursp.lct @~PROD:~PATH/~FILE"
+DEFINE FND_USER
+  KEY   USER_NAME				VARCHAR2(100)
+  CTX   OWNER                           	VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                	VARCHAR2(10)
+  BASE  ENCRYPTED_FOUNDATION_PASSWORD   	VARCHAR2(100)   # OBSOLETE - Bug 7687370
+  BASE  ENCRYPTED_USER_PASSWORD		        VARCHAR2(32000)
+  BASE  SESSION_NUMBER 		 		VARCHAR2(256)   # OBSOLETE - Bug 7687370
+  BASE  START_DATE				VARCHAR2(11)
+  BASE  END_DATE				VARCHAR2(4000)
+  BASE  LAST_LOGON_DATE				VARCHAR2(11)
+  TRANS DESCRIPTION				VARCHAR2(240)
+  BASE  PASSWORD_DATE				VARCHAR2(4000)
+  BASE  PASSWORD_ACCESSES_LEFT 		        VARCHAR2(4000)
+  BASE  PASSWORD_LIFESPAN_ACCESSES		VARCHAR2(4000)
+  BASE  PASSWORD_LIFESPAN_DAYS 		        VARCHAR2(4000)
+  BASE  EMAIL_ADDRESS				VARCHAR2(4000)
+  BASE  FAX					VARCHAR2(4000)
+
+  DEFINE FND_USER_RESP_GROUPS
+    KEY   RG           		REFERENCES FND_RESPONSIBILITY
+    KEY   SECURITY_GROUP	REFERENCES FND_SECURITY_GROUPS AS SG_KEY
+    CTX   OWNER                 VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE      VARCHAR2(10)
+    BASE  START_DATE		VARCHAR2(11)
+    BASE  END_DATE		VARCHAR2(4000)
+    BASE  DESCRIPTION		VARCHAR2(240)
+  END FND_USER_RESP_GROUPS
+END FND_USER
+
+DEFINE FND_SECURITY_GROUPS
+  KEY	SECURITY_GROUP_KEY	VARCHAR2(30)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+  TRANS SECURITY_GROUP_NAME	VARCHAR2(80)
+  TRANS DESCRIPTION		VARCHAR2(240)
+END FND_SECURITY_GROUPS
+
+DEFINE FND_APPLICATION
+  KEY   APPLICATION_SHORT_NAME  	VARCHAR2(50)
+  CTX   OWNER                 	        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE      	        VARCHAR2(10)
+  BASE  BASEPATH			VARCHAR2(20)
+  TRANS APPLICATION_NAME 		VARCHAR2(240)
+  TRANS DESCRIPTION			VARCHAR2(240)
+END FND_APPLICATION
+
+DEFINE FND_ORACLE_USERID
+  KEY   ORACLE_USERNAME         	VARCHAR2(30)
+  CTX   OWNER                 	        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  BASE  ENCRYPTED_ORACLE_PASSWORD 	VARCHAR2(32000)
+  BASE  ENABLED_FLAG            	VARCHAR2(1)
+  BASE  READ_ONLY_FLAG          	VARCHAR2(1)
+  TRANS DESCRIPTION			VARCHAR2(240)
+END FND_ORACLE_USERID
+
+# Note: RESPONSIBILITY_ID is included here for backward compatibility 
+#       purposes.  We no longer download RESPONSIBILITY_ID and we ignore 
+#       RESPONSIBILITY_ID during upload - Bug 4459766. 
+
+DEFINE FND_RESPONSIBILITY
+  KEY   APPLICATION_SHORT_NAME	REFERENCES FND_APPLICATION AS APPLICATION_SHORT_NAME
+  KEY   RESP_KEY	   		VARCHAR2(30)
+  BASE  RESPONSIBILITY_ID	   	VARCHAR2(50)
+  TRANS RESPONSIBILITY_NAME	   	VARCHAR2(100)
+  CTX   OWNER                      	VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  BASE  DATA_GROUP_APP_SHORT_NAME  	REFERENCES FND_APPLICATION AS DATA_GROUP_APP_SHORT_NAME
+  BASE  DATA_GROUP_NAME		   	VARCHAR2(50)
+  BASE  MENU_NAME		   	VARCHAR2(80)
+  BASE  START_DATE		   	VARCHAR2(11)
+  BASE  END_DATE		   	VARCHAR2(4000)
+  TRANS DESCRIPTION		   	VARCHAR2(240)
+  BASE  GROUP_APP_SHORT_NAME	   	REFERENCES FND_APPLICATION AS GROUP_APP_SHORT_NAME
+  BASE  REQUEST_GROUP_NAME	   	VARCHAR2(30)
+  BASE  VERSION			   	VARCHAR2(1)
+  BASE  WEB_HOST_NAME		   	VARCHAR2(4000)
+  BASE  WEB_AGENT_NAME 		   	VARCHAR2(4000)
+
+  DEFINE FND_RESP_FUNCTIONS
+    KEY   RULE_TYPE		VARCHAR2(1)
+    KEY   ACTION	 	VARCHAR2(480)
+    CTX   OWNER			VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE	VARCHAR2(10)
+  END FND_RESP_FUNCTIONS
+END FND_RESPONSIBILITY
+
+DEFINE FND_DATA_GROUPS
+  KEY   DATA_GROUP_NAME		VARCHAR2(30)
+  CTX   OWNER			VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+  BASE  DEFAULT_GROUP_FLAG	VARCHAR2(1)
+  TRANS DESCRIPTION		VARCHAR2(240)
+
+  DEFINE FND_DATA_GROUP_UNITS
+    KEY   APPLICATION_SHORT_NAME	REFERENCES FND_APPLICATION AS APPLICATION_SHORT_NAME
+    BASE  ORACLE_USERNAME   	    	VARCHAR2(30)
+    CTX   OWNER		    	    	VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    TRANS DESCRIPTION	                VARCHAR2(240)
+  END FND_DATA_GROUP_UNITS
+END FND_DATA_GROUPS
+
+DEFINE FND_ENABLED_PLSQL
+  KEY  PLSQL_TYPE 		VARCHAR2(30)
+  KEY  PLSQL_NAME 		VARCHAR2(100)
+  CTX  OWNER      		VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(10)
+  BASE ENABLED    		VARCHAR2(1)
+END FND_ENABLED_PLSQL
+
+DOWNLOAD FND_USER
+  "select USER_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          '' ENCRYPTED_FOUNDATION_PASSWORD,
+          decode(UPPER(:DOWNLOAD_PASSWORD),
+              'Y', substr(FND_USER_PKG.GetReEncryptedPassword(USER_NAME, 'LOADER'),1, 100),
+              '') ENCRYPTED_USER_PASSWORD,
+          '' SESSION_NUMBER,
+          TO_CHAR(START_DATE, 'YYYY/MM/DD') START_DATE,
+	  nvl(to_char(end_date,'YYYY/MM/DD'), fnd_load_util.null_value) END_DATE,
+          decode(UPPER(:DOWNLOAD_PASSWORD),
+              'Y', nvl(TO_CHAR(LAST_LOGON_DATE, 'YYYY/MM/DD'), fnd_load_util.null_value),
+              '') LAST_LOGON_DATE,
+          DESCRIPTION,
+          decode(UPPER(:DOWNLOAD_PASSWORD),
+              'Y', nvl(TO_CHAR(PASSWORD_DATE, 'YYYY/MM/DD'), fnd_load_util.null_value),
+              '') PASSWORD_DATE,
+          decode(UPPER(:DOWNLOAD_PASSWORD),
+              'Y', nvl(TO_CHAR(PASSWORD_ACCESSES_LEFT), fnd_load_util.null_value),
+              '') PASSWORD_ACCESSES_LEFT,
+   	  nvl(TO_CHAR(PASSWORD_LIFESPAN_ACCESSES), fnd_load_util.null_value) PASSWORD_LIFESPAN_ACCESSES, 
+   	  nvl(TO_CHAR(PASSWORD_LIFESPAN_DAYS), fnd_load_util.null_value) PASSWORD_LIFESPAN_DAYS,
+   	  nvl(EMAIL_ADDRESS, fnd_load_util.null_value) EMAIL_ADDRESS,
+   	  nvl(FAX, fnd_load_util.null_value) FAX
+   from   FND_USER
+   where  (:USER_NAME is null or
+             (:USER_NAME is not null and USER_NAME like :USER_NAME)) "
+
+DOWNLOAD FND_USER_RESP_GROUPS
+  "select A.APPLICATION_SHORT_NAME,
+          R.RESPONSIBILITY_KEY,
+          S.SECURITY_GROUP_KEY,
+          fnd_load_util.owner_name(u.LAST_UPDATED_BY) OWNER,
+          to_char(UR.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+     	  TO_CHAR(UR.START_DATE, 'YYYY/MM/DD') START_DATE,
+          nvl(to_char(ur.end_date,'YYYY/MM/DD'), fnd_load_util.null_value) END_DATE,
+          '' DESCRIPTION
+   from   FND_USER U,
+          FND_USER_RESP_GROUPS_DIRECT UR,
+          FND_APPLICATION_VL A,
+          FND_RESPONSIBILITY_VL R,
+          FND_SECURITY_GROUPS_VL S
+   where  U.USER_NAME = :USER_NAME
+   and    UR.USER_ID = U.USER_ID
+   and    to_number(UR.RESPONSIBILITY_ID) = R.RESPONSIBILITY_ID
+   and    UR.RESPONSIBILITY_APPLICATION_ID = R.APPLICATION_ID
+   and    A.APPLICATION_ID = R.APPLICATION_ID
+   and    UR.SECURITY_GROUP_ID = S.SECURITY_GROUP_ID
+   and    ((:SECURITY_GROUP is null and S.SECURITY_GROUP_KEY = 'STANDARD') or
+              (:SECURITY_GROUP is not null
+		 and S.SECURITY_GROUP_KEY like :SECURITY_GROUP)) 
+   and    (:RESP_KEY is null or
+             (:RESP_KEY is not null and R.RESPONSIBILITY_KEY like :RESP_KEY))
+   and    (:APPLICATION_SHORT_NAME is null or
+             (:APPLICATION_SHORT_NAME is not null and A.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)) "
+
+DOWNLOAD FND_SECURITY_GROUPS
+  "select SECURITY_GROUP_KEY,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          SECURITY_GROUP_NAME,
+   	  DESCRIPTION
+   from   FND_SECURITY_GROUPS_VL
+   where  (:SECURITY_GROUP_KEY is null or
+             (:SECURITY_GROUP_KEY is not null and
+                  SECURITY_GROUP_KEY like :SECURITY_GROUP_KEY)) "
+
+DOWNLOAD FND_APPLICATION
+  "select APPLICATION_SHORT_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          BASEPATH, 
+          APPLICATION_NAME,
+   	  DESCRIPTION
+   from   FND_APPLICATION_VL
+   where  (:APPLICATION_SHORT_NAME is null or
+             (:APPLICATION_SHORT_NAME is not null and
+                 APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)) "
+
+DOWNLOAD FND_ORACLE_USERID
+  "select ORACLE_USERNAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          substr(FND_ORACLE_USER_PKG.GetReEncryptedPassword(ORACLE_USERNAME, 'LOADER'), 1, 100),
+   	  ENABLED_FLAG, 
+   	  READ_ONLY_FLAG, 
+          DESCRIPTION
+   from   FND_ORACLE_USERID
+   where  (:ORACLE_USERNAME is null or
+     (:ORACLE_USERNAME is not null and ORACLE_USERNAME like :ORACLE_USERNAME)) "
+
+DOWNLOAD FND_RESPONSIBILITY
+  "select A.APPLICATION_SHORT_NAME,
+   	  RV.RESPONSIBILITY_KEY,
+          null,                     -- bug 4459766 RESPONSIBILITY_ID is no longer downloaded
+   	  RV.RESPONSIBILITY_NAME,
+          fnd_load_util.owner_name(RV.LAST_UPDATED_BY) OWNER,
+          to_char(RV.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+   	  ADG.APPLICATION_SHORT_NAME DATA_GROUP_APP,
+   	  DG.DATA_GROUP_NAME,
+   	  M.MENU_NAME,
+          TO_CHAR(RV.START_DATE, 'YYYY/MM/DD') START_DATE,
+          nvl(TO_CHAR(RV.END_DATE, 'YYYY/MM/DD'), fnd_load_util.null_value)  END_DATE,
+   	  RV.DESCRIPTION,
+   	  ARG.APPLICATION_SHORT_NAME REQUEST_GROUP_APP,
+   	  RG.REQUEST_GROUP_NAME,
+   	  RV.VERSION,
+   	  nvl(RV.WEB_HOST_NAME, fnd_load_util.null_value) WEB_HOST_NAME,
+   	  nvl(RV.WEB_AGENT_NAME, fnd_load_util.null_value) WEB_AGENT_NAME
+   from	  FND_RESPONSIBILITY_VL RV,
+   	  FND_APPLICATION A,
+   	  FND_MENUS M,
+   	  FND_APPLICATION ADG,
+   	  FND_DATA_GROUPS DG,
+   	  FND_APPLICATION ARG,
+   	  FND_REQUEST_GROUPS RG
+   where  A.APPLICATION_ID = RV.APPLICATION_ID
+   and	  ADG.APPLICATION_ID = RV.DATA_GROUP_APPLICATION_ID
+   and	  DG.DATA_GROUP_ID = RV.DATA_GROUP_ID
+   and	  ARG.APPLICATION_ID (+) = RV.GROUP_APPLICATION_ID
+   and	  RG.REQUEST_GROUP_ID (+) = RV.REQUEST_GROUP_ID
+   and	  RG.APPLICATION_ID (+) = RV.GROUP_APPLICATION_ID
+   and	  M.MENU_ID = RV.MENU_ID
+   and	  RV.VERSION IS NOT NULL
+   and	  (:RESP_KEY is null or (:RESP_KEY is not null
+		and RV.RESPONSIBILITY_KEY like :RESP_KEY))
+   and    (:APPLICATION_SHORT_NAME is null or
+             (:APPLICATION_SHORT_NAME is not null and
+                A.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)) 
+   and    ((    :DATA_GROUP_NAME is null 
+            and DG.DATA_GROUP_NAME = 'Standard') or
+           (    :DATA_GROUP_NAME is not null 
+            and DG.DATA_GROUP_NAME like :DATA_GROUP_NAME))"
+
+
+DOWNLOAD FND_RESP_FUNCTIONS
+  "select RF.RULE_TYPE,
+   	  decode(RF.RULE_TYPE,
+   		'F', FF.FUNCTION_NAME,
+   		'W', FF.FUNCTION_NAME,
+   		'M', M.MENU_NAME,
+   		'Unsupported type - '||rule_type),
+          fnd_load_util.owner_name(RF.LAST_UPDATED_BY) OWNER,
+          to_char(RF.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE  
+   from   FND_RESP_FUNCTIONS RF,
+   	  FND_FORM_FUNCTIONS_VL FF,
+   	  FND_MENUS_VL M,
+   	  FND_APPLICATION A,
+   	  FND_RESPONSIBILITY_VL R
+   where  FF.FUNCTION_ID (+) = RF.ACTION_ID
+   and    M.MENU_ID (+) = RF.ACTION_ID
+   and    R.APPLICATION_ID = RF.APPLICATION_ID
+   and    R.RESPONSIBILITY_ID = RF.RESPONSIBILITY_ID
+   and    R.RESPONSIBILITY_KEY = :RESP_KEY
+   and    A.APPLICATION_ID = R.APPLICATION_ID
+   and	  A.APPLICATION_SHORT_NAME = :APPLICATION_SHORT_NAME "
+
+DOWNLOAD FND_DATA_GROUPS
+  "select DATA_GROUP_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          DEFAULT_GROUP_FLAG,
+          DESCRIPTION
+   from   FND_DATA_GROUPS
+   where  (:DATA_GROUP_NAME is null or
+             (:DATA_GROUP_NAME is not null
+                and DATA_GROUP_NAME like :DATA_GROUP_NAME)) "
+
+DOWNLOAD FND_DATA_GROUP_UNITS
+  "select A.APPLICATION_SHORT_NAME,
+          O.ORACLE_USERNAME,
+          fnd_load_util.owner_name(DGU.LAST_UPDATED_BY) OWNER,
+          to_char(DGU.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          DGU.DESCRIPTION
+   from   FND_DATA_GROUP_UNITS DGU,
+          FND_APPLICATION        A,
+          FND_ORACLE_USERID      O,
+          FND_DATA_GROUPS       DG
+   where  DGU.APPLICATION_ID = A.APPLICATION_ID
+   and    DGU.ORACLE_ID      = O.ORACLE_ID
+   and    DGU.DATA_GROUP_ID  = DG.DATA_GROUP_ID
+   and    DG.DATA_GROUP_NAME = :DATA_GROUP_NAME"
+
+DOWNLOAD FND_ENABLED_PLSQL
+  "select PLSQL_TYPE,
+          PLSQL_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          ENABLED
+   from   FND_ENABLED_PLSQL
+   where  PLSQL_TYPE like nvl(:PLSQL_TYPE, PLSQL_TYPE)
+   and    PLSQL_NAME like nvl(:PLSQL_NAME, PLSQL_NAME)"
+
+UPLOAD FND_USER
+BEGIN
+  "declare
+     user_exists varchar2(1);
+   begin
+     -- no NLS data for FND_USER - bug 7687370
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+     -- Bug 7687370 do not update existing user unless UPDATE_USER='Y'
+     if (nvl(UPPER(:UPDATE_USER), 'N') <> 'Y') then 
+       -- insert missing users only
+       begin
+         select 'Y' into user_exists
+         from   fnd_user
+         where  user_name = :USER_NAME;
+         -- found existing user, bail out
+         return;
+       exception
+         when no_data_found then
+           null; -- no existing user found, must load it
+       end;
+     end if;
+
+     fnd_user_pkg.LOAD_ROW (
+       :USER_NAME,
+       :OWNER,
+       :ENCRYPTED_USER_PASSWORD,
+       NULL,
+       :START_DATE,
+       :END_DATE,
+       :LAST_LOGON_DATE,
+       :DESCRIPTION,
+       :PASSWORD_DATE,
+       :PASSWORD_ACCESSES_LEFT,
+       :PASSWORD_LIFESPAN_ACCESSES,
+       :PASSWORD_LIFESPAN_DAYS,
+       :EMAIL_ADDRESS,
+       :FAX,
+       :CUSTOM_MODE,
+       :LAST_UPDATE_DATE );
+   end; "
+
+UPLOAD FND_USER_RESP_GROUPS
+  "declare
+     v_user_id number;
+     v_app_id number;
+     v_resp_id number;
+     v_sec_group_id number;
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+   begin
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+   
+     select USER_ID into v_user_id
+     from   FND_USER
+     where  USER_NAME = :USER_NAME;
+
+     select APPLICATION_ID into v_app_id
+     from   FND_APPLICATION
+     where  APPLICATION_SHORT_NAME = :RG_APPLICATION_SHORT_NAME;
+
+     select RESPONSIBILITY_ID into v_resp_id
+     from   FND_RESPONSIBILITY
+     where  RESPONSIBILITY_KEY = :RG_RESP_KEY
+     and    APPLICATION_ID = v_app_id;
+
+     select SECURITY_GROUP_ID into v_sec_group_id
+     from   FND_SECURITY_GROUPS
+     where  SECURITY_GROUP_KEY = :SG_KEY;
+
+     -- Translate owner to file_last_updated_by
+     f_luby := fnd_load_util.owner_id(:OWNER);
+
+     -- Translate char last_update_date to date
+     f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+     select distinct LAST_UPDATED_BY, LAST_UPDATE_DATE
+     into db_luby, db_ludate
+     from FND_USER_RESP_GROUPS
+     where RESPONSIBILITY_ID = v_resp_id
+     and RESPONSIBILITY_APPLICATION_ID = v_app_id
+     and SECURITY_GROUP_ID = v_sec_group_id
+     and USER_ID = v_user_id;
+
+     if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                   db_ludate, :CUSTOM_MODE)) then
+         fnd_user_resp_groups_api.LOAD_ROW (
+           :USER_NAME,
+           :RG_RESP_KEY,
+           :RG_APPLICATION_SHORT_NAME,
+           :SG_KEY,
+           :OWNER,
+           :START_DATE,
+           :END_DATE,
+           :DESCRIPTION,
+           f_ludate);    -- Bug3649874 - Added parameter to be passed in
+     end if;
+     exception
+       when no_data_found then
+         fnd_user_resp_groups_api.LOAD_ROW (
+           :USER_NAME,
+           :RG_RESP_KEY,
+           :RG_APPLICATION_SHORT_NAME,
+           :SG_KEY,
+           :OWNER,
+           :START_DATE,
+           :END_DATE,
+           :DESCRIPTION,
+           f_ludate);   -- Bug3649874 - Added parameter to be passed in
+end; "
+
+UPLOAD FND_SECURITY_GROUPS
+ "declare
+    v_db_owner_id number;
+
+  begin
+    if (:UPLOAD_MODE = 'NLS') then
+      fnd_security_groups_pkg.TRANSLATE_ROW (
+        :SECURITY_GROUP_KEY,
+        :OWNER,
+        :SECURITY_GROUP_NAME,
+        :DESCRIPTION, 
+        :CUSTOM_MODE,
+        :LAST_UPDATE_DATE);
+    else
+      fnd_security_groups_pkg.LOAD_ROW (
+          :SECURITY_GROUP_KEY,
+          :OWNER,
+          :SECURITY_GROUP_NAME,
+          :DESCRIPTION,
+          :CUSTOM_MODE,
+          :LAST_UPDATE_DATE );
+    end if;
+  end; "
+
+UPLOAD FND_APPLICATION
+ "begin
+    return;
+  end; "
+
+UPLOAD FND_ORACLE_USERID
+   "declare
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+
+    begin
+      if (:UPLOAD_MODE = 'NLS') then
+ 
+       -- Translate owner to file_last_updated_by
+       f_luby := fnd_load_util.owner_id(:OWNER);
+
+       -- Translate char last_update_date to date
+       f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+       begin
+         select LAST_UPDATED_BY, LAST_UPDATE_DATE
+         into db_luby, db_ludate
+         from fnd_oracle_userid
+         where ORACLE_USERNAME = :ORACLE_USERNAME
+         and userenv('LANG') =
+          (select language_code
+           from FND_LANGUAGES
+           where installed_flag = 'B');
+
+         if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                       db_ludate, :CUSTOM_MODE)) then
+           update FND_ORACLE_USERID set
+            DESCRIPTION = :DESCRIPTION,
+            LAST_UPDATED_BY = f_luby,
+            LAST_UPDATE_DATE = f_ludate,
+            LAST_UPDATE_LOGIN = 0
+           where ORACLE_USERNAME = :ORACLE_USERNAME
+           and userenv('LANG') =
+            (select language_code
+             from FND_LANGUAGES
+             where installed_flag = 'B');
+         end if;
+        exception
+          when no_data_found then
+           null;
+       end;
+
+      else
+       fnd_oracle_user_pkg.LOAD_ROW (
+              :ORACLE_USERNAME,
+              :OWNER,
+              :ENCRYPTED_ORACLE_PASSWORD,
+              :DESCRIPTION,
+              :ENABLED_FLAG,
+              :READ_ONLY_FLAG,
+              :CUSTOM_MODE,
+              :LAST_UPDATE_DATE);
+      end if;
+    end; "
+
+UPLOAD FND_RESPONSIBILITY
+BEGIN
+  "declare
+     v_db_owner_id number;
+     v_app_id number;
+     v_resp_id number;
+
+   begin
+    if (:UPLOAD_MODE = 'NLS') then
+      fnd_responsibility_pkg.TRANSLATE_ROW (
+        :APPLICATION_SHORT_NAME,
+        :RESP_KEY,
+        :RESPONSIBILITY_NAME,
+        :DESCRIPTION,
+        :OWNER,
+        :CUSTOM_MODE,
+        :LAST_UPDATE_DATE);
+    else
+        fnd_responsibility_pkg.LOAD_ROW (
+          :APPLICATION_SHORT_NAME,
+          :RESP_KEY,
+          null,                 -- Bug 4459766 RESPONSIBILITY_ID is derived in the plsql handler
+          :RESPONSIBILITY_NAME,
+          :OWNER,
+          :DATA_GROUP_APP_SHORT_NAME,
+          :DATA_GROUP_NAME,
+          :MENU_NAME,
+          :START_DATE,
+          :END_DATE,
+          :DESCRIPTION,
+          :GROUP_APP_SHORT_NAME,
+          :REQUEST_GROUP_NAME,
+          :VERSION,
+          :WEB_HOST_NAME,
+          :WEB_AGENT_NAME,
+          :CUSTOM_MODE,
+          :LAST_UPDATE_DATE );
+     end if;
+  end; "
+
+UPLOAD FND_RESP_FUNCTIONS
+  " begin
+      if (:UPLOAD_MODE = 'NLS') then
+        null;
+      else
+          fnd_resp_functions_pkg.LOAD_ROW (
+            :APPLICATION_SHORT_NAME,
+            :RESP_KEY,
+            :RULE_TYPE,
+            :ACTION,
+            :OWNER,
+            :CUSTOM_MODE,
+            :LAST_UPDATE_DATE );
+      end if;
+    end; "
+
+UPLOAD FND_DATA_GROUPS
+BEGIN
+  " declare
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+
+     begin
+     f_luby := fnd_load_util.owner_id(:OWNER);
+
+     -- Translate char last_update_date to date
+     f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+     begin
+     if (:UPLOAD_MODE = 'NLS') then
+     begin
+      select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+       from FND_DATA_GROUPS 
+	where DATA_GROUP_NAME = :DATA_GROUP_NAME
+        and userenv('LANG') =
+          (select language_code
+           from FND_LANGUAGES
+           where installed_flag = 'B');
+
+       if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                     db_ludate, :CUSTOM_MODE)) then
+        update FND_DATA_GROUPS set
+          DESCRIPTION = :DESCRIPTION,
+          LAST_UPDATED_BY = f_luby,
+          LAST_UPDATE_DATE = f_ludate,
+          LAST_UPDATE_LOGIN = 0
+        where DATA_GROUP_NAME = :DATA_GROUP_NAME
+        and userenv('LANG') =
+          (select language_code
+           from FND_LANGUAGES
+           where installed_flag = 'B');
+       end if;
+     exception
+       when no_data_found then
+        null;
+     end;
+   else
+    -- *** No Non-NLS update. ***
+    -- This table should only be updated by AutoInstall.
+    null;
+   end if;
+  end;
+end; "
+
+UPLOAD FND_DATA_GROUP_UNITS
+  " declare
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+
+    begin
+      if (:UPLOAD_MODE = 'NLS') then
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.owner_id(:OWNER);
+
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+     begin
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+	  from fnd_data_group_units
+        where DATA_GROUP_ID =
+            (select DATA_GROUP_ID
+             from FND_DATA_GROUPS
+             where DATA_GROUP_NAME = :DATA_GROUP_NAME)
+        and APPLICATION_ID =
+            (select APPLICATION_ID
+             from FND_APPLICATION
+             where APPLICATION_SHORT_NAME = :APPLICATION_SHORT_NAME)
+        and userenv('LANG') =
+          (select language_code
+           from FND_LANGUAGES
+           where installed_flag = 'B');
+
+       if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                     db_ludate, :CUSTOM_MODE)) then
+        update FND_DATA_GROUP_UNITS set
+          DESCRIPTION = :DESCRIPTION,
+          LAST_UPDATED_BY = f_luby,
+          LAST_UPDATE_DATE = f_ludate,
+          LAST_UPDATE_LOGIN = 0
+        where DATA_GROUP_ID =
+            (select DATA_GROUP_ID
+             from FND_DATA_GROUPS
+             where DATA_GROUP_NAME = :DATA_GROUP_NAME)
+        and APPLICATION_ID =
+            (select APPLICATION_ID
+             from FND_APPLICATION
+             where APPLICATION_SHORT_NAME = :APPLICATION_SHORT_NAME)
+        and userenv('LANG') =
+          (select language_code
+           from FND_LANGUAGES
+           where installed_flag = 'B');
+        end if;
+     exception
+       when no_data_found then
+	null;
+     end;
+   else
+	-- *** No Non-NLS update. ***
+      -- This table should only be updated by AutoInstall.
+      null;
+  end if;
+end; "
+
+UPLOAD FND_ENABLED_PLSQL
+  " declare
+     v_db_owner_id number;
+     f_luby    number;  -- entity owner in file
+     f_ludate  date;    -- entity update date in file
+     db_luby   number;  -- entity owner in db
+     db_ludate date;    -- entity update date in db
+
+    begin
+      if (:UPLOAD_MODE = 'NLS') then
+        null;
+      else
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+        begin
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+           into db_luby, db_ludate
+          from fnd_enabled_plsql
+           where PLSQL_TYPE = :PLSQL_TYPE
+           and PLSQL_NAME = :PLSQL_NAME;
+
+          if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+           update FND_ENABLED_PLSQL set
+            ENABLED = :ENABLED,
+            LAST_UPDATED_BY = f_luby,
+            LAST_UPDATE_DATE = f_ludate,
+            LAST_UPDATE_LOGIN = 0
+          where PLSQL_TYPE = :PLSQL_TYPE
+          and PLSQL_NAME = :PLSQL_NAME;
+        end if;
+      exception
+        when no_data_found then
+          insert into FND_ENABLED_PLSQL (
+            PLSQL_TYPE,
+            PLSQL_NAME,
+            ENABLED,
+            CREATED_BY,
+            CREATION_DATE,
+            LAST_UPDATED_BY,
+            LAST_UPDATE_DATE,
+            LAST_UPDATE_LOGIN)
+          select
+            :PLSQL_TYPE,
+            :PLSQL_NAME,
+            :ENABLED,
+            f_luby,
+            f_ludate,
+            f_luby,
+            f_ludate,
+            0
+          from sys.dual;
+   end;
+ end if;
+end; "
+

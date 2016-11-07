@@ -1,0 +1,170 @@
+# +======================================================================+
+# |               Copyright (c) 2002, Oracle Corporation                 |
+# |                   Redwood Shores, California, USA                    |
+# |                        All rights reserved.                          |
+# +======================================================================+
+#
+# Filename
+#       afsvcct.lct
+# Entity
+#       FND_SVC_COMP_TYPES
+# According to Workflow Development Standard
+#    http://www-apps/atg/wf/std/wf26/jbes/wfjbesdevstd_3b-3.pdf 
+# We use CUSTOMIZATION_LEVEL instead of LAST_UPDATE_DATE to protect seed data 
+# from changes  and preserve any permitted customizations by customers. It 
+# has three different values:
+#   'C'(Core): Non-customizable seeded data by product teams. Cannot be 
+#              changed at a customer site.
+#   'L'(Limit): Seeded data by product teams that can be Enabled/Disabled at 
+#               a customer site. 
+#   'U'(User-defined): Defined by customer.
+#
+# $Header: afsvcct.lct 120.0.12010000.1 2008/07/25 13:40:42 appldev ship $ 
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+54 checkfile:~PROD:~PATH:~FILE:FND_SVC_COMP_TYPES &ui_apps 0 Y UPLOAD_PARTIAL @FND:patch/115/import/afsvcct.lct @~PROD:~PATH/~FILE FND_SVC_COMP_TYPES"
+
+#
+# -- DEFINE SECTION --
+#
+
+
+DEFINE FND_SVC_COMP_TYPES
+    KEY     COMPONENT_TYPE    VARCHAR2(30)
+    BASE    COMPONENT_CLASS_NAME  VARCHAR2(240)
+    BASE    CONFIG_UI_REGION  VARCHAR2(240)
+    BASE    CUSTOMIZATION_LEVEL   VARCHAR2(30)
+    BASE    OBJECT_VERSION_NUMBER NUMBER
+    TRANS   DISPLAY_NAME        VARCHAR2(80)
+    TRANS   DESCRIPTION     VARCHAR2(1996)
+    CTX     OWNER     VARCHAR2(7)
+    CTX     LAST_UPDATE_DATE  VARCHAR2(75)
+
+  DEFINE FND_SVC_COMP_PARAMS
+      KEY   PARAMETER_NAME    VARCHAR2(30)
+      BASE  DEFAULT_PARAMETER_VALUE VARCHAR2(1996)
+      BASE  REQUIRED_FLAG   VARCHAR2(1)
+      BASE  ALLOW_RELOAD_FLAG VARCHAR2(1)
+      BASE  ENCRYPTED_FLAG    VARCHAR2(1)
+      BASE  CUSTOMIZATION_LEVEL VARCHAR2(30)
+      BASE  OBJECT_VERSION_NUMBER NUMBER
+      TRANS DISPLAY_NAME    VARCHAR2(80)
+      TRANS DESCRIPTION     VARCHAR2(1996)
+      CTX   OWNER       VARCHAR2(7)
+      CTX   LAST_UPDATE_DATE  VARCHAR2(75)
+  END FND_SVC_COMP_PARAMS
+
+END FND_SVC_COMP_TYPES
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD FND_SVC_COMP_TYPES
+  "SELECT component_type
+        , component_class_name
+        , config_ui_region
+        , customization_level
+        , -1 object_version_number
+        , display_name
+        , description
+        , DECODE (last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+        , to_char(last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date
+   FROM fnd_svc_comp_types_vl
+   WHERE ((:COMPONENT_TYPE is NULL) OR
+          (:COMPONENT_TYPE is NOT NULL) AND (component_type like :COMPONENT_TYPE)) 
+   ORDER BY component_type"
+
+
+DOWNLOAD FND_SVC_COMP_PARAMS
+  "SELECT parameter_name
+        , default_parameter_value
+        , required_flag
+        , allow_reload_flag
+        , encrypted_flag
+        , customization_level
+        , -1 object_version_number
+        , display_name
+        , description
+        , DECODE (last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+        , to_char(last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date
+   FROM fnd_svc_comp_params_vl
+   WHERE component_type = :COMPONENT_TYPE 
+   ORDER BY parameter_name"
+
+#
+# -- UPLOAD SECTION --
+#
+
+UPLOAD FND_SVC_COMP_TYPES
+BEGIN
+"BEGIN
+  DECLARE 
+  BEGIN
+  
+    IF (:UPLOAD_MODE='NLS') THEN
+
+        FND_SVC_COMP_TYPES_PKG.Translate_Row 
+        (
+              x_component_type => :COMPONENT_TYPE
+            , x_display_name => :DISPLAY_NAME
+            , x_description => :DESCRIPTION
+            , x_owner => :OWNER
+        );
+
+    ELSE
+        FND_SVC_COMP_TYPES_PKG.Load_Row 
+        (
+              x_component_type => :COMPONENT_TYPE
+            , x_component_class_name => :COMPONENT_CLASS_NAME
+            , x_config_ui_region => :CONFIG_UI_REGION
+            , x_customization_level => :CUSTOMIZATION_LEVEL
+            , x_object_version_number => :OBJECT_VERSION_NUMBER
+            , x_display_name => :DISPLAY_NAME
+            , x_description => :DESCRIPTION
+            , x_owner => :OWNER
+        );
+    END IF;
+  END;
+END;"
+
+UPLOAD FND_SVC_COMP_PARAMS
+"BEGIN
+  DECLARE
+    l_parameter_id fnd_svc_comp_params_b.parameter_id%TYPE;
+    
+  BEGIN
+
+
+    IF (:UPLOAD_MODE='NLS') THEN
+    
+        SELECT parameter_id
+        INTO l_parameter_id
+        FROM fnd_svc_comp_params_b
+        WHERE parameter_name = :PARAMETER_NAME
+          and component_type = :COMPONENT_TYPE;
+    
+        FND_SVC_COMP_PARAMS_PKG.TRANSLATE_ROW
+        (
+              x_parameter_id => l_parameter_id
+            , x_display_name => :DISPLAY_NAME
+            , x_description => :DESCRIPTION
+            , x_owner => :OWNER
+        );
+    ELSE
+        FND_SVC_COMP_PARAMS_PKG.LOAD_ROW 
+        (
+            x_parameter_name => :PARAMETER_NAME
+          , x_component_type => :COMPONENT_TYPE
+          , x_default_parameter_value => :DEFAULT_PARAMETER_VALUE
+          , x_required_flag => :REQUIRED_FLAG
+          , x_allow_reload_flag => :ALLOW_RELOAD_FLAG
+          , x_encrypted_flag => :ENCRYPTED_FLAG
+          , x_customization_level => :CUSTOMIZATION_LEVEL
+          , x_object_version_number => :OBJECT_VERSION_NUMBER
+          , x_display_name => :DISPLAY_NAME
+          , x_description => :DESCRIPTION
+          , x_owner => :OWNER
+          );
+    END IF;
+  END;
+END;"

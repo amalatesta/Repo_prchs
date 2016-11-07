@@ -1,0 +1,150 @@
+#
+# $Header: fndpiagp.lct 120.0 2005/05/07 16:18:34 appldev noship $
+#
+# Entities
+#        FND_PRIVACY_ATTRIBUTE_CHILDREN 
+#
+
+  DEFINE  FND_PRIVACY_ATTRIBUTE_CHILDREN
+    KEY   PARENT_ATTRIBUTE_CODE           VARCHAR2(30)
+    KEY   ATTRIBUTE_CODE                  VARCHAR2(30)
+    CTX   OWNER                           VARCHAR2(30)
+    BASE  OBJECT_VERSION_NUMBER           NUMBER
+    BASE  SECURITY_GROUP_ID               NUMBER
+    BASE  ATTRIBUTE_CATEGORY              VARCHAR2(150)
+    BASE  ATTRIBUTE1                      VARCHAR2(150)
+    BASE  ATTRIBUTE2                      VARCHAR2(150)
+    BASE  ATTRIBUTE3                      VARCHAR2(150)
+    BASE  ATTRIBUTE4                      VARCHAR2(150)
+    BASE  ATTRIBUTE5                      VARCHAR2(150)
+    BASE  ATTRIBUTE6                      VARCHAR2(150)
+    BASE  ATTRIBUTE7                      VARCHAR2(150)
+    BASE  ATTRIBUTE8                      VARCHAR2(150)
+    BASE  ATTRIBUTE9                      VARCHAR2(150)
+    BASE  ATTRIBUTE10                     VARCHAR2(150)
+    BASE  ATTRIBUTE11                     VARCHAR2(150)
+    BASE  ATTRIBUTE12                     VARCHAR2(150)
+    BASE  ATTRIBUTE13                     VARCHAR2(150)
+    BASE  ATTRIBUTE14                     VARCHAR2(150)
+    BASE  ATTRIBUTE15                     VARCHAR2(150)
+  END FND_PRIVACY_ATTRIBUTE_CHILDREN 
+
+DOWNLOAD FND_PRIVACY_ATTRIBUTE_CHILDREN
+  "select 
+    B.PARENT_ATTRIBUTE_CODE,
+    B.ATTRIBUTE_CODE,
+    decode(B.LAST_UPDATED_BY,1,'SEED',0, 'SEED', 'CUSTOM') OWNER,
+    B.OBJECT_VERSION_NUMBER,          
+    B.SECURITY_GROUP_ID    ,        
+    B.ATTRIBUTE_CATEGORY   ,       
+    B.ATTRIBUTE1  ,      
+    B.ATTRIBUTE2  ,     
+    B.ATTRIBUTE3  ,    
+    B.ATTRIBUTE4  ,   
+    B.ATTRIBUTE5  ,  
+    B.ATTRIBUTE6  , 
+    B.ATTRIBUTE7  , 
+    B.ATTRIBUTE8  , 
+    B.ATTRIBUTE9  , 
+    B.ATTRIBUTE10 , 
+    B.ATTRIBUTE11 , 
+    B.ATTRIBUTE12 , 
+    B.ATTRIBUTE13 , 
+    B.ATTRIBUTE14 , 
+    B.ATTRIBUTE15  
+  FROM  FND_PRIVACY_ATTRIBUTE_CHILDREN B
+  WHERE B.PARENT_ATTRIBUTE_CODE = :PARENT_ATTRIBUTE_CODE
+"
+
+
+UPLOAD FND_PRIVACY_ATTRIBUTE_CHILDREN
+   " DECLARE  
+       x  	                 number;  
+       l_parent_attribute_code   varchar2(30);  
+       l_attribute_code          varchar2(30);  
+       l_object_version_number   number;  
+       l_user_id 	         number;  
+       l_row_id                  rowid;  
+     BEGIN  
+ 
+       IF (:OWNER = 'ORACLE') THEN
+          l_user_id := 1;
+       ELSE
+          l_user_id := 0;
+       END IF;
+
+       IF (:UPLOAD_MODE = 'NLS') then
+                null;
+       ELSE
+        BEGIN
+          SELECT parent_attribute_code, attribute_code, object_version_number, last_updated_by
+          INTO   l_parent_attribute_code, l_attribute_code, l_object_version_number, l_last_updated_by
+          FROM   fnd_privacy_attribute_children
+          WHERE  parent_attribute_code = :parent_attribute_code
+          AND    attribute_code = :attribute_code;
+          EXCEPTION WHEN no_data_found THEN
+            l_parent_attribute_code := NULL;
+            l_attribute_code := NULL;
+        END;
+
+        IF (l_parent_attribute_code IS NULL AND l_attribute_code IS NULL) THEN
+
+          FND_PRIV_ATTR_CHILDREN_PKG.INSERT_ROW(  
+                X_ROW_ID                 => l_row_id,
+                X_PARENT_ATTRIBUTE_CODE  => :PARENT_ATTRIBUTE_CODE,
+                X_ATTRIBUTE_CODE         => :ATTRIBUTE_CODE,
+                X_CREATION_DATE          => sysdate,
+                X_CREATED_BY             => l_user_id ,
+                X_LAST_UPDATE_DATE       => SYSDATE ,
+                X_LAST_UPDATED_BY        => l_user_id ,
+                X_LAST_UPDATE_LOGIN      => 0,
+                X_ATTRIBUTE1    	 => NULL ,
+                X_ATTRIBUTE2     	 => NULL ,
+                X_ATTRIBUTE3     	 => NULL ,
+                X_ATTRIBUTE4    	 => NULL ,
+                X_ATTRIBUTE5    	 => NULL ,
+                X_ATTRIBUTE6    	 => NULL ,
+                X_ATTRIBUTE7    	 => NULL ,
+                X_ATTRIBUTE8    	 => NULL ,
+                X_ATTRIBUTE9    	 => NULL ,
+                X_ATTRIBUTE10     	 => NULL ,
+                X_ATTRIBUTE11    	 => NULL ,
+                X_ATTRIBUTE12   	 => NULL ,
+                X_ATTRIBUTE13  		 => NULL ,
+                X_ATTRIBUTE14 		 => NULL ,
+                X_ATTRIBUTE15     	 => NULL ,
+	        X_ATTRIBUTE_CATEGORY	 => NULL );
+
+        ELSE 
+
+           IF (l_last_updated_by = 1) THEN
+
+          FND_PRIV_ATTR_CHILDREN_PKG.UPDATE_ROW(  
+                X_PARENT_ATTRIBUTE_CODE => :PARENT_ATTRIBUTE_CODE,
+                X_ATTRIBUTE_CODE        => :ATTRIBUTE_CODE,
+                X_LAST_UPDATE_DATE      => SYSDATE ,
+                X_LAST_UPDATED_BY       => l_user_id ,
+                X_LAST_UPDATE_LOGIN     => 0,
+                X_ATTRIBUTE1    	=> NULL ,
+                X_ATTRIBUTE2     	=> NULL ,
+                X_ATTRIBUTE3     	=> NULL ,
+                X_ATTRIBUTE4    	=> NULL ,
+                X_ATTRIBUTE5    	=> NULL ,
+                X_ATTRIBUTE6    	=> NULL ,
+                X_ATTRIBUTE7    	=> NULL ,
+                X_ATTRIBUTE8    	=> NULL ,
+                X_ATTRIBUTE9    	=> NULL ,
+                X_ATTRIBUTE10     	=> NULL ,
+                X_ATTRIBUTE11    	=> NULL ,
+                X_ATTRIBUTE12   	=> NULL ,
+                X_ATTRIBUTE13  		=> NULL ,
+                X_ATTRIBUTE14 		=> NULL ,
+                X_ATTRIBUTE15     	=> NULL ,
+	        X_ATTRIBUTE_CATEGORY	=> NULL ,
+                X_OBJECT_VERSION_NUMBER => l_object_version_number + 1);
+
+           END IF;  -- last updated by check
+        END IF;     -- purpose code is null check
+      END IF;       -- upload mode is NLS check
+
+     END; "

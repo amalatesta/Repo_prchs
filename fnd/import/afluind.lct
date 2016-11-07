@@ -1,0 +1,122 @@
+# $Header: afluind.lct 120.2 2005/12/19 11:03:06 dbowles noship $
+# afluind -  FND Industries Lookups Loader Configuration
+#
+# Entities -
+#
+#    FND_LOOKUP_VALUES_IL
+#
+# Parameters -
+#
+# upload example
+# FNDLOAD apps/apps 0 Y UPLOAD afluind.lct my.ldt
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afluind.lct @~PROD:~PATH/~FILE" 
+DEFINE FND_LOOKUP_VALUES_IL
+  KEY   INDUSTRY_ID                     NUMBER
+  KEY   LANGUAGE_CODE                   VARCHAR2(30)
+  KEY   APPLICATION_ID                  NUMBER
+  KEY   LOOKUP_TYPE                     VARCHAR2(30)
+  KEY   LOOKUP_CODE                     VARCHAR2(30)
+  TRANS MEANING                         VARCHAR2(80)
+  TRANS DESCRIPTION                     VARCHAR2(240)
+  BASE  OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(11)
+END FND_LOOKUP_VALUES_IL
+
+
+
+UPLOAD FND_LOOKUP_VALUES_IL
+   "DECLARE
+    f_luby         number; -- entity owner in file
+    f_ludate       date;   -- entity update date in file
+    f_creator      number;
+    db_luby        number; -- entity owner in db
+    db_ludate      date;   -- entity update date in db 
+    meaning_text   varchar2(240);
+    desc_text      varchar2(500);
+    l_lang         varchar2(4) := userenv('LANG');
+    
+    
+   BEGIN
+   
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+    -- Find the user who has last updated the record.
+    -- Note: Even though we do not provide a UI or API to update the existing records
+    -- we will check to see if the customer has done so.
+    select LAST_UPDATED_BY, LAST_UPDATE_DATE
+      into db_luby, db_ludate
+      from FND_LOOKUP_VALUES_IL
+      where industry_id = :INDUSTRY_ID and 
+            application_id = :APPLICATION_ID and
+            language_code = userenv('LANG') and
+            lookup_type = :LOOKUP_TYPE and
+            lookup_code = :LOOKUP_CODE;
+      
+    if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                  db_ludate, :CUSTOM_MODE)) then
+    --  Since each language has it's own complete row, if upload_mode=nls, do nothing then fall
+    --  into the update logic.
+      if :UPLOAD_MODE='NLS' then
+        null;
+      end if;                                  
+    -- Since the ldt was generated from the respository we have separate rows for
+    -- the meaning and description, we have to branch out on the updates 
+      if :MEANING is not NULL then                                   
+        update fnd_lookup_values_il set 
+           meaning           = :MEANING,
+           last_updated_by   = f_luby,
+           last_update_date  = f_ludate,
+           last_update_login = 0
+        where industry_id    = :INDUSTRY_ID and 
+              application_id = :APPLICATION_ID and
+              language_code  = l_lang and 
+              lookup_type    = :LOOKUP_TYPE and
+              lookup_code    = :LOOKUP_CODE;
+      
+      elsif :DESCRIPTION is not NULL then                                   
+        update fnd_lookup_values_il set 
+           description       = :DESCRIPTION,
+           last_updated_by   = f_luby,
+           last_update_date  = f_ludate,
+           last_update_login = 0
+        where industry_id    = :INDUSTRY_ID and 
+              application_id = :APPLICATION_ID and
+              language_code  =  l_lang and 
+              lookup_type    = :LOOKUP_TYPE and
+              lookup_code    = :LOOKUP_CODE;
+      end if;
+    end if;
+  EXCEPTION
+    WHEN NO_DATA_FOUND then
+       insert into FND_LOOKUP_VALUES_IL(
+         INDUSTRY_ID,                 
+         LANGUAGE_CODE,      
+         APPLICATION_ID,        
+         LOOKUP_TYPE,      
+         LOOKUP_CODE,
+         MEANING,
+         DESCRIPTION,     
+         CREATED_BY,         
+         CREATION_DATE,      
+         LAST_UPDATED_BY,              
+         LAST_UPDATE_DATE,   
+         LAST_UPDATE_LOGIN)
+      values(
+         :INDUSTRY_ID,
+         l_lang,
+         :APPLICATION_ID,        
+         :LOOKUP_TYPE, 
+         :LOOKUP_CODE,     
+         :MEANING,
+         :DESCRIPTION,
+         f_luby,
+         f_ludate,
+         f_luby,
+         f_ludate,
+         0);
+    
+   END; "
+   

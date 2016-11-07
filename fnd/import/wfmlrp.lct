@@ -1,0 +1,27 @@
+# $Header: wfmlrp.lct 120.0 2005/05/07 16:19:43 appldev ship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/wfmlrp.lct @~PROD:~PATH/~FILE"
+
+
+DEFINE MAILERPARAMS
+   KEY  NAME       VARCHAR2(12)
+   KEY  PARAMETER   VARCHAR2(30)
+   BASE VALUE       VARCHAR2(200)
+   BASE REQUIRED    VARCHAR2(1)
+   BASE CALLBACK    VARCHAR2(60)
+   BASE ALLOWRELOAD VARCHAR2(1)
+END MAILERPARAMS
+
+# --- End Entity Definitions ---
+DOWNLOAD MAILERPARAMS
+   "select NAME, PARAMETER, VALUE, REQUIRED, CB, ALLOW_RELOAD
+    from WF_MAILER_PARAMETERS
+    where NAME = :NAME"
+
+UPLOAD MAILERPARAMS
+   "begin 
+       wf_mailer_parameter.PutParameter(:NAME, :PARAMETER,:VALUE, :REQUIRED, :CALLBACK, :ALLOWRELOAD); 
+    end;"
+
+

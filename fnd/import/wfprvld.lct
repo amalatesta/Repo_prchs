@@ -1,0 +1,143 @@
+# +======================================================================+
+# |               Copyright (c) 2002, Oracle Corporation                 |
+# |                   Redwood Shores, California, USA                    |
+# |                        All rights reserved.                          |
+# +======================================================================+
+#
+#   Filename
+# wfprvld.lct
+#   Entity
+#       WF_LOGICAL_DEVICES
+#
+# $Header: wfprvld.lct 120.1 2005/08/02 07:13:45 hgandiko noship $ 
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE:WF_LOGICAL_DEVICES &ui_apps 0 Y UPLOAD_PARTIAL @FND:patch/115/import/wfprvld.lct @~PROD:~PATH/~FILE WF_LOGICAL_DEVICES"
+
+#
+# -- DEFINE SECTION --
+#
+
+DEFINE WF_LOGICAL_DEVICES
+    KEY  DEVICE_TYPE_NAME      VARCHAR2(80)
+    KEY   DEVICE_NAME          VARCHAR2(80)
+    TRANS DESCRIPTION          VARCHAR2(2000)
+    BASE  CUSTOMIZATION_LEVEL  VARCHAR2(30)
+    BASE  OBJECT_VERSION_NUMBER  NUMBER
+    BASE  SECURITY_GROUP_ID VARCHAR2(32)
+    CTX   OWNER       VARCHAR2(4000)
+    
+        DEFINE WF_DEVICE_PARAM_VALS
+            KEY   PARAMETER_NAME    VARCHAR2(30)
+            BASE  PARAMETER_VALUE   VARCHAR2(1996)
+            BASE  CUSTOMIZATION_LEVEL VARCHAR2(30)
+            BASE  OBJECT_VERSION_NUMBER NUMBER
+            BASE  SECURITY_GROUP_ID VARCHAR2(32)
+            CTX   OWNER       VARCHAR2(4000)
+        END WF_DEVICE_PARAM_VALS
+
+END WF_LOGICAL_DEVICES
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD WF_LOGICAL_DEVICES
+  "SELECT device_type_name
+  , software_version
+  , device_name
+  , inbound_agent_name
+  , outbound_agent_name
+  , description
+  , customization_level
+  , -1 object_version_number
+  . security_group_id
+  , DECODE (last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+   FROM   wf_logical_devices_vl
+   WHERE ((:DEVICE_NAME is NULL) OR
+          (:DEVICE_NAME is NOT NULL) AND (device_name like :DEVICE_NAME))
+   ORDER BY device_name"
+
+DOWNLOAD WF_DEVICE_PARAM_VALS
+  "SELECT dpb.parameter_name
+        , dpv.parameter_value
+        , dpv.customization_level
+        , -1 object_version_number
+        . security_group_id
+        , DECODE (dpv.last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+   FROM   wf_logical_devices d
+        , wf_device_type_params_b dpb
+        , wf_device_param_vals dpv
+   WHERE d.device_name = :DEVICE_NAME
+     AND dpb.device_type_id = d.device_type_id
+     AND dpv.device_type_param_id = dpb.device_type_param_id
+     AND dpv.device_id = d.device_id
+   ORDER BY dpb.parameter_name"
+
+#
+# -- UPLOAD SECTION --
+#
+
+UPLOAD WF_LOGICAL_DEVICES
+BEGIN
+"BEGIN
+  DECLARE 
+    l_device_id NUMBER;
+  BEGIN
+
+      WF_EVENTS_PKG.LoaderSetMode
+      (
+            x_mode => 'UPGRADE'
+      );
+
+      IF (:UPLOAD_MODE='NLS') THEN
+
+          SELECT device_id
+          INTO l_device_id
+          FROM wf_logical_devices
+          WHERE device_name = :DEVICE_NAME;
+      
+          WF_LOGICAL_DEVICES_PKG.TRANSLATE_ROW
+          (
+                x_device_id => l_device_id
+              , x_description => :DESCRIPTION
+              , x_owner => :OWNER
+          );
+      ELSE
+ 
+        WF_LOGICAL_DEVICES_PKG.LOAD_ROW 
+        (
+              x_device_type_name => :DEVICE_TYPE_NAME
+            , x_device_name => :DEVICE_NAME
+            , x_description => :DESCRIPTION
+            , x_customization_level => :CUSTOMIZATION_LEVEL
+            , x_owner => :OWNER
+            , x_object_version_number => :OBJECT_VERSION_NUMBER
+            , x_security_group_id => :SECURITY_GROUP_ID
+        );
+      END IF;
+      END;
+END;"
+
+UPLOAD WF_DEVICE_PARAM_VALS
+"BEGIN
+  DECLARE
+  BEGIN
+
+    WF_EVENTS_PKG.LoaderSetMode
+    (
+          x_mode => 'UPGRADE'
+    );
+
+    WF_DEVICE_PARAM_VALS_PKG.LOAD_ROW 
+    (
+          x_device_name => :DEVICE_NAME
+        , x_parameter_name => :PARAMETER_NAME
+        , x_parameter_value => :PARAMETER_VALUE
+        , x_customization_level => :CUSTOMIZATION_LEVEL
+        , x_owner => :OWNER
+        , x_object_version_number => :OBJECT_VERSION_NUMBER
+        , x_security_group_id => :SECURITY_GROUP_ID
+    );
+  END;
+END;"
+

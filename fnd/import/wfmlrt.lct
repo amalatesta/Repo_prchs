@@ -1,0 +1,31 @@
+# $Header: wfmlrt.lct 120.1 2005/08/15 07:50:08 smayze ship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/wfmlrt.lct @~PROD:~PATH/~FILE"
+
+
+DEFINE MAILERTAGS
+   KEY TAG_ID       NUMBER
+   BASE NAME        VARCHAR2(12)
+   BASE ACTION      VARCHAR2(8)
+   BASE PATTERN     VARCHAR2(200)
+END MAILERTAGS
+
+# --- End Entity Definitions ---
+DOWNLOAD MAILERTAGS
+   "select TAG_ID, NAME, ACTION, PATTERN
+    from WF_MAILER_TAGS
+    where NAME = :NAME"
+
+UPLOAD MAILERTAGS
+   "DECLARE
+       ltag_id  NUMBER := :TAG_ID;
+       lname    VARCHAR2(12) := :NAME;
+       laction  VARCHAR2(8) := :ACTION;
+       lpattern VARCHAR2(200) := :PATTERN;
+    BEGIN 
+       wf_mailer_parameter.PutTag(lname, ltag_id, laction,lpattern); 
+    EXCEPTION WHEN OTHERS THEN
+       RAISE;
+    END;"
+

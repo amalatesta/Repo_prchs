@@ -1,0 +1,104 @@
+#
+# $Header: icxsques.lct 120.0 2005/10/13 12:33:05 gjimenez noship $
+#
+# afscprof.lct -  Profile Options Loader Configuration
+#
+# Entities -
+#
+#    QUESTION				- ICX_QUESTIONS and ICX_QUESTIONS_TL
+#	 QUESTION_FUNCTION		- ICX_QUESTION_FUNCTIONS
+#
+
+DEFINE QUESTION
+  KEY   QUESTION_CODE			VARCHAR2(30)
+  CTX  APPLICATION_SHORT_NAME          VARCHAR2(50)
+  BASE  TYPE				VARCHAR2(10)
+  TRANS QUESTION 				VARCHAR2(4000)
+  CTX	OWNER				VARCHAR2(30)
+END QUESTION
+
+DEFINE QUESTION_FUNCTION
+  KEY	QUESTION_CODE			VARCHAR2(30)
+  KEY	FUNCTION_NAME			VARCHAR2(30)
+  CTX	OWNER				VARCHAR2(30)
+END QUESTION_FUNCTION
+
+DOWNLOAD QUESTION
+  "  select  q.QUESTION_CODE, "
+  "          a.APPLICATION_SHORT_NAME, "
+  "          q.TYPE, "
+  "          q.QUESTION, "
+  "	     decode(q.LAST_UPDATED_BY, 0, 'SEED', 1, 'SEED', 'CUSTOM') OWNER "
+  "  from    icx_questions_vl q, "
+  "          fnd_application a "
+  "  where   q.application_id = a.application_id "
+  "  and     a.application_short_name like nvl(:PRODUCT, '%') "
+  "  and     ((:QUESTION_CODE is null) or ((:QUESTION_CODE is not null)
+     and     (q.question_code like :QUESTION_CODE))) "
+
+DOWNLOAD QUESTION_FUNCTION
+  "  select  QUESTION_CODE, "
+  "          FUNCTION_NAME, "
+  "	     decode(LAST_UPDATED_BY, 0, 'SEED', 1, 'SEED', 'CUSTOM') OWNER "
+  "  from    icx_question_functions "
+  "  where   ((:QUESTION_CODE is null) or ((:QUESTION_CODE is not null)
+     and     (question_code like :QUESTION_CODE))) "
+
+UPLOAD QUESTION
+  " declare "
+  "	appl_id		number; "
+  " begin "
+  " select application_id into appl_id "
+  " from fnd_application "
+  " where application_short_name = :APPLICATION_SHORT_NAME; "
+  " if (:UPLOAD_MODE = 'NLS') then "
+  "   icx_questions_pkg.TRANSLATE_ROW ( "
+  "     :QUESTION_CODE, "
+  "     :OWNER, "
+  "     :QUESTION ); "
+  " else "
+  "   icx_questions_pkg.LOAD_ROW ( "
+  "     :QUESTION_CODE, "
+  "     :OWNER, "
+  "     appl_id, "
+  "     :TYPE, "
+  "     :QUESTION ); "
+  " end if; "
+  " end; "
+
+UPLOAD QUESTION_FUNCTION
+  " declare "
+  "   user_id	number := 0; "
+  "   ques_code	varchar2(30); "
+  "   func_name	varchar2(30); "
+  "   begin "
+  "     if (:OWNER = 'SEED') then "
+  "        user_id := 1; "
+  "     end if; "
+  " if (:UPLOAD_MODE = 'NLS') then "
+  "		null; "
+  " else "
+  "		select QUESTION_CODE, FUNCTION_NAME into ques_code, func_name "
+  "		from ICX_QUESTION_FUNCTIONS "
+  "		where QUESTION_CODE = :QUESTION_CODE "
+  "		and FUNCTION_NAME = :FUNCTION_NAME; "
+  " end if; "
+  " 	  exception "
+  "		when NO_DATA_FOUND then "
+  " 	    insert into icx_question_functions ( "
+  " 	      question_code, "
+  " 	      function_name, "
+  " 	      last_update_date, "
+  " 	      last_updated_by, "
+  " 	      creation_date, "
+  " 	      created_by, "
+  " 	      last_update_login "
+  " 	      ) values ( "
+  " 	      :QUESTION_CODE, "
+  " 	      :FUNCTION_NAME, "
+  " 	      sysdate, "
+  " 	      user_id, "
+  " 	      sysdate, "
+  " 	      user_id,  "
+  " 	      0 ); "
+  "   end; "

@@ -1,0 +1,310 @@
+#
+# $Header: afoamums.lct 120.1 2006/05/25 18:26:16 rjaiswal noship $
+#
+# afoamums.lct - Update Management System Loader Configuration File
+#
+# History:
+#
+#   YYYY/MM/DD  userid    comment
+#   ----------  --------  ------------------------------------------------------
+#   2006/05/19  rjaiswal  Switched download from ARU to UMS data model
+#
+# Entities:
+#
+#  FND_UMS_BUGFIX                      -- Bugfixes
+#  |                                      - FND_UMS_BUGFIXES
+#  +- FND_UMS_BUGFIX_FILE              -- File versions
+#  |                                      - FND_UMS_BUGFIX_FILE_VERSIONS
+#  |                                      - FND_UMS_FILE_VERSIONS
+#  |                                      - FND_UMS_FILES
+#  +- FND_UMS_BUGFIX_RELATIONSHIP      -- Bugfix relationships
+#                                         - FND_UMS_BUGFIX_RELATIONSHIPS
+#
+#  FND_UMS_ONE_BUGFIX                  -- One bugfix
+#  |
+#  +- FND_UMS_ONE_BUGFIX_REFERENCE     -- Reference to FND_UMS_BUGFIX
+#                                         - FND_UMS_BUGFIXES
+#
+#  FND_UMS_BUGFIXES                    -- One or more bugfixes
+#  |
+#  +- FND_UMS_BUGFIXES_REFERENCE       -- Reference to FND_UMS_BUGFIX
+#                                         - FND_UMS_BUGFIXES
+#
+# ------------------------------------------------------------------------------
+# Notes:
+#   - afumsaru.lct and afoamums.lct DEFINE sections must be identical.
+#
+# Parameters:
+#   FND_UMS_BUGFIX
+#      Cannot be downloaded standalone
+#
+#   FND_UMS_ONE_BUGFIX
+#      RELEASE_NAME         : Release name (e.g., '11i')
+#      BUG_NUMBER           : Bug number (e.g., '1234567')
+#
+#   FND_UMS_BUGFIXES
+#      ENTITY_DOWNLOAD_MODE : Entity download mode 
+#                             (e.g., 'ONE', 'UPDATED', 'ALL')
+#      RELEASE_NAME         : Release name (e.g., '11i')
+#      BUG_NUMBER           : Bug number (e.g., '1234567')
+#      START_DATE           : Earliest LAST_UPDATED_DATE to be downloaded
+#                             (YYYY/MM/DD format)
+#      END_DATE             : Latest LAST_UPDATED_DATE to be downloaded
+#                             (YYYY/MM/DD format)
+
+COMMENT="THIS FILE CONTAINS META-INFORMATION THAT WILL BE USED BY ADPATCH.  PLEASE DO NOT EDIT OR REMOVE THIS FILE."
+
+DEFINE FND_UMS_BUGFIX
+   KEY     RELEASE_NAME              varchar2(30)
+   KEY     BASELINE                  varchar2(30)
+   KEY     BUG_NUMBER                varchar2(50)
+   KEY     DOWNLOAD_MODE             varchar2(30)
+   BASE    APPLICATION_SHORT_NAME    varchar2(50)
+   BASE    RELEASE_STATUS            varchar2(30)
+   BASE    TYPE                      varchar2(30)
+   BASE    ABSTRACT                  varchar2(240)
+   BASE    LAST_DEFINITION_DATE      varchar2(30)
+   BASE    LAST_UPDATE_DATE          varchar2(30)
+
+   DEFINE FND_UMS_BUGFIX_FILE
+      KEY    APPLICATION_SHORT_NAME     varchar2(50)
+      KEY    LOCATION                   varchar2(160)
+      KEY    NAME                       varchar2(90)
+      KEY    VERSION                    varchar2(30)
+   END FND_UMS_BUGFIX_FILE
+
+   DEFINE FND_UMS_BUGFIX_RELATIONSHIP
+      KEY    RELATION_TYPE              varchar2(30)
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_BUGFIX_RELATIONSHIP
+END FND_UMS_BUGFIX
+
+DEFINE FND_UMS_ONE_BUGFIX
+   KEY     RELEASE_NAME              varchar2(30)
+   KEY     BASELINE                  varchar2(30)
+   KEY     BUG_NUMBER                varchar2(50)
+   BASE    ENTITY_DOWNLOAD_MODE      varchar2(30)
+
+   DEFINE FND_UMS_ONE_BUGFIX_REFERENCE
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_ONE_BUGFIX_REFERENCE
+END FND_UMS_ONE_BUGFIX
+
+DEFINE FND_UMS_BUGFIXES
+   KEY     ENTITY_DOWNLOAD_MODE      varchar2(30)
+   KEY     RELEASE_NAME              varchar2(30)
+   KEY     BUG_NUMBER                varchar2(50)
+   KEY     START_DATE                varchar2(30)
+   KEY     END_DATE                  varchar2(30)
+
+   DEFINE FND_UMS_BUGFIXES_REFERENCE
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_BUGFIXES_REFERENCE
+END FND_UMS_BUGFIXES
+
+DOWNLOAD FND_UMS_BUGFIX
+"select release_name,
+        bug_number,
+        download_mode,
+        application_short_name,
+        release_status,
+        type,
+        abstract,
+        to_char(last_definition_date, 'YYYY/MM/DD HH24:MI:SS'),
+        to_char(last_update_date, 'YYYY/MM/DD HH24:MI:SS')
+   from fnd_ums_bugfixes
+  where release_name = :release_name
+    and bug_number = :bug_number
+    and baseline = :baseline
+"
+
+DOWNLOAD FND_UMS_BUGFIX_FILE
+"select fuf.application_short_name,
+        fuf.location,
+        fuf.name,
+        fufv.version
+   from fnd_ums_bugfixes fub,
+        fnd_ums_bugfix_file_versions fubfv,
+        fnd_ums_file_versions fufv,
+        fnd_ums_files fuf
+  where fub.release_name = :release_name
+    and fub.bug_number = :bug_number
+    and fubfv.bugfix_guid = fub.bugfix_guid
+    and fufv.file_version_guid = fubfv.file_version_guid
+    and fuf.file_guid = fufv.file_guid
+  order by fuf.application_short_name,
+           fuf.location,
+           fuf.name,
+           fufv.version
+"
+
+DOWNLOAD FND_UMS_BUGFIX_RELATIONSHIP
+"select fubr.relation_type,
+        fub.release_name,
+        fub.bug_number,
+        fub.download_mode
+   from fnd_ums_bugfixes fub0,
+        fnd_ums_bugfix_relationships fubr,
+        fnd_ums_bugfixes fub
+  where fub0.release_name = :release_name
+    and fub0.bug_number = :bug_number
+    and fubr.bugfix_guid = fub0.bugfix_guid
+    and fub.bugfix_guid = fubr.related_bugfix_guid
+    and fub.release_name = fub0.release_name
+  order by fubr.relation_type,
+           fub.bug_number
+"
+
+DOWNLOAD FND_UMS_ONE_BUGFIX
+"select substrb(:release_name, 1, 30),
+        substrb(:bug_number, 1, 50),
+        substrb('ONE', 1, 30)
+   from dual
+"
+
+DOWNLOAD FND_UMS_ONE_BUGFIX_REFERENCE
+"select release_name,
+        bug_number,
+        download_mode
+   from fnd_ums_bugfixes
+  where release_name = :release_name
+    and bug_number = :bug_number
+    and baseline = :baseline
+"
+
+DOWNLOAD FND_UMS_BUGFIXES
+"select substrb(:entity_download_mode, 1, 30),
+        substrb(:release_name, 1, 30),
+        substrb(:bug_number, 1, 50),
+        substrb(to_char(to_date(nvl(:start_date, '1900/01/01'), 'YYYY/MM/DD'),
+                        'YYYY/MM/DD') || ' 00:00:00', 1, 30),
+        substrb(to_char(to_date(nvl(:end_date, '2100/01/01'), 'YYYY/MM/DD'),
+                        'YYYY/MM/DD') || ' 23:59:59', 1, 30)
+   from dual
+"
+
+DOWNLOAD FND_UMS_BUGFIXES_REFERENCE
+"select release_name,
+        bug_number,
+        download_mode
+   from fnd_ums_bugfixes
+  where release_name = :release_name
+    and ((    :entity_download_mode = 'ONE'
+          and bug_number = :bug_number)
+        or
+         (    :entity_download_mode = 'UPDATED'
+          and release_status in ('SUPERSEDED',
+                                 'OBSOLETED')
+          and last_update_date between to_date(:start_date, 'YYYY/MM/DD HH24:MI:SS')
+                                   and to_date(:end_date, 'YYYY/MM/DD HH24:MI:SS'))
+        or
+         (    :entity_download_mode = 'ALL'
+          and last_update_date between to_date(:start_date, 'YYYY/MM/DD HH24:MI:SS')
+                                   and to_date(:end_date, 'YYYY/MM/DD HH24:MI:SS'))
+        )
+"
+
+UPLOAD FND_UMS_BUGFIX
+BEGIN
+"begin
+   fnd_oam_ums_loader.set_debugging(:DEBUG_FLAG);
+   fnd_oam_ums_loader.up_fnd_ums_bugfix(
+               p_upload_phase           => 'BEGIN',
+               p_release_name           => :release_name, 
+               p_baseline               => :baseline,
+               p_bug_number             => :bug_number,
+               p_download_mode          => :download_mode,
+               p_application_short_name => :application_short_name,
+               p_release_status         => :release_status,
+               p_type                   => :type,
+               p_abstract               => :abstract,
+               p_last_definition_date   => :last_definition_date,
+               p_last_update_date       => :last_update_date,
+               p_custom_mode            => :custom_mode);
+ end;"
+END
+"begin
+   fnd_oam_ums_loader.up_fnd_ums_bugfix(
+               p_upload_phase           => 'END',
+               p_release_name           => :release_name, 
+               p_baseline               => :baseline,
+               p_bug_number             => :bug_number,
+               p_download_mode          => :download_mode,
+               p_application_short_name => :application_short_name,
+               p_release_status         => :release_status,
+               p_type                   => :type,
+               p_abstract               => :abstract,
+               p_last_definition_date   => :last_definition_date,
+               p_last_update_date       => :last_update_date,
+               p_custom_mode            => :custom_mode);
+ end;"
+
+UPLOAD FND_UMS_BUGFIX_FILE
+"begin
+   fnd_oam_ums_loader.up_fnd_ums_bugfix_file(
+               p_application_short_name => :application_short_name,
+               p_location               => :location,
+               p_name                   => :name,
+               p_version                => :version);
+ end;"
+
+UPLOAD FND_UMS_BUGFIX_RELATIONSHIP
+"begin
+   fnd_oam_ums_loader.up_fnd_ums_bugfix_relationship(
+               p_relation_type                => :relation_type,
+               p_related_bugfix_release_name  => :parent_release_name, 
+               p_related_bugfix_bug_number    => :parent_bug_number,
+               p_related_bugfix_download_mode => :parent_download_mode);
+ end;"
+
+UPLOAD FND_UMS_ONE_BUGFIX
+BEGIN
+"begin
+   fnd_oam_ums_loader.set_debugging(:DEBUG_FLAG);
+   fnd_oam_ums_loader.up_fnd_ums_one_bugfix(
+               p_upload_phase           => 'BEGIN',
+               p_release_name           => :release_name, 
+               p_baseline               => :baseline,                
+               p_bug_number             => :bug_number);
+ end;"
+END
+"begin
+   fnd_oam_ums_loader.up_fnd_ums_one_bugfix(
+               p_upload_phase           => 'END',
+               p_release_name           => :release_name,
+               p_baseline               => :baseline, 
+               p_bug_number             => :bug_number);
+ end;"
+
+UPLOAD FND_UMS_ONE_BUGFIX_REFERENCE
+"begin
+   null;
+ end;"
+
+UPLOAD FND_UMS_BUGFIXES
+BEGIN
+"begin
+   fnd_oam_ums_loader.set_debugging(:DEBUG_FLAG);
+   fnd_oam_ums_loader.up_fnd_ums_bugfixes(
+               p_upload_phase           => 'BEGIN',
+               p_entity_download_mode   => :entity_download_mode,
+               p_release_name           => :release_name,
+               p_bug_number             => :bug_number,
+               p_start_date             => :start_date,
+               p_end_date               => :end_date);
+ end;"
+END
+"begin
+   fnd_oam_ums_loader.up_fnd_ums_bugfixes(
+               p_upload_phase           => 'END',
+               p_entity_download_mode   => :entity_download_mode,
+               p_release_name           => :release_name,
+               p_bug_number             => :bug_number,
+               p_start_date             => :start_date,
+               p_end_date               => :end_date);
+ end;"
+
+UPLOAD FND_UMS_BUGFIXES_REFERENCE
+"begin
+   null;
+ end;"

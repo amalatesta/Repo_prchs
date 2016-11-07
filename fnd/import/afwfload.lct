@@ -1,0 +1,447 @@
+#
+# $Header: afwfload.lct 120.0 2005/05/07 16:17:56 appldev ship $
+#
+# afwfload.lct -  Workflow Translation Information
+#
+# Entities
+#    ITEM_TYPES, ITEM_ATTRIBUTES, ACTIVITIES, ACTIVITY_ATTRIBUTES,
+#    MESSAGES, MESSAGE_ATTRIBUTES, LOOKUP_TYPES, LOOKUPS
+#
+# PARAMETERS:
+#
+# 
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afwfload.lct @~PROD:~PATH/~FILE - UPLOAD_MODE=NLS WARNINGS=TRUE"
+
+DEFINE ROLE
+  KEY NAME VARCHAR2(30)
+  BASE DISPLAY_NAME VARCHAR2(80)
+  BASE DESCRIPTION VARCHAR2(240)
+  BASE NOTIFICATION_PREFERENCE VARCHAR2(8)
+  BASE LANGUAGE VARCHAR2(30)
+  BASE TERRITORY VARCHAR2(30)
+  BASE EMAIL_ADDRESS VARCHAR2(240)
+  BASE FAX VARCHAR2(240)
+  BASE STATUS VARCHAR2(8)
+  BASE EXPIRATION_DATE VARCHAR2(40)
+END ROLE
+
+DEFINE ITEM_TYPE
+  KEY NAME VARCHAR2(8)
+  TRANS DISPLAY_NAME VARCHAR2(80)
+  TRANS DESCRIPTION VARCHAR2(240)
+  BASE PROTECT_LEVEL VARCHAR2(30)
+  BASE CUSTOM_LEVEL VARCHAR2(30)
+  BASE WF_SELECTOR VARCHAR2(240)
+  BASE READ_ROLE VARCHAR2(30)
+  BASE WRITE_ROLE VARCHAR2(30)
+  BASE EXECUTE_ROLE VARCHAR2(30)
+  BASE PERSISTENCE_TYPE VARCHAR2(8)
+  BASE PERSISTENCE_DAYS VARCHAR2(30)
+
+  DEFINE ITEM_ATTRIBUTE
+    KEY NAME VARCHAR2(30)
+    TRANS DISPLAY_NAME VARCHAR2(80)
+    TRANS DESCRIPTION VARCHAR2(240)
+    BASE PROTECT_LEVEL VARCHAR2(30)
+    BASE CUSTOM_LEVEL VARCHAR2(30)
+    BASE TYPE VARCHAR2(8)
+    BASE FORMAT VARCHAR2(240)
+    BASE VALUE_TYPE VARCHAR2(8)
+    BASE DEFAULT VARCHAR2(4000)
+  END ITEM_ATTRIBUTE
+END ITEM_TYPE
+
+DEFINE LOOKUP_TYPE
+  KEY NAME VARCHAR2(30)
+  TRANS DISPLAY_NAME VARCHAR2(80)
+  TRANS DESCRIPTION VARCHAR2(240)
+  BASE PROTECT_LEVEL VARCHAR2(30)
+  BASE CUSTOM_LEVEL VARCHAR2(30)
+  BASE ITEM_TYPE VARCHAR2(8)
+
+  DEFINE LOOKUP_CODE
+    KEY NAME VARCHAR2(30)
+    TRANS MEANING VARCHAR2(80)
+    TRANS DESCRIPTION VARCHAR2(240)
+  END LOOKUP_CODE
+END LOOKUP_TYPE
+
+DEFINE MESSAGE
+  KEY ITEM_TYPE VARCHAR2(8)
+  KEY NAME VARCHAR2(30)
+  TRANS DISPLAY_NAME VARCHAR2(80)
+  TRANS DESCRIPTION VARCHAR2(240)
+  BASE PROTECT_LEVEL VARCHAR2(30)
+  BASE CUSTOM_LEVEL VARCHAR2(30)
+  TRANS SUBJECT VARCHAR2(240)
+  TRANS BODY VARCHAR2(4000)
+  TRANS HTML_BODY VARCHAR2(4000)
+  BASE DEFAULT_PRIORITY VARCHAR2(30)
+  BASE READ_ROLE VARCHAR2(30)
+  BASE WRITE_ROLE VARCHAR2(30)
+
+  DEFINE MESSAGE_ATTRIBUTE
+    KEY NAME VARCHAR2(30)
+    TRANS DISPLAY_NAME VARCHAR2(80)
+    TRANS DESCRIPTION VARCHAR2(240)
+    BASE TYPE VARCHAR2(8)
+    BASE SUBTYPE VARCHAR2(8)
+    BASE FORMAT VARCHAR2(240)
+    BASE VALUE_TYPE VARCHAR2(8)
+    BASE DEFAULT VARCHAR2(4000)
+    BASE ATTACH VARCHAR2(1)
+  END MESSAGE_ATTRIBUTE
+END MESSAGE
+
+DEFINE ACTIVITY
+  KEY ITEM_TYPE VARCHAR2(8)
+  KEY NAME VARCHAR2(30)
+  TRANS DISPLAY_NAME VARCHAR2(80)
+  TRANS DESCRIPTION VARCHAR2(240)
+  BASE PROTECT_LEVEL VARCHAR2(30)
+  BASE CUSTOM_LEVEL VARCHAR2(30)
+  BASE TYPE VARCHAR2(8)
+  BASE FUNCTION VARCHAR2(240)
+  BASE FUNCTION_TYPE VARCHAR2(30)
+  BASE RESULT_TYPE VARCHAR2(30)
+  BASE RERUN VARCHAR2(8)
+  BASE COST VARCHAR2(30)
+  BASE READ_ROLE VARCHAR2(30)
+  BASE WRITE_ROLE VARCHAR2(30)
+  BASE EXECUTE_ROLE VARCHAR2(30)
+  BASE ICON_NAME VARCHAR2(30)
+  BASE MESSAGE VARCHAR2(30)
+  BASE ERROR_PROCESS VARCHAR2(30)
+  BASE ERROR_ITEM_TYPE VARCHAR2(8)
+  BASE EXPAND_ROLE VARCHAR2(1)
+  BASE RUNNABLE VARCHAR2(1)
+  BASE EVENT_FILTER VARCHAR2(240)
+  BASE EVENT_TYPE VARCHAR2(30)
+
+  DEFINE ACTIVITY_ATTRIBUTE
+    KEY NAME VARCHAR2(30)
+    TRANS DISPLAY_NAME VARCHAR2(80)
+    TRANS DESCRIPTION VARCHAR2(240)
+    BASE TYPE VARCHAR2(8)
+    BASE FORMAT VARCHAR2(240)
+    BASE VALUE_TYPE VARCHAR2(8)
+    BASE DEFAULT VARCHAR2(4000)
+  END ACTIVITY_ATTRIBUTE
+
+  DEFINE PROCESS_ACTIVITY
+    KEY LABEL VARCHAR2(30)
+    BASE ACTIVITY_ITEM_TYPE VARCHAR2(8)
+    BASE ACTIVITY_NAME VARCHAR2(30)
+    BASE START_END VARCHAR2(8)
+    BASE DEFAULT_RESULT VARCHAR2(30)
+    BASE ICON_GEOMETRY VARCHAR2(2000)
+    BASE VALUE_TYPE VARCHAR2(8)
+    BASE PERFORM_ROLE VARCHAR2(30)
+    BASE USER_COMMENT VARCHAR2(4000)
+
+    DEFINE ACTIVITY_ATTRIBUTE_VALUE
+      KEY NAME VARCHAR2(30)
+      BASE VALUE_TYPE VARCHAR2(8)
+      BASE VALUE VARCHAR2(4000)
+    END ACTIVITY_ATTRIBUTE_VALUE
+
+    DEFINE ACTIVITY_TRANSITION
+      KEY FROM VARCHAR2(30)
+      KEY TO VARCHAR2(30)
+      BASE ARROW_GEOMETRY VARCHAR2(2000)
+    END ACTIVITY_TRANSITION
+  END PROCESS_ACTIVITY
+END ACTIVITY
+
+UPLOAD ROLE
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+           /*
+           ** Do not translate any columns
+           */
+           null;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end; 
+     end; 
+"
+
+UPLOAD ITEM_TYPE
+BEGIN
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_ITEM_TYPES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  NAME = :NAME
+            AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+
+          /*
+          ** Set a global plsql variable that stores the current item
+          ** type when uploading an item.  This is used by the generic
+          ** loader overlay because the primary key of the wf_item_types
+          ** table is :NAME and the primary key for the wf_item_attributes
+          ** table is :NAME and item_type but the item_type comes from th
+          ** :NAME value in the loader definition
+          */
+          WF_CORE.UPLOAD_PLACEHOLDER := :NAME;
+          
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD ITEM_ATTRIBUTE
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_ITEM_ATTRIBUTES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  NAME = :NAME
+            AND  ITEM_TYPE = WF_CORE.UPLOAD_PLACEHOLDER
+            AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+    end; 
+"
+
+UPLOAD LOOKUP_TYPE
+BEGIN
+   "  begin       
+
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_LOOKUP_TYPES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME , 
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  LOOKUP_TYPE = :NAME
+            AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+
+	  /*  
+	  ** Set a global plsql variable that stores the current lookup code
+          ** name when uploading an lookup code.  This is used by the generic
+          ** loader overlay because the primary key of the wf_lookup_types
+          ** table is :NAME and the primary key for the wf_lookup_codes
+          ** table is :NAME and loookup_type but the lookup_type comes from th
+          ** :NAME value in the loader definition
+          */
+          WF_CORE.UPLOAD_PLACEHOLDER := :NAME;
+
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+"
+
+UPLOAD LOOKUP_CODE
+  " BEGIN
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_LOOKUPS_TL
+          SET    MEANING = :MEANING,
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  LOOKUP_CODE = :NAME
+            AND  LOOKUP_TYPE = WF_CORE.UPLOAD_PLACEHOLDER
+            AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD MESSAGE
+BEGIN
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_MESSAGES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION,
+                 SUBJECT = :SUBJECT,
+                 BODY = :BODY,
+                 HTML_BODY = :HTML_BODY,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  TYPE = :ITEM_TYPE
+            AND  NAME = :NAME
+	    AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+		
+          /*
+          ** Set a global plsql variable that stores the current message_name
+          */
+          WF_CORE.UPLOAD_PLACEHOLDER := :NAME;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD MESSAGE_ATTRIBUTE
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_MESSAGE_ATTRIBUTES_TL 
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  MESSAGE_TYPE = :ITEM_TYPE
+            AND  MESSAGE_NAME = WF_CORE.UPLOAD_PLACEHOLDER
+            AND  NAME = :NAME
+	    AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+    end; 
+"
+
+UPLOAD ACTIVITY
+BEGIN
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_ACTIVITIES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION,
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  ITEM_TYPE = :ITEM_TYPE
+            AND  NAME = :NAME
+	    AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+          /*
+          ** Set a global plsql variable that stores the current message_name
+          */
+          WF_CORE.UPLOAD_PLACEHOLDER := :NAME;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD ACTIVITY_ATTRIBUTE
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+          UPDATE WF_ACTIVITY_ATTRIBUTES_TL
+          SET    DISPLAY_NAME = :DISPLAY_NAME,
+                 DESCRIPTION  = :DESCRIPTION, 
+		 SOURCE_LANG = userenv('LANG')
+          WHERE  ACTIVITY_ITEM_TYPE = :ITEM_TYPE
+            AND  ACTIVITY_NAME = WF_CORE.UPLOAD_PLACEHOLDER
+            AND  NAME = :NAME
+	    AND  userenv('LANG') in (LANGUAGE, SOURCE_LANG);
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD PROCESS_ACTIVITY
+BEGIN
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+           /*
+           ** Do not translate any columns
+           */
+           null;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD ACTIVITY_ATTRIBUTE_VALUE
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+           /*
+           ** Do not translate any columns
+           */
+           null;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+UPLOAD ACTIVITY_TRANSITION
+  " begin 
+      begin       
+        if (:UPLOAD_MODE = 'NLS') then  
+           /*
+           ** Do not translate any columns
+           */
+           null;
+        else  
+           null; /* To be implemented later */
+           fnd_message.set_name('FND','GENERIC-INTERNAL ERROR');
+           fnd_message.set_token('REASON',
+                  'Error- must pass arg UPLOAD_MODE=NLS');
+           app_exception.raise_exception;
+        end if;
+      end;  
+     end; 
+"
+
+
+

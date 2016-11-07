@@ -1,0 +1,59 @@
+# $Header: afscapp.lct 120.1 2005/05/16 10:11:31 skghosh noship $
+#
+# Entities
+#
+#    FND_APPLICATION	        - Applications
+#
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afscapp.lct @~PROD:~PATH/~FILE"
+
+DEFINE FND_APPLICATION
+  KEY   APPLICATION_SHORT_NAME  	VARCHAR2(50)
+  BASE  APPLICATION_ID           	NUMBER
+  CTX   OWNER                 	        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE      	        VARCHAR2(10)
+  BASE  BASEPATH			VARCHAR2(20)
+  BASE  PRODUCT_CODE			VARCHAR2(50)
+  TRANS APPLICATION_NAME 		VARCHAR2(240)
+  TRANS DESCRIPTION			VARCHAR2(240)
+END FND_APPLICATION
+
+DOWNLOAD FND_APPLICATION
+  "select APPLICATION_SHORT_NAME,
+          APPLICATION_ID,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          BASEPATH, 
+          PRODUCT_CODE,
+          APPLICATION_NAME,
+   	  substrb(nvl(DESCRIPTION, fnd_load_util.null_value), 1, 240) DESCRIPTION
+   from   FND_APPLICATION_VL
+   where  (:APPLICATION_SHORT_NAME is null or
+             (:APPLICATION_SHORT_NAME is not null and
+                 APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)) "
+
+UPLOAD FND_APPLICATION
+ "begin
+      if (:UPLOAD_MODE = 'NLS') then
+           fnd_application_pkg.TRANSLATE_ROW (
+	     :APPLICATION_SHORT_NAME,
+             :OWNER,
+ 	     :APPLICATION_NAME,
+             :DESCRIPTION,
+             :CUSTOM_MODE,
+             :LAST_UPDATE_DATE );
+      else
+          fnd_application_pkg.load_row(
+              X_APPLICATION_SHORT_NAME      =>  :APPLICATION_SHORT_NAME,
+              X_APPLICATION_ID              =>  :APPLICATION_ID,
+              X_OWNER                       =>  :OWNER,
+              X_BASEPATH                    =>  :BASEPATH,
+              X_APPLICATION_NAME            =>  :APPLICATION_NAME,
+              X_DESCRIPTION                 =>  :DESCRIPTION,
+              X_CUSTOM_MODE                 =>  :CUSTOM_MODE,
+              X_LAST_UPDATE_DATE            =>  :LAST_UPDATE_DATE,
+              X_PRODUCT_CODE                =>  :PRODUCT_CODE
+             );
+     end if;
+  end; "
+

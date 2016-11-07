@@ -1,0 +1,452 @@
+# $Header: affaudit.lct 120.5.12010000.1 2008/07/25 13:39:55 appldev ship $
+#
+# This Loader Files supports UPLOAD with Following Entities
+#
+# The Download Can be done for a Particular FND_AUDIT_GROUPS or For an APPLICATION
+# History
+#
+# Created Srikanth Karimisetty 8th Nov 2001
+# Modification Srikanth Karimisetty 13th Nov 2001
+#        Added Schema_id in the FND_AUDIT_GROUP Upload section
+#        Bug 5336625 JWSMITH OWNER field is too small
+#
+# Entities -
+#
+#   FND_AUDIT_GROUPS
+#     |
+#     +--FND_AUDIT_TABLES
+#        |
+#        +--FND_AUDIT_COLUMNS      
+# 
+#   FND_AUDIT_SCHEMAS
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+53 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/affaudit.lct @~PROD:~PATH/~FILE"
+
+
+
+
+# ==================================================
+# FND_AUDIT_GROUPS
+# ==================================================
+ 
+DEFINE FND_AUDIT_GROUPS
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  KEY   GROUP_NAME              VARCHAR2(240)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  STATE                   VARCHAR2(1)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(75)
+  BASE  DESCRIPTION             VARCHAR2(240)
+
+  #==================================================
+  # FND_AUDIT_TABLES
+  # ==================================================
+
+  DEFINE FND_AUDIT_TABLES
+    KEY   APPLICATION_SHORT_NAME VARCHAR2(50)
+    KEY   GROUP_NAME             VARCHAR2(240)
+    KEY   TABLE_NAME             VARCHAR2(240)
+    CTX   OWNER                  VARCHAR2(4000)
+    BASE  STATE                  VARCHAR2(1)
+    BASE  LAST_UPDATE_DATE	 VARCHAR2(75)
+
+    #==================================================
+    # FND_AUDIT_COLUMNS
+    # ==================================================
+
+    DEFINE FND_AUDIT_COLUMNS
+      KEY   APPLICATION_SHORT_NAME VARCHAR2(50)
+      KEY   TABLE_NAME             VARCHAR2(240)
+      KEY   COLUMN_NAME            VARCHAR2(240)
+      CTX   OWNER                  VARCHAR2(4000)
+      BASE  STATE                  VARCHAR2(1)
+      BASE  SCHEMA_ID              VARCHAR2(10)
+      BASE  SEQUENCE_ID            VARCHAR2(10)
+      BASE  LAST_UPDATE_DATE	     VARCHAR2(75)
+    
+    END FND_AUDIT_COLUMNS
+  
+  END FND_AUDIT_TABLES 
+
+END FND_AUDIT_GROUPS
+
+# ==================================================
+# FND_AUDIT_SCHEMAS
+# ==================================================
+
+DEFINE FND_AUDIT_SCHEMAS
+  KEY   ORACLE_USERNAME         VARCHAR2(240)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  STATE                   VARCHAR2(1)
+  BASE  INSTALL_GROUP_NUM       NUMBER
+  BASE  LAST_UPDATE_DATE	VARCHAR2(75)
+
+END FND_AUDIT_SCHEMAS
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+
+# ==================================================
+# FND_AUDIT_GROUPS
+# ==================================================
+
+DOWNLOAD FND_AUDIT_GROUPS
+  "select b.APPLICATION_SHORT_NAME,
+          a.GROUP_NAME,
+          fnd_load_util.owner_name(a.LAST_UPDATED_BY) OWNER,
+          'R' STATE,
+  	  to_char(a.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          a.DESCRIPTION
+   from   FND_AUDIT_GROUPS a,FND_APPLICATION b
+          where ((:GROUP_NAME is null) or
+                 ((:GROUP_NAME is not null) and
+                  (a.GROUP_NAME like :GROUP_NAME)))
+   and          ((:APPLICATION_SHORT_NAME is null) or
+                 ((:APPLICATION_SHORT_NAME is not null) and
+                  (b.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+   and    a.APPLICATION_ID = b.APPLICATION_ID "
+
+
+
+# ==================================================
+# FND_AUDIT_TABLES
+# ==================================================
+#
+# DownLoad Only tables for Groups Fetched in FND_AUDIT_GROUPS
+#
+
+DOWNLOAD FND_AUDIT_TABLES
+  "select d.APPLICATION_SHORT_NAME,
+          a.GROUP_NAME,
+          c.TABLE_NAME, 
+          fnd_load_util.owner_name(b.LAST_UPDATED_BY) OWNER,
+          'P' STATE,
+  	  to_char(b.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_AUDIT_GROUPS a, 
+          FND_AUDIT_TABLES b, 
+          FND_TABLES       c,
+          FND_APPLICATION  d
+          where a.GROUP_NAME     =      :GROUP_NAME 
+           AND  a.AUDIT_GROUP_ID =      b.AUDIT_GROUP_ID   
+           AND  a.APPLICATION_ID =      b.AUDIT_GROUP_APP_ID
+           AND  b.TABLE_APP_ID   =      c.APPLICATION_ID
+           AND  b.TABLE_ID       =      c.TABLE_ID  
+           AND  C.APPLICATION_ID =      d.APPLICATION_ID "
+
+# ==================================================
+# FND_AUDIT_COLUMNS
+# ==================================================
+#
+# DownLoad Only columns for tables Fetched in FND_AUDIT_TABLES
+#
+
+DOWNLOAD FND_AUDIT_COLUMNS
+  "select d.APPLICATION_SHORT_NAME,
+          c.TABLE_NAME,
+          e.COLUMN_NAME, 
+          fnd_load_util.owner_name(b.LAST_UPDATED_BY) OWNER,
+          'P' STATE,
+          -1 SCHEMA_ID,
+          -1 SEQUENCE_ID,
+  	  to_char(b.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_AUDIT_COLUMNS b, 
+          FND_TABLES        c,
+          FND_APPLICATION   d,
+          FND_COLUMNS       e
+          where c.TABLE_NAME      =      :TABLE_NAME 
+           AND  b.TABLE_APP_ID    =      c.APPLICATION_ID
+           AND  b.TABLE_ID        =      c.TABLE_ID 
+           AND  b.column_id       =      e.column_id  
+           AND  C.APPLICATION_ID  =      d.APPLICATION_ID "
+
+# ==================================================
+# FND_AUDIT_SCHEMAS
+# ==================================================
+
+DOWNLOAD FND_AUDIT_SCHEMAS
+  "select c.ORACLE_USERNAME,
+          fnd_load_util.owner_name(a.LAST_UPDATED_BY) OWNER,
+          'R' STATE,
+          c.INSTALL_GROUP_NUM, 
+  	  to_char(a.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_AUDIT_SCHEMAS a, 
+          FND_ORACLE_USERID c,
+          FND_APPLICATION d
+          where  a.ORACLE_ID = C.ORACLE_ID  
+ and             a.ORACLE_ID = d.APPLICATION_ID
+ and             ((:APPLICATION_SHORT_NAME is null) or
+                  ((:APPLICATION_SHORT_NAME is not null) and
+                   (d.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))"
+
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+
+
+
+UPLOAD FND_AUDIT_GROUPS
+BEGIN
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_app_id         number  := 0;
+      l_audit_group_id number  := 0;
+      user_id  number := 0;
+     begin
+      select application_id into l_app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+       -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+       -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       select AUDIT_GROUP_ID,LAST_UPDATED_BY, LAST_UPDATE_DATE 
+         into l_audit_group_id,db_luby, db_ludate
+        from FND_AUDIT_GROUPS
+        where application_id = l_app_id
+        and GROUP_NAME = :GROUP_NAME;
+   
+     -- Update record, honoring customization mode.
+        -- Record should be updated only if:
+        -- a. CUSTOM_MODE = FORCE, or
+        -- b. file owner is USER, db owner is SEED
+        -- c. owners are the same, and file_date > db_date
+        IF (fnd_load_util.UPLOAD_TEST(
+                     p_file_id     => f_luby, 
+                     p_file_lud    => f_ludate,
+                     p_db_id       => db_luby, 
+                     p_db_lud      => db_ludate, 
+                     p_custom_mode => :CUSTOM_MODE)) 
+        THEN
+      	update 	FND_AUDIT_GROUPS
+          		set   DESCRIPTION       = :DESCRIPTION,
+                		LAST_UPDATE_DATE  = f_ludate,  
+				LAST_UPDATED_BY   = f_luby,
+                		LAST_UPDATE_LOGIN = 0  
+	  		where	APPLICATION_ID    = L_app_id
+	    		and   AUDIT_GROUP_ID    = l_AUDIT_GROUP_ID;
+        END IF;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_GROUPS 
+		(APPLICATION_ID, AUDIT_GROUP_ID, 
+		 GROUP_NAME, STATE,DESCRIPTION,
+                 CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		LAST_UPDATE_LOGIN)
+	   values (l_app_id,FND_AUDIT_GROUPS_s.nextval,:GROUP_NAME,:STATE,
+		:DESCRIPTION,
+		f_ludate, f_luby, f_ludate, f_luby, 0);
+   end;
+ end;"
+
+#
+
+UPLOAD FND_AUDIT_TABLES
+BEGIN
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_tab_app_id         number := 0;
+      l_grp_app_id         number := 0;
+      l_audit_group_id     number := 0;
+      l_table_id           number := 0;
+      user_id              number := 0;
+      AOL_TABLE_ERROR      EXCEPTION;
+      l_error              varchar2(2000);
+     begin
+      select application_id into l_tab_app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+      
+      select application_id,audit_group_id into l_grp_app_id,l_audit_group_id
+         from  fnd_audit_groups
+         WHERE GROUP_NAME = :GROUP_NAME;
+      
+      BEGIN
+      select  table_id into l_table_id
+         from FND_TABLES
+         where TABLE_NAME =:TABLE_NAME
+          AND  APPLICATION_ID =l_tab_app_id;
+      EXCEPTION
+          when no_data_found THEN
+          raise AOL_TABLE_ERROR;
+      END;
+       -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        select LAST_UPDATED_BY, LAST_UPDATE_DATE
+        into db_luby, db_ludate
+	from FND_AUDIT_TABLES
+	where 
+          	AUDIT_GROUP_ID         = l_audit_group_id       
+	AND	AUDIT_GROUP_APP_ID     = l_grp_app_id
+	AND	TABLE_APP_ID           = l_tab_app_id
+	AND	TABLE_ID               = l_table_id;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_TABLES 
+		( AUDIT_GROUP_ID,         
+                  AUDIT_GROUP_APP_ID,
+                  TABLE_APP_ID,           
+                  TABLE_ID,               
+                  STATE, 
+                 CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		LAST_UPDATE_LOGIN)
+	   values (l_audit_group_id,l_grp_app_id,l_tab_app_id,l_table_id,:STATE,
+  		   f_ludate, f_luby, f_ludate, f_luby, 0);
+        WHEN AOL_TABLE_ERROR THEN
+             FND_MESSAGE.SET_NAME('FND','FND-COLUMN NAME');
+             FND_MESSAGE.SET_TOKEN('COLUMN_NAME',:TABLE_NAME);
+             FND_MESSAGE.SET_TOKEN('OBJECT_TYPE',:APPLICATION_SHORT_NAME);
+             FND_MESSAGE.SET_TOKEN('OBJECT_NAME',:GROUP_NAME);
+             l_error:=FND_MESSAGE.GET;
+             FND_FILE.PUT_LINE(FND_FILE.LOG,l_error);
+   end;
+ end;"
+
+#
+
+UPLOAD FND_AUDIT_COLUMNS
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_tab_app_id         number := 0;
+      l_grp_app_id         number := 0;
+      l_audit_group_id     number := 0;
+      l_table_id           number := 0;
+      l_column_id          number := 0; 
+      user_id              number := 0;
+      AOL_COLUMN_ERROR     EXCEPTION;
+      l_error              varchar2(2000);
+     begin
+      select application_id into l_tab_app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+      
+      BEGIN
+      select  table_id into l_table_id
+         from FND_TABLES
+         where TABLE_NAME =:TABLE_NAME
+          AND  APPLICATION_ID =l_tab_app_id;
+ 
+     select  column_id into l_column_id
+          from FND_COLUMNS
+         where COLUMN_NAME =:COLUMN_NAME
+          AND  application_id = l_tab_app_id and
+               table_id       = l_table_id;
+        EXCEPTION
+          when no_data_found THEN
+          raise AOL_COLUMN_ERROR;
+      END;
+     
+     -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        select LAST_UPDATED_BY, LAST_UPDATE_DATE
+        into db_luby, db_ludate
+	from FND_AUDIT_COLUMNS
+	where 
+          	TABLE_APP_ID           = l_tab_app_id
+	AND	TABLE_ID               = l_table_id
+        AND     COLUMN_ID              = l_column_id
+        AND     SCHEMA_ID              = :SCHEMA_ID;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_COLUMNS 
+		( TABLE_APP_ID,   
+		  TABLE_ID,       
+		  COLUMN_ID ,     
+		  SCHEMA_ID,
+                  STATE,          
+		  SEQUENCE_ID,      
+                  CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		  LAST_UPDATE_LOGIN)
+	   values (l_tab_app_id,l_table_id,l_column_id,:SCHEMA_ID,:STATE,:SEQUENCE_ID,
+  		   f_ludate, f_luby, f_ludate, f_luby, 0);
+         WHEN AOL_COLUMN_ERROR THEN
+             FND_MESSAGE.SET_NAME('FND','FND-COLUMN NAME');
+             FND_MESSAGE.SET_TOKEN('COLUMN_NAME',:COLUMN_NAME);
+             FND_MESSAGE.SET_TOKEN('OBJECT_TYPE',:APPLICATION_SHORT_NAME);
+             FND_MESSAGE.SET_TOKEN('OBJECT_NAME',:TABLE_NAME);
+             l_error:=FND_MESSAGE.GET;
+             FND_FILE.PUT_LINE(FND_FILE.LOG,l_error);
+   end;
+ end;"
+
+
+
+UPLOAD FND_AUDIT_SCHEMAS
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_orcl_id         number := 0;
+      l_schema_id       number := 0;
+     begin
+      
+      select  oracle_id into l_orcl_id
+         from FND_ORACLE_USERID
+         where ORACLE_USERNAME =:ORACLE_USERNAME;
+          
+     -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        select LAST_UPDATED_BY, LAST_UPDATE_DATE
+        into db_luby, db_ludate
+	from FND_AUDIT_SCHEMAS
+	where 
+		ORACLE_ID               = l_ORCL_id;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_SCHEMAS 
+		( APPLICATION_ID,   
+		  ORACLE_ID,       
+		  SCHEMA_ID,
+                  STATE,          
+                  CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		  LAST_UPDATE_LOGIN)
+	   values (-1,l_orcl_id,DECODE(:INSTALL_GROUP_NUM,0,900,899+nvl(:INSTALL_GROUP_NUM,1)),
+                   :STATE,
+  		   f_ludate, f_luby, f_ludate, f_luby, 0);
+   end;
+ end;"

@@ -1,0 +1,866 @@
+#
+# $Header: afattach.lct 120.3.12010000.2 2009/06/26 14:34:44 ctilley ship $
+#
+# afattach.lct -  Attachment Seed Data Loader Configuration
+#  
+#   C Tilley  30-OCT-2000  Altered where condition for download due
+#                          to OE split into ONT and WSH.
+#   B Lash    22-OCT-2003  Added LAST_UPDATE_DATE to all DEFINE's
+#			   increased CTX OWNER to 4000.
+#			   Added version control.
+#   B Lash    01-MAR-2004  Altered where condition for download due
+#			   to split GMI and IC.
+#                          
+#
+# Entities
+#    FND_DOCUMENT_ENTITIES		- Document Entities
+#    FND_DOCUMENT_CATEGORIES		- Document Categories
+#    FND_ATTACHMENT_FUNCTIONS   	- Functions
+#      FND_ATTACHMENT_BLOCKS		- Blocks
+#        FND_ATTACHMENT_BLK_ENTITIES	- Block Entities.
+#      FND_DOC_CATEGORY_USAGES		- Document Category Usages.
+#    FND_DOCUMENT_DATATYPES		- Document Datatypes.
+#
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afattach.lct @~PROD:~PATH/~FILE" 
+DEFINE FND_ATTACHMENT_FUNCTIONS
+  KEY   FUNCTION_NAME			VARCHAR2(30)
+  KEY   FUNCTION_TYPE			VARCHAR2(1)
+  KEY   APPLICATION_SHORT_NAME		VARCHAR2(50)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  SESSION_CONTEXT_FIELD	 	VARCHAR2(61)
+  BASE  ENABLED_FLAG 		 	VARCHAR2(1)
+  BASE  LAST_UPDATE_DATE		VARCHAR2(10)   
+
+  DEFINE FND_ATTACHMENT_BLOCKS
+    KEY   BLOCK_NAME			VARCHAR2(30)
+    CTX   OWNER				VARCHAR2(4000)
+    BASE  QUERY_FLAG			VARCHAR2(1)
+    BASE  SECURITY_TYPE			VARCHAR2(50)
+    BASE  ORG_CONTEXT_FIELD		VARCHAR2(61)
+    BASE  SET_OF_BOOKS_CONTEXT_FIELD	VARCHAR2(61)
+    BASE  BUSINESS_UNIT_CONTEXT_FIELD 	VARCHAR2(61)
+    BASE  CONTEXT1_FIELD		VARCHAR2(61)
+    BASE  CONTEXT2_FIELD		VARCHAR2(61)
+    BASE  CONTEXT3_FIELD		VARCHAR2(61)
+    BASE  LAST_UPDATE_DATE		VARCHAR2(10)  
+
+    DEFINE FND_ATTACHMENT_BLK_ENTITIES
+	KEY   BLK_ENTITY		REFERENCES FND_DOCUMENT_ENTITIES
+	BASE  DISPLAY_METHOD		VARCHAR2(1)
+	BASE  INCLUDE_IN_INDICATOR_FLAG	VARCHAR2(1)
+	CTX   OWNER			VARCHAR2(4000)
+	BASE  PK1_FIELD 		VARCHAR2(61)
+	BASE  PK2_FIELD 		VARCHAR2(61)
+	BASE  PK3_FIELD 		VARCHAR2(61)
+	BASE  PK4_FIELD 		VARCHAR2(61)
+	BASE  PK5_FIELD 		VARCHAR2(61)
+	BASE  SQL_STATEMENT		VARCHAR2(2000)
+	BASE  INDICATOR_IN_VIEW_FLAG	VARCHAR2(1)
+	BASE  QUERY_PERMISSION_TYPE 	VARCHAR2(1)
+	BASE  INSERT_PERMISSION_TYPE	VARCHAR2(1)
+	BASE  UPDATE_PERMISSION_TYPE	VARCHAR2(1)
+	BASE  DELETE_PERMISSION_TYPE	VARCHAR2(1)
+	BASE  CONDITION_FIELD		VARCHAR2(61)
+        BASE  CONDITION_OPERATOR	VARCHAR2(50)
+	BASE  CONDITION_VALUE1		VARCHAR2(100)
+	BASE  CONDITION_VALUE2		VARCHAR2(100)
+        BASE  LAST_UPDATE_DATE		VARCHAR2(10) 
+    END FND_ATTACHMENT_BLK_ENTITIES
+  END FND_ATTACHMENT_BLOCKS
+
+  DEFINE FND_DOC_CATEGORY_USAGES
+    KEY	 CATEGORY_USAGE		REFERENCES FND_DOCUMENT_CATEGORIES
+    BASE ENABLED_FLAG	                VARCHAR2(1)
+    CTX  OWNER	                	VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE		VARCHAR2(10)    	
+  END FND_DOC_CATEGORY_USAGES
+END FND_ATTACHMENT_FUNCTIONS
+
+DEFINE FND_DOCUMENT_ENTITIES
+  KEY   DATA_OBJECT_CODE	VARCHAR2(30)
+  CTX   APPLICATION_SHORT_NAME	VARCHAR2(50)
+  BASE  TABLE_NAME		VARCHAR2(30)
+  BASE  ENTITY_NAME		VARCHAR2(40)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  PK1_COLUMN		VARCHAR2(30)
+  BASE  PK2_COLUMN		VARCHAR2(30)
+  BASE  PK3_COLUMN		VARCHAR2(30)
+  BASE  PK4_COLUMN		VARCHAR2(30)
+  BASE  PK5_COLUMN		VARCHAR2(30)
+  TRANS USER_ENTITY_NAME	VARCHAR2(240)	
+  TRANS USER_ENTITY_PROMPT	VARCHAR2(40)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(10)   
+END FND_DOCUMENT_ENTITIES
+
+DEFINE FND_DOCUMENT_CATEGORIES
+  KEY   CATEGORY_NAME		VARCHAR2(30)
+  CTX   APPLICATION_SHORT_NAME	VARCHAR2(50)
+  CTX   OWNER			VARCHAR2(4000)
+  BASE  START_DATE_ACTIVE	VARCHAR2(11)
+  BASE  END_DATE_ACTIVE		VARCHAR2(11)
+  BASE  ATTRIBUTE_CATEGORY	VARCHAR2(30)
+  BASE  ATTRIBUTE1		VARCHAR2(150)
+  BASE  ATTRIBUTE2		VARCHAR2(150)
+  BASE  ATTRIBUTE3		VARCHAR2(150)
+  BASE  ATTRIBUTE4		VARCHAR2(150)
+  BASE  ATTRIBUTE5		VARCHAR2(150)
+  BASE  ATTRIBUTE6		VARCHAR2(150)
+  BASE  ATTRIBUTE7		VARCHAR2(150)
+  BASE  ATTRIBUTE8		VARCHAR2(150)
+  BASE  ATTRIBUTE9		VARCHAR2(150)
+  BASE  ATTRIBUTE10		VARCHAR2(150)
+  BASE  ATTRIBUTE11		VARCHAR2(150)
+  BASE  ATTRIBUTE12		VARCHAR2(150)
+  BASE  ATTRIBUTE13		VARCHAR2(150)
+  BASE  ATTRIBUTE14		VARCHAR2(150)
+  BASE  ATTRIBUTE15		VARCHAR2(150)
+  BASE	DEFAULT_DATATYPE_ID	VARCHAR2(50)
+  BASE  APP_SOURCE_VERSION	VARCHAR2(255)
+  TRANS USER_NAME		VARCHAR2(255)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(10)    
+END FND_DOCUMENT_CATEGORIES
+
+DEFINE FND_DOCUMENT_DATATYPES
+  KEY   DATATYPE_ID		VARCHAR2(50)
+  KEY   NAME			VARCHAR2(80)
+  CTX   OWNER			VARCHAR2(4000)
+  BASE  START_DATE_ACTIVE	VARCHAR2(11)
+  BASE  END_DATE_ACTIVE		VARCHAR2(11)
+  TRANS USER_NAME		VARCHAR2(80)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(10)  
+END FND_DOCUMENT_DATATYPES
+
+DOWNLOAD FND_ATTACHMENT_FUNCTIONS
+  "select AF.FUNCTION_NAME, 
+  	  AF.FUNCTION_TYPE, 
+         nvl(AP.APPLICATION_SHORT_NAME, '#NULL'),
+         fnd_load_util.owner_name(AF.LAST_UPDATED_BY) OWNER, 
+         AF.SESSION_CONTEXT_FIELD, 
+         AF.ENABLED_FLAG,
+         to_char(AF.last_update_date, 'YYYY/MM/DD') last_update_date 
+  from   FND_APPLICATION AP, 
+         FND_ATTACHMENT_FUNCTIONS AF 
+  where  AP.APPLICATION_ID (+) = AF.APPLICATION_ID 
+   and   (((:APPLICATION_SHORT_NAME LIKE 'PER') and
+           (AF.FUNCTION_NAME LIKE 'HR%')) or
+           ((:APPLICATION_SHORT_NAME IN ('ONT','WSH')) and
+           (AF.FUNCTION_NAME LIKE 'OE%')) or
+           ((:APPLICATION_SHORT_NAME IN ('WIP')) and
+           (AF.FUNCTION_NAME LIKE 'WSM%')) or
+	   ((:APPLICATION_SHORT_NAME IN ('BOM')) and
+           (AF.FUNCTION_NAME LIKE 'ENG%')) or
+           ((:APPLICATION_SHORT_NAME IN ('GMI')) and
+           (AF.FUNCTION_NAME LIKE 'IC%')) or 
+           ((:APPLICATION_SHORT_NAME IN ('SQLAP')) and
+           (AF.FUNCTION_NAME LIKE 'AP%')) or
+           ((:APPLICATION_SHORT_NAME IN ('GMF')) and
+           (AF.FUNCTION_NAME LIKE 'CM%')) or
+           ((:APPLICATION_SHORT_NAME LIKE 'PO') and
+             (AF.FUNCTION_NAME LIKE 'RCV%')) or
+            AF.FUNCTION_NAME like :APPLICATION_SHORT_NAME||'%') 
+   and   ((:FUNCTION_NAME is NULL ) or
+	 ((:FUNCTION_NAME is not NULL) and 
+	 (AF.FUNCTION_NAME like :FUNCTION_NAME)))
+   and   ((:APPLICATION_SHORT_NAME is NULL) or
+         ((:APPLICATION_SHORT_NAME is not NULL) and 
+	 (AP.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+   and   AF.FUNCTION_TYPE like nvl(:FUNCTION_TYPE, '%') "
+
+DOWNLOAD FND_ATTACHMENT_BLOCKS
+  "select AB.BLOCK_NAME, 
+         fnd_load_util.owner_name(AB.LAST_UPDATED_BY) OWNER,  
+         AB.QUERY_FLAG, 
+    	 TO_CHAR(AB.SECURITY_TYPE) SECURITY_TYPE, 
+         AB.ORG_CONTEXT_FIELD, 
+         AB.SET_OF_BOOKS_CONTEXT_FIELD, 
+         AB.BUSINESS_UNIT_CONTEXT_FIELD, 
+         AB.CONTEXT1_FIELD, 
+         AB.CONTEXT2_FIELD, 
+         AB.CONTEXT3_FIELD,
+	 to_char(AB.last_update_date, 'YYYY/MM/DD') last_update_date
+  from   FND_ATTACHMENT_BLOCKS AB, 
+         FND_ATTACHMENT_FUNCTIONS AF 
+  where  AF.ATTACHMENT_FUNCTION_ID = AB.ATTACHMENT_FUNCTION_ID 
+  and    AF.FUNCTION_NAME = :FUNCTION_NAME 
+  and    ((:BLOCK_NAME is NULL) or
+         ((:BLOCK_NAME is not NULL) AND (AB.BLOCK_NAME like :BLOCK_NAME))) "
+
+DOWNLOAD FND_ATTACHMENT_BLK_ENTITIES
+  "select ABE.DATA_OBJECT_CODE, 
+         ABE.DISPLAY_METHOD, 
+         ABE.INCLUDE_IN_INDICATOR_FLAG, 
+         fnd_load_util.owner_name(ABE.LAST_UPDATED_BY) OWNER,  
+         ABE.PK1_FIELD, 
+         ABE.PK2_FIELD, 
+         ABE.PK3_FIELD, 
+         ABE.PK4_FIELD, 
+         ABE.PK5_FIELD, 
+         ABE.SQL_STATEMENT, 
+         ABE.INDICATOR_IN_VIEW_FLAG, 
+         ABE.QUERY_PERMISSION_TYPE, 
+         ABE.INSERT_PERMISSION_TYPE, 
+         ABE.UPDATE_PERMISSION_TYPE, 
+         ABE.DELETE_PERMISSION_TYPE, 
+         ABE.CONDITION_FIELD, 
+         TO_CHAR(ABE.CONDITION_OPERATOR) CONDITION_OPERATOR, 
+         ABE.CONDITION_VALUE1, 
+         ABE.CONDITION_VALUE2,
+         to_char(ABE.last_update_date, 'YYYY/MM/DD') last_update_date 
+  from   FND_ATTACHMENT_BLK_ENTITIES ABE, 
+         FND_ATTACHMENT_BLOCKS AB, 
+         FND_ATTACHMENT_FUNCTIONS AF, 
+         FND_APPLICATION AP 
+  where  AF.ATTACHMENT_FUNCTION_ID = AB.ATTACHMENT_FUNCTION_ID 
+  and    AP.APPLICATION_ID (+) = AF.APPLICATION_ID 
+  and    AB.ATTACHMENT_BLK_ID = ABE.ATTACHMENT_BLK_ID 
+  and    AF.FUNCTION_NAME = :FUNCTION_NAME 
+  and    AB.BLOCK_NAME = :BLOCK_NAME 
+  and    ((:DATA_OBJECT_CODE is NULL) or 
+         ((:DATA_OBJECT_CODE is not NULL) and    
+         (ABE.DATA_OBJECT_CODE like :DATA_OBJECT_CODE))) "
+
+DOWNLOAD FND_DOCUMENT_ENTITIES
+  "select DE.DATA_OBJECT_CODE, 
+         AP.APPLICATION_SHORT_NAME, 
+         DE.TABLE_NAME, 
+         DE.ENTITY_NAME, 
+         fnd_load_util.owner_name(DE.LAST_UPDATED_BY) OWNER,  
+         DE.PK1_COLUMN, 
+         DE.PK2_COLUMN, 
+         DE.PK3_COLUMN, 
+         DE.PK4_COLUMN, 
+         DE.PK5_COLUMN, 
+         DETL.USER_ENTITY_NAME, 
+         DETL.USER_ENTITY_PROMPT,
+         to_char(DE.last_update_date, 'YYYY/MM/DD') last_update_date 
+  from   FND_DOCUMENT_ENTITIES DE, 
+         FND_DOCUMENT_ENTITIES_TL DETL, 
+         FND_APPLICATION AP 
+  where  DE.DATA_OBJECT_CODE = DETL.DATA_OBJECT_CODE 
+  and    AP.APPLICATION_ID(+) = DE.APPLICATION_ID
+  and    DETL.LANGUAGE = USERENV('LANG')
+  and    ((:DATA_OBJECT_CODE is NULL) or 
+         ((:DATA_OBJECT_CODE is not NULL) and 
+	 (DE.DATA_OBJECT_CODE like :DATA_OBJECT_CODE))) "
+
+DOWNLOAD FND_DOCUMENT_CATEGORIES
+  "select DC.NAME, 
+         AP.APPLICATION_SHORT_NAME, 
+         fnd_load_util.owner_name(DC.LAST_UPDATED_BY) OWNER,  
+         TO_CHAR(DC.START_DATE_ACTIVE, 'YYYY/MM/DD') START_DATE_ACTIVE, 
+         TO_CHAR(DC.END_DATE_ACTIVE, 'YYYY/MM/DD') END_DATE_ACTIVE, 
+         DC.ATTRIBUTE_CATEGORY, 
+         DC.ATTRIBUTE1, 
+         DC.ATTRIBUTE2, 
+         DC.ATTRIBUTE3, 
+         DC.ATTRIBUTE4, 
+         DC.ATTRIBUTE5, 
+         DC.ATTRIBUTE6, 
+         DC.ATTRIBUTE7, 
+         DC.ATTRIBUTE8, 
+         DC.ATTRIBUTE9, 
+         DC.ATTRIBUTE10, 
+         DC.ATTRIBUTE11, 
+         DC.ATTRIBUTE12, 
+         DC.ATTRIBUTE13, 
+         DC.ATTRIBUTE14, 
+         DC.ATTRIBUTE15, 
+         DC.DEFAULT_DATATYPE_ID, 
+         DCTL.APP_SOURCE_VERSION, 
+         DCTL.USER_NAME,
+         to_char(DC.last_update_date, 'YYYY/MM/DD') last_update_date 
+  from   FND_DOCUMENT_CATEGORIES DC, 
+         FND_DOCUMENT_CATEGORIES_TL DCTL, 
+         FND_APPLICATION AP 
+  where  DC.CATEGORY_ID = DCTL.CATEGORY_ID 
+  and    DC.NAME = DCTL.NAME 
+  and    AP.APPLICATION_ID (+) = DC.APPLICATION_ID
+  and    DCTL.LANGUAGE = USERENV('LANG')
+  and    ((:CATEGORY_NAME is NULL) or 
+         ((:CATEGORY_NAME is not NULL) and (DC.NAME like :CATEGORY_NAME))) "
+
+DOWNLOAD FND_DOC_CATEGORY_USAGES
+  "select DC.NAME, 
+         DCU.ENABLED_FLAG, 
+  	 fnd_load_util.owner_name(DCU.LAST_UPDATED_BY) OWNER,
+         to_char(DCU.last_update_date, 'YYYY/MM/DD') last_update_date
+  from   FND_DOCUMENT_CATEGORIES DC, 
+  	  FND_ATTACHMENT_FUNCTIONS AF, 
+         FND_APPLICATION AP, 
+  	  FND_DOC_CATEGORY_USAGES DCU 
+  where  DC.CATEGORY_ID = DCU.CATEGORY_ID 
+  and    DCU.ATTACHMENT_FUNCTION_ID = AF.ATTACHMENT_FUNCTION_ID 
+  and    AP.APPLICATION_ID (+)= AF.APPLICATION_ID 
+  and    AF.FUNCTION_NAME  = :FUNCTION_NAME 
+  and    ((:NAME is NULL) or 
+         ((:NAME is not NULL) and (DC.NAME like :NAME))) "
+
+
+DOWNLOAD FND_DOCUMENT_DATATYPES
+  "select to_char(DATATYPE_ID), 
+          NAME, 
+  	  fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,  
+          TO_CHAR(START_DATE_ACTIVE, 'YYYY/MM/DD') START_DATE_ACTIVE, 
+          TO_CHAR(END_DATE_ACTIVE, 'YYYY/MM/DD') END_DATE_ACTIVE, 
+  	  USER_NAME,
+          to_char(last_update_date, 'YYYY/MM/DD') last_update_date 
+  from   FND_DOCUMENT_DATATYPES"
+
+UPLOAD FND_ATTACHMENT_FUNCTIONS
+  BEGIN
+  "  declare 
+        l_app_id		number := 0; 
+        l_function_id	number := 0;
+        f_luby number;  -- entity owner in file
+        f_ludate date;  -- entity update date in file
+        db_luby number; -- entity owner in db
+        db_ludate date; -- entity update date in db 
+        NODATA BOOLEAN := FALSE;
+        begin 
+
+       if (:UPLOAD_MODE = 'NLS') then
+          return;
+       end if;
+
+       if (:APPLICATION_SHORT_NAME = '#NULL') then
+          l_app_id := NULL;
+       else
+          select application_id
+	    into l_app_id
+	   from fnd_application
+	  where application_short_name = :APPLICATION_SHORT_NAME ;
+       end if;
+
+       BEGIN
+       if (:FUNCTION_TYPE = 'F') then 
+         select function_id
+  	   into  l_function_id 
+  	   from  fnd_form_functions
+  	   where function_name = :FUNCTION_NAME; 
+       elsif (:FUNCTION_TYPE = 'O') then
+         select form_id
+  	   into  l_function_id
+  	   from  fnd_form
+  	   where form_name = :FUNCTION_NAME 
+  	    and  application_id = l_app_id; 
+       end if;
+       EXCEPTION
+         WHEN NO_DATA_FOUND THEN
+		IF (:FUNCTION_TYPE = 'F') then
+    		  FND_MESSAGE.SET_NAME('CS', 'CS_CONTRACTS_VALUE_NOT_FOUND');
+                  FND_MESSAGE.SET_TOKEN('VALUE','FUNCTION_NAME: '
+                  || :FUNCTION_NAME || ' in FND_FORM_FUNCTIONS' );
+                  APP_EXCEPTION.RAISE_EXCEPTION();
+                ELSE
+                  FND_MESSAGE.SET_NAME('CS', 'CS_CONTRACTS_VALUE_NOT_FOUND');
+                  FND_MESSAGE.SET_TOKEN('VALUE','FUNCTION_NAME: '
+                  || :FUNCTION_NAME || ' in FND_FORM' );
+                  APP_EXCEPTION.RAISE_EXCEPTION();
+                END IF;
+       END;
+
+       -- Translate owner to file_last_updated_by
+       f_luby := fnd_load_util.owner_id(:OWNER);
+
+       -- Translate char last_update_date to date
+       f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       BEGIN
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+       from FND_ATTACHMENT_FUNCTIONS
+       where nvl(application_id, -1) = nvl(l_app_id, -1) 
+       and  function_name = :FUNCTION_NAME
+       and  function_type = :FUNCTION_TYPE;
+       EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+    		   NODATA := TRUE;
+       END;
+  
+        if NODATA then 
+           NODATA := FALSE;
+           insert into fnd_attachment_functions ( 
+  	      ATTACHMENT_FUNCTION_ID, 
+  	      FUNCTION_TYPE, 
+  	      FUNCTION_ID, 
+  	      FUNCTION_NAME, 
+  	      CREATION_DATE, 
+  	      CREATED_BY, 
+  	      LAST_UPDATE_DATE, 
+  	      LAST_UPDATED_BY, 
+  	      LAST_UPDATE_LOGIN, 
+  	      APPLICATION_ID, 
+  	      SESSION_CONTEXT_FIELD, 
+  	      ENABLED_FLAG) 	
+           values ( 
+  	      fnd_attachment_functions_s.nextval, 
+  	      :FUNCTION_TYPE, 
+  	      l_function_id, 
+  	      :FUNCTION_NAME, 
+              f_ludate, 
+              f_luby, 
+              f_ludate, 
+              f_luby, 
+              0, 
+              l_app_id, 
+  	      :SESSION_CONTEXT_FIELD, 
+              :ENABLED_FLAG); 
+        else
+            if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+            update fnd_attachment_functions set 
+  	    function_type = :FUNCTION_TYPE, 
+  	    session_context_field = :SESSION_CONTEXT_FIELD, 
+  	    enabled_flag = :ENABLED_FLAG, 
+            last_updated_by = f_luby,
+            last_update_date = f_ludate,
+            last_update_login = 0 
+      	    where nvl(application_id, -1) = nvl(l_app_id, -1) 
+       	    and  function_name = :FUNCTION_NAME
+       	    and  function_type = :FUNCTION_TYPE; 
+            end if;
+        end if; 
+   end;"
+
+UPLOAD FND_ATTACHMENT_BLOCKS
+  BEGIN
+  "   declare 
+        l_app_id number; 
+        l_attachment_function_id	number := 0;
+        f_luby number;  -- entity owner in file
+        f_ludate date;  -- entity update date in file
+        db_luby number; -- entity owner in db
+        db_ludate date; -- entity update date in db 
+	NODATA   BOOLEAN := FALSE;  
+   
+     begin 
+
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        if (:APPLICATION_SHORT_NAME = '#NULL') then
+          l_app_id := NULL;
+        else
+          select application_id
+	    into l_app_id
+	   from fnd_application
+	  where application_short_name = :APPLICATION_SHORT_NAME ;
+        end if;
+
+       select attachment_function_id 
+  	 into  l_attachment_function_id 
+  	 from  fnd_attachment_functions
+  	 where function_name = :FUNCTION_NAME
+	  and  function_type = :FUNCTION_TYPE
+          and  nvl(application_id, -1) = nvl(l_app_id, -1);
+
+       BEGIN
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+       from FND_ATTACHMENT_BLOCKS
+       where block_name = :BLOCK_NAME 
+       and  attachment_function_id = l_attachment_function_id ;
+       EXCEPTION
+	 WHEN NO_DATA_FOUND THEN
+	   NODATA := TRUE;
+       END;    
+   
+         if NODATA then
+	   NODATA := FALSE; 
+           insert into fnd_attachment_blocks ( 
+  	      ATTACHMENT_BLK_ID, 
+  	      ATTACHMENT_FUNCTION_ID, 
+  	      BLOCK_NAME, 
+  	      QUERY_FLAG, 
+  	      SECURITY_TYPE, 
+  	      CREATION_DATE,
+  	      CREATED_BY, 
+  	      LAST_UPDATE_DATE, 
+  	      LAST_UPDATED_BY, 
+  	      LAST_UPDATE_LOGIN, 
+  	      ORG_CONTEXT_FIELD, 
+  	      SET_OF_BOOKS_CONTEXT_FIELD, 
+  	      BUSINESS_UNIT_CONTEXT_FIELD, 
+  	      CONTEXT1_FIELD, 
+  	      CONTEXT2_FIELD, 
+  	      CONTEXT3_FIELD)	
+           values ( 
+  	      fnd_attachment_blocks_s.nextval, 
+  	      l_attachment_function_id, 
+  	      :BLOCK_NAME, 
+  	      :QUERY_FLAG, 
+  	      to_number(:SECURITY_TYPE), 
+              f_ludate, 
+              f_luby, 
+              f_ludate,   
+              f_luby,
+              0, 
+  	      :ORG_CONTEXT_FIELD, 
+  	      :SET_OF_BOOKS_CONTEXT_FIELD, 
+  	      :BUSINESS_UNIT_CONTEXT_FIELD, 
+  	      :CONTEXT1_FIELD, 
+  	      :CONTEXT2_FIELD, 
+             :CONTEXT3_FIELD);
+         ELSE 
+           if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+            update fnd_attachment_blocks set 
+  	    query_flag = :QUERY_FLAG, 
+  	    security_type = to_number(:SECURITY_TYPE), 
+            last_updated_by = f_luby, 
+            last_update_date = f_ludate, 
+            last_update_login = 0, 
+  	    org_context_field = :ORG_CONTEXT_FIELD, 
+  	    set_of_books_context_field = :SET_OF_BOOKS_CONTEXT_FIELD, 
+  	    business_unit_context_field = :BUSINESS_UNIT_CONTEXT_FIELD, 
+  	    context1_field = :CONTEXT1_FIELD, 
+  	    context2_field = :CONTEXT2_FIELD, 
+  	    context3_field = :CONTEXT3_FIELD 
+            where block_name = :BLOCK_NAME 
+            and  attachment_function_id = l_attachment_function_id ;
+           end if;  
+         end if; 
+   end; "
+
+UPLOAD FND_ATTACHMENT_BLK_ENTITIES
+  " declare 
+        l_app_id number := 0; 
+        l_attachment_blk_id number := 0;
+        f_luby number;  -- entity owner in file
+        f_ludate date;  -- entity update date in file
+        db_luby number; -- entity owner in db
+        db_ludate date; -- entity update date in db
+	NODATA  BOOLEAN := FALSE;  
+     begin 
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+ 
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        if (:APPLICATION_SHORT_NAME = '#NULL') then
+          l_app_id := NULL;
+        else
+          select application_id
+	    into l_app_id
+	   from fnd_application
+	  where application_short_name = :APPLICATION_SHORT_NAME ;
+        end if;
+
+       BEGIN
+       select ab.attachment_blk_id 
+  	 into  l_attachment_blk_id 
+  	 from  fnd_attachment_blocks ab, 
+              fnd_attachment_functions af, 
+              fnd_application ap 
+        where ap.application_id = af.application_id 
+         and  af.attachment_function_id = ab.attachment_function_id 
+         and  af.function_name = :FUNCTION_NAME 
+         and  af.function_type = :FUNCTION_TYPE
+         and  nvl(af.application_id, -1) = nvl(l_app_id, -1)
+  	 and  ab.block_name = :BLOCK_NAME; 
+       EXCEPTION
+	 WHEN NO_DATA_FOUND THEN
+	  FND_MESSAGE.SET_NAME('CS', 'CS_CONTRACTS_VALUE_NOT_FOUND');
+          FND_MESSAGE.SET_TOKEN('VALUE','BLOCK_NAME: '
+          || :BLOCK_NAME || ' in FND_ATTACHMENT_BLOCKS');
+          APP_EXCEPTION.RAISE_EXCEPTION();
+       END; 
+   
+       BEGIN
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+       from FND_ATTACHMENT_BLK_ENTITIES
+       where data_object_code = :BLK_ENTITY_DATA_OBJECT_CODE
+       and  attachment_blk_id = l_attachment_blk_id;   
+       EXCEPTION
+	 WHEN NO_DATA_FOUND THEN
+           NODATA := TRUE;
+       END;
+   
+        if NODATA then
+           NODATA := FALSE;
+           insert into fnd_attachment_blk_entities ( 
+  	      ATTACHMENT_BLK_ENTITY_ID, 
+  	      ATTACHMENT_BLK_ID, 
+  	      DISPLAY_METHOD, 
+  	      INCLUDE_IN_INDICATOR_FLAG, 
+  	      CREATION_DATE, 
+  	      CREATED_BY, 
+  	      LAST_UPDATE_DATE, 
+  	      LAST_UPDATED_BY, 
+  	      LAST_UPDATE_LOGIN, 
+  	      PK1_FIELD, 
+  	      PK2_FIELD, 
+  	      PK3_FIELD, 
+  	      PK4_FIELD, 
+  	      PK5_FIELD, 
+  	      SQL_STATEMENT, 
+  	      DATA_OBJECT_CODE, 
+  	      INDICATOR_IN_VIEW_FLAG, 
+  	      QUERY_PERMISSION_TYPE, 
+  	      INSERT_PERMISSION_TYPE, 
+  	      UPDATE_PERMISSION_TYPE, 
+  	      DELETE_PERMISSION_TYPE, 
+  	      CONDITION_FIELD, 
+  	      CONDITION_OPERATOR, 
+  	      CONDITION_VALUE1, 
+  	      CONDITION_VALUE2) 	
+           values ( 
+  	      fnd_attachment_blk_entities_s.nextval, 
+  	      l_attachment_blk_id, 
+  	      :DISPLAY_METHOD, 
+  	      :INCLUDE_IN_INDICATOR_FLAG, 
+              f_ludate, 
+              f_luby, 
+              f_ludate,
+	      f_luby, 
+              0, 
+  	      :PK1_FIELD, 
+  	      :PK2_FIELD, 
+  	      :PK3_FIELD, 
+  	      :PK4_FIELD, 
+  	      :PK5_FIELD, 
+  	      :SQL_STATEMENT, 
+  	      :BLK_ENTITY_DATA_OBJECT_CODE, 
+  	      :INDICATOR_IN_VIEW_FLAG, 
+  	      :QUERY_PERMISSION_TYPE, 
+  	      :INSERT_PERMISSION_TYPE, 
+  	      :UPDATE_PERMISSION_TYPE, 
+  	      :DELETE_PERMISSION_TYPE, 
+  	      :CONDITION_FIELD, 
+  	      to_number(:CONDITION_OPERATOR), 
+  	      :CONDITION_VALUE1, 
+             :CONDITION_VALUE2); 
+        ELSE
+         if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+            update fnd_attachment_blk_entities set 
+  	    display_method = :DISPLAY_METHOD, 
+  	    include_in_indicator_flag = :INCLUDE_IN_INDICATOR_FLAG, 
+            last_updated_by = f_luby, 
+            last_update_date = f_ludate, 
+            last_update_login = 0, 
+  	    pk1_field = :PK1_FIELD, 
+  	    pk2_field = :PK2_FIELD, 
+  	    pk3_field = :PK3_FIELD, 
+  	    pk4_field = :PK4_FIELD, 
+  	    pk5_field = :PK5_FIELD, 
+  	    sql_statement = :SQL_STATEMENT, 
+  	    indicator_in_view_flag = :INDICATOR_IN_VIEW_FLAG, 
+  	    query_permission_type = :QUERY_PERMISSION_TYPE, 
+  	    insert_permission_type = :INSERT_PERMISSION_TYPE, 
+  	    update_permission_type = :UPDATE_PERMISSION_TYPE, 
+  	    delete_permission_type = :DELETE_PERMISSION_TYPE, 
+  	    condition_field = :CONDITION_FIELD, 
+  	    condition_operator = to_number(:CONDITION_OPERATOR), 
+  	    condition_value1 = :CONDITION_VALUE1, 
+  	    condition_value2 = :CONDITION_VALUE2 
+            where data_object_code = :BLK_ENTITY_DATA_OBJECT_CODE
+            and  attachment_blk_id = l_attachment_blk_id;
+         end if; 
+        end if; 
+   end; "
+
+
+UPLOAD FND_DOC_CATEGORY_USAGES
+  "   declare 
+        l_attachment_function_id number := 0; 
+        l_category_id number := 0; 
+        l_app_id number := 0; 
+        f_luby number;  -- entity owner in file
+        f_ludate date;  -- entity update date in file
+        db_luby number; -- entity owner in db
+        db_ludate date; -- entity update date in db
+        NODATA  BOOLEAN := FALSE; 
+     begin 
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);   
+ 
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        if (:APPLICATION_SHORT_NAME = '#NULL') then
+          l_app_id := NULL;
+        else
+          select application_id
+	    into l_app_id
+	   from fnd_application
+	  where application_short_name = :APPLICATION_SHORT_NAME ;
+        end if;
+      
+         select af.attachment_function_id 
+  	 into  l_attachment_function_id 
+  	 from  fnd_attachment_functions af
+  	 where af.function_name = :FUNCTION_NAME
+          and af.function_type = :FUNCTION_TYPE 
+  	  and  nvl(af.application_id, -1) = nvl(l_app_id, -1);
+      
+      BEGIN
+       select category_id 
+  	 into  l_category_id 
+  	 from  fnd_document_categories 
+  	 where name = :CATEGORY_USAGE_CATEGORY_NAME;
+      EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+	  FND_MESSAGE.SET_NAME('CS', 'CS_CONTRACTS_VALUE_NOT_FOUND');
+          FND_MESSAGE.SET_TOKEN('VALUE','CATEGORY_USAGE_CATEGORY_NAME: '
+          || :CATEGORY_USAGE_CATEGORY_NAME || ' in FND_DOCUMENT_CATEGORIES');
+          APP_EXCEPTION.RAISE_EXCEPTION();
+      END;  
+   
+       BEGIN
+       select LAST_UPDATED_BY, LAST_UPDATE_DATE
+       into db_luby, db_ludate
+       from fnd_doc_category_usages
+       where attachment_function_id = l_attachment_function_id 
+       and  category_id = l_category_id;    
+       EXCEPTION
+	 WHEN NO_DATA_FOUND THEN
+	   NODATA := TRUE;
+       END;
+ 
+        if NODATA then
+	   NODATA := FALSE; 
+           insert into fnd_doc_category_usages ( 
+  	      DOC_CATEGORY_USAGE_ID, 
+  	      CATEGORY_ID, 
+  	      ATTACHMENT_FUNCTION_ID, 
+  	      ENABLED_FLAG, 
+  	      CREATION_DATE, 
+  	      CREATED_BY, 
+  	      LAST_UPDATE_DATE, 
+  	      LAST_UPDATED_BY, 
+  	      LAST_UPDATE_LOGIN) 	
+           values ( 
+  	      fnd_doc_category_usages_s.nextval, 
+  	      l_category_id, 
+  	      l_attachment_function_id, 
+  	      :ENABLED_FLAG, 
+              f_ludate, 
+              f_luby, 
+              f_ludate,
+	      f_luby, 
+              0);
+        ELSE
+         if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then 
+         update fnd_doc_category_usages set 
+  	    enabled_flag = :ENABLED_FLAG, 
+            last_updated_by = f_luby, 
+            last_update_date = f_ludate, 
+            last_update_login = 0 
+         where attachment_function_id = l_attachment_function_id 
+  	 and  category_id = l_category_id;
+         end if;  
+        end if; 
+   end; "
+
+UPLOAD FND_DOCUMENT_ENTITIES
+  " begin 
+      if (:UPLOAD_MODE = 'NLS') then 
+        fnd_document_entities_pkg.TRANSLATE_ROW ( 
+          :DATA_OBJECT_CODE, 
+          :APPLICATION_SHORT_NAME, 
+          :USER_ENTITY_NAME, 
+          :USER_ENTITY_PROMPT, 
+          :OWNER,
+	  :LAST_UPDATE_DATE,
+          :CUSTOM_MODE); 
+      else 
+        fnd_document_entities_pkg.LOAD_ROW ( 
+          :DATA_OBJECT_CODE, 
+          :APPLICATION_SHORT_NAME, 
+          :TABLE_NAME, 
+          :ENTITY_NAME, 
+          :OWNER, 
+          :PK1_COLUMN, 
+          :PK2_COLUMN, 
+          :PK3_COLUMN, 
+          :PK4_COLUMN, 
+          :PK5_COLUMN, 
+          :USER_ENTITY_NAME, 
+          :USER_ENTITY_PROMPT,
+          :LAST_UPDATE_DATE,
+          :CUSTOM_MODE); 
+      end if; 
+   end; "
+
+UPLOAD FND_DOCUMENT_CATEGORIES
+  " begin 
+      if (:UPLOAD_MODE = 'NLS') then 
+        fnd_doc_categories_pkg.TRANSLATE_ROW ( 
+          :CATEGORY_NAME, 
+          :USER_NAME, 
+          :OWNER,
+          :LAST_UPDATE_DATE,
+	  :CUSTOM_MODE); 
+      else 
+        fnd_doc_categories_pkg.LOAD_ROW ( 
+          :CATEGORY_NAME, 
+          :APPLICATION_SHORT_NAME, 
+          :OWNER, 
+          :START_DATE_ACTIVE, 
+          :END_DATE_ACTIVE, 
+          :ATTRIBUTE_CATEGORY, 
+          :ATTRIBUTE1, 
+          :ATTRIBUTE2, 
+          :ATTRIBUTE3, 
+          :ATTRIBUTE4, 
+          :ATTRIBUTE5, 
+          :ATTRIBUTE6, 
+          :ATTRIBUTE7, 
+          :ATTRIBUTE8, 
+          :ATTRIBUTE9, 
+          :ATTRIBUTE10, 
+          :ATTRIBUTE11, 
+          :ATTRIBUTE12, 
+          :ATTRIBUTE13, 
+          :ATTRIBUTE14, 
+          :ATTRIBUTE15, 
+          :DEFAULT_DATATYPE_ID, 
+          :APP_SOURCE_VERSION, 
+          :USER_NAME,
+          :LAST_UPDATE_DATE,
+	  :CUSTOM_MODE); 
+      end if; 
+   end; "
+
+UPLOAD FND_DOCUMENT_DATATYPES
+  " begin 
+      if (:UPLOAD_MODE = 'NLS') then 
+        fnd_document_datatypes_pkg.TRANSLATE_ROW ( 
+          :DATATYPE_ID, 
+          :NAME, 
+          :USER_NAME, 
+          :OWNER,
+          :LAST_UPDATE_DATE,
+	  :CUSTOM_MODE); 
+      else 
+        fnd_document_datatypes_pkg.LOAD_ROW ( 
+          :DATATYPE_ID, 
+          :NAME, 
+          :OWNER, 
+          :START_DATE_ACTIVE, 
+          :END_DATE_ACTIVE, 
+          :USER_NAME,
+          :LAST_UPDATE_DATE,
+	  :CUSTOM_MODE); 
+      end if; 
+   end; "

@@ -1,0 +1,233 @@
+#
+# $Header: aflvmlu.lct 120.0.12010000.1 2008/07/25 13:40:14 appldev ship $
+#
+# aflookup.lct - Standard Lookups Loader Configuration
+#
+# Entities
+#    FND_LOOKUP_TYPES  - Lookup Types
+#        FND_LOOKUP_VALUES - Lookup Values (codes)
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+51 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/aflvmlu.lct @~PROD:~PATH/~FILE"
+
+DEFINE FND_LOOKUP_TYPE
+  KEY   VIEW_APPSNAME                   VARCHAR2(50)
+  KEY   LOOKUP_TYPE                     VARCHAR2(30)
+  CTX   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  BASE  CUSTOMIZATION_LEVEL             VARCHAR2(1)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)  
+  TRANS MEANING                         VARCHAR2(80)
+  TRANS DESCRIPTION                     VARCHAR2(240)
+
+  DEFINE FND_LOOKUP_VALUE
+    KEY   LOOKUP_CODE                     VARCHAR2(30)
+    BASE  ENABLED_FLAG                    VARCHAR2(1)
+    BASE  START_DATE_ACTIVE               VARCHAR2(10)
+    BASE  END_DATE_ACTIVE                 VARCHAR2(10)
+    BASE  TERRITORY_CODE                  VARCHAR2(2)
+    BASE  TAG                             VARCHAR2(150)
+    BASE  ATTRIBUTE_CATEGORY              VARCHAR2(30)
+    BASE  ATTRIBUTE1                      VARCHAR2(150)
+    BASE  ATTRIBUTE2                      VARCHAR2(150)
+    BASE  ATTRIBUTE3                      VARCHAR2(150)
+    BASE  ATTRIBUTE4                      VARCHAR2(150)
+    BASE  ATTRIBUTE5                      VARCHAR2(150)
+    BASE  ATTRIBUTE6                      VARCHAR2(150)
+    BASE  ATTRIBUTE7                      VARCHAR2(150)
+    BASE  ATTRIBUTE8                      VARCHAR2(150)
+    BASE  ATTRIBUTE9                      VARCHAR2(150)
+    BASE  ATTRIBUTE10                     VARCHAR2(150)
+    BASE  ATTRIBUTE11                     VARCHAR2(150)
+    BASE  ATTRIBUTE12                     VARCHAR2(150)
+    BASE  ATTRIBUTE13                     VARCHAR2(150)
+    BASE  ATTRIBUTE14                     VARCHAR2(150)
+    BASE  ATTRIBUTE15                     VARCHAR2(150)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    TRANS MEANING                         VARCHAR2(80)
+    TRANS DESCRIPTION                     VARCHAR2(240)
+  END FND_LOOKUP_VALUE
+END FND_LOOKUP_TYPE
+
+DOWNLOAD FND_LOOKUP_TYPE
+  "select VA.APPLICATION_SHORT_NAME VIEW_APPSNAME,  
+          LT.LOOKUP_TYPE,  
+          OA.APPLICATION_SHORT_NAME,
+          LT.CUSTOMIZATION_LEVEL,  
+          fnd_load_util.owner_name(LT.LAST_UPDATED_BY) OWNER,          
+          to_char(LT.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	  LT.MEANING,  
+          LT.DESCRIPTION  
+   from   FND_LOOKUP_TYPES_VL LT,  
+          FND_APPLICATION VA,  
+          FND_APPLICATION OA,  
+          FND_SECURITY_GROUPS SG  
+   where  VA.APPLICATION_ID = LT.VIEW_APPLICATION_ID  
+   and    OA.APPLICATION_ID = LT.APPLICATION_ID  
+   and    (:VIEW_APPSNAME is null or
+            (:VIEW_APPSNAME is not null 
+                 and VA.APPLICATION_SHORT_NAME like :VIEW_APPSNAME))
+   and    (:LOOKUP_TYPE is null or 
+             (:LOOKUP_TYPE is not null and LT.LOOKUP_TYPE like :LOOKUP_TYPE))
+   and    (:APPLICATION_SHORT_NAME is null or 
+             (:APPLICATION_SHORT_NAME is not null and 
+              OA.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME))
+   and    SG.SECURITY_GROUP_ID = LT.SECURITY_GROUP_ID  
+   and    ((:SECURITY_GROUP is null and SG.SECURITY_GROUP_KEY = 'STANDARD') or
+            (:SECURITY_GROUP is not null 
+                 and SG.SECURITY_GROUP_KEY = :SECURITY_GROUP)) 
+   order by 1, 2 "
+
+DOWNLOAD FND_LOOKUP_VALUE
+  "select LV.LOOKUP_CODE,  
+          LV.ENABLED_FLAG,  
+          TO_CHAR(LV.START_DATE_ACTIVE, 'YYYY/MM/DD') START_DATE_ACTIVE,  
+          TO_CHAR(LV.END_DATE_ACTIVE, 'YYYY/MM/DD') END_DATE_ACTIVE,  
+          LV.TERRITORY_CODE,  
+          LV.TAG,  
+          LV.ATTRIBUTE_CATEGORY,  
+          LV.ATTRIBUTE1,  
+          LV.ATTRIBUTE2,  
+          LV.ATTRIBUTE3,  
+          LV.ATTRIBUTE4,  
+          LV.ATTRIBUTE5,  
+          LV.ATTRIBUTE6,  
+          LV.ATTRIBUTE7,  
+          LV.ATTRIBUTE8,  
+          LV.ATTRIBUTE9,  
+          LV.ATTRIBUTE10,  
+          LV.ATTRIBUTE11,  
+          LV.ATTRIBUTE12,  
+          LV.ATTRIBUTE13,  
+          LV.ATTRIBUTE14,  
+          LV.ATTRIBUTE15,  
+          fnd_load_util.owner_name(LV.LAST_UPDATED_BY) OWNER,          
+	  to_char(LV.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          LV.MEANING,  
+          LV.DESCRIPTION  
+   from   FND_LOOKUP_VALUES_VL LV,  
+          FND_APPLICATION VA,  
+          FND_SECURITY_GROUPS SG  
+   where  VA.APPLICATION_ID = LV.VIEW_APPLICATION_ID  
+   and    VA.APPLICATION_SHORT_NAME = :VIEW_APPSNAME  
+   and    LV.LOOKUP_TYPE = :LOOKUP_TYPE  
+   and    SG.SECURITY_GROUP_ID = LV.SECURITY_GROUP_ID  
+   and    ((:SECURITY_GROUP is null and SG.SECURITY_GROUP_KEY = 'STANDARD') or
+            (:SECURITY_GROUP is not null 
+                 and SG.SECURITY_GROUP_KEY = :SECURITY_GROUP))
+   order by LV.LAST_UPDATE_DATE "
+
+UPLOAD FND_LOOKUP_TYPE
+  BEGIN 
+   " declare  
+       view_appid number;  
+
+       cursor secgrp_curs is
+         select SG.SECURITY_GROUP_ID
+         from FND_LOOKUP_TYPES LT, FND_SECURITY_GROUPS SG
+         where LT.LOOKUP_TYPE = :LOOKUP_TYPE
+         and LT.VIEW_APPLICATION_ID = view_appid 
+         and LT.SECURITY_GROUP_ID = SG.SECURITY_GROUP_ID
+         and SG.SECURITY_GROUP_KEY like nvl(:SECURITY_GROUP, 'STANDARD');
+
+     begin  
+       if (:UPLOAD_MODE = 'NLS') then
+         select APPLICATION_ID  
+         into view_appid  
+         from FND_APPLICATION  
+         where APPLICATION_SHORT_NAME = :VIEW_APPSNAME;  
+      
+         -- Do NLS updates in all matching security groups.
+         for secgrp in secgrp_curs loop   
+	   fnd_lookup_types_pkg.TRANSLATE_ROW(  
+             x_lookup_type         => :LOOKUP_TYPE,  
+             x_security_group_id   => secgrp.security_group_id,  
+             x_view_application_id => view_appid,  
+             x_owner               => :OWNER,  
+             x_meaning             => :MEANING,  
+             x_description         => :DESCRIPTION,
+	     x_last_update_date    => :LAST_UPDATE_DATE,
+	     x_custom_mode         => :CUSTOM_MODE);  
+	 end loop;
+       else
+         fnd_lookup_types_pkg.Load_Row(
+           x_view_appsname          => :VIEW_APPSNAME,   
+           x_lookup_type            => :LOOKUP_TYPE,
+           x_application_short_name => :APPLICATION_SHORT_NAME,     
+           x_customization_level    => :CUSTOMIZATION_LEVEL,    
+           x_owner                  => :OWNER,     
+           x_last_update_date       => :LAST_UPDATE_DATE,     
+           x_meaning                => :MEANING,    
+           x_description            => :DESCRIPTION,    
+           x_security_group         => :SECURITY_GROUP,   
+           x_custom_mode            => :CUSTOM_MODE);     
+       end if;
+
+     end; "
+    
+UPLOAD FND_LOOKUP_VALUE
+   " declare  
+       view_appid number;  
+  
+       cursor secgrp_curs is
+         select SG.SECURITY_GROUP_ID
+         from FND_LOOKUP_TYPES LT, FND_SECURITY_GROUPS SG
+         where LT.LOOKUP_TYPE = :LOOKUP_TYPE
+         and LT.VIEW_APPLICATION_ID = view_appid 
+         and LT.SECURITY_GROUP_ID = SG.SECURITY_GROUP_ID
+         and SG.SECURITY_GROUP_KEY like nvl(:SECURITY_GROUP, 'STANDARD');
+
+     begin  
+       if (:UPLOAD_MODE = 'NLS') then
+         select APPLICATION_ID  
+         into view_appid  
+         from FND_APPLICATION  
+         where APPLICATION_SHORT_NAME = :VIEW_APPSNAME;  
+       
+         -- Do NLS updates in all matching security groups.
+         for secgrp in secgrp_curs loop  
+           fnd_lookup_values_pkg.TRANSLATE_ROW(  
+             x_lookup_type         => :LOOKUP_TYPE,  
+             x_security_group_id   => secgrp.security_group_id,  
+             x_view_application_id => view_appid,  
+             x_owner               => :OWNER,  
+             x_meaning             => :MEANING,  
+             x_description         => :DESCRIPTION,  
+             x_lookup_code         => :LOOKUP_CODE,
+	     x_last_update_date    => :LAST_UPDATE_DATE,
+	     x_custom_mode         => :CUSTOM_MODE);  
+         end loop;
+       else
+         fnd_lookup_values_pkg.Load_Row(
+	   x_lookup_type        => :LOOKUP_TYPE,
+	   x_view_appsname      => :VIEW_APPSNAME,
+	   x_lookup_code        => :LOOKUP_CODE,
+           x_enabled_flag       => :ENABLED_FLAG,
+           x_start_date_active  => :START_DATE_ACTIVE,
+	   x_end_date_active    => :END_DATE_ACTIVE,
+           x_territory_code     => :TERRITORY_CODE,
+           x_tag                => :TAG,
+           x_attribute_category => :ATTRIBUTE_CATEGORY,
+           x_attribute1         => :ATTRIBUTE1,
+           x_attribute2         => :ATTRIBUTE2,
+           x_attribute3         => :ATTRIBUTE3,
+           x_attribute4         => :ATTRIBUTE4,
+           x_attribute5         => :ATTRIBUTE5,
+           x_attribute6         => :ATTRIBUTE6,
+           x_attribute7         => :ATTRIBUTE7,
+           x_attribute8         => :ATTRIBUTE8,
+           x_attribute9         => :ATTRIBUTE9,
+           x_attribute10        => :ATTRIBUTE10,
+           x_attribute11        => :ATTRIBUTE11,
+           x_attribute12        => :ATTRIBUTE12,
+           x_attribute13        => :ATTRIBUTE13,
+           x_attribute14        => :ATTRIBUTE14,
+           x_attribute15        => :ATTRIBUTE15,
+           x_last_update_date   => :LAST_UPDATE_DATE,
+           x_owner              => :OWNER,
+	   x_meaning            => :MEANING,
+           x_description        => :DESCRIPTION,
+           x_security_group     => :SECURITY_GROUP,
+           x_custom_mode        => :CUSTOM_MODE);
+       end if;
+     end; "  

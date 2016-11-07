@@ -1,0 +1,305 @@
+#
+# $Header: afcpsrvs.lct 120.2 2007/07/13 10:19:22 ggupta ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+# SERVICE
+#
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+54 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcpsrvs.lct @~PROD:~PATH/~FILE"
+DEFINE SERVICE
+  KEY   SERVICE_HANDLE 	 	VARCHAR2(8)
+  CTX   OWNER          	        VARCHAR2(4000)
+  BASE  CARTRIDGE_HANDLE 	VARCHAR2(8)
+  BASE  ALLOW_MULTIPLE_PROC_INSTANCE 	VARCHAR2(1)
+  BASE  ALLOW_MULTIPLE_PROC_NODE 	VARCHAR2(1)
+  BASE  MIGRATE_ON_FAILURE 	VARCHAR2(1)
+  BASE  SERVER_TYPE 		VARCHAR2(1)
+  BASE  ALLOW_SUSPEND 		VARCHAR2(1)
+  BASE  ALLOW_VERIFY 		VARCHAR2(1)
+  BASE  ALLOW_PARAMETER 	VARCHAR2(1)
+  BASE  ALLOW_START 		VARCHAR2(1)
+  BASE  ALLOW_RESTART 		VARCHAR2(1)
+  BASE  ALLOW_EDIT		VARCHAR2(1)
+  BASE  PARAMETER_CHANGE_ACTION	VARCHAR2(1)
+  BASE  DEVELOPER_PARAMETERS	VARCHAR2(2000)
+  BASE  ENV_FILE_NAME		VARCHAR2(30)
+  BASE  ALLOW_CREATE		VARCHAR2(1)
+  BASE  SERVICE_CLASS		VARCHAR2(1024)
+  BASE  SERVICE_INSTANCE_CLASS	VARCHAR2(1024)
+  BASE  ALLOW_RCG		VARCHAR2(1)
+  BASE  OAM_DISPLAY_ORDER	VARCHAR2(50)
+  BASE  DEBUG_CHANGE_ACTION     VARCHAR2(1)
+  BASE  ENABLED                 VARCHAR2(1)
+  BASE  CARTRIDGE_APPLICATION_SN        VARCHAR2(50)
+  TRANS SERVICE_NAME     	VARCHAR2(240)
+  TRANS DESCRIPTION     	VARCHAR2(240)
+  BASE  DEBUG_TYPE		VARCHAR2(30)
+  BASE  ALLOW_MULTIPLE_PROC_SI 	VARCHAR2(1)
+  BASE  DEFAULT_DEBUG_LEVEL 	VARCHAR2(1)
+  TRANS SERVICE_PLURAL_NAME     VARCHAR2(240)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+END SERVICE 
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD SERVICE
+  "select 
+        v.SERVICE_HANDLE,  
+	fnd_load_util.owner_name (v.LAST_UPDATED_BY) OWNER,
+  	v.CARTRIDGE_HANDLE,
+  	v.ALLOW_MULTIPLE_PROC_INSTANCE ,
+  	v.ALLOW_MULTIPLE_PROC_NODE,
+  	v.MIGRATE_ON_FAILURE,
+  	v.SERVER_TYPE,
+  	v.ALLOW_SUSPEND,
+  	v.ALLOW_VERIFY,
+  	v.ALLOW_PARAMETER,
+  	v.ALLOW_START,
+  	v.ALLOW_RESTART,
+	v.ALLOW_EDIT,
+  	v.PARAMETER_CHANGE_ACTION,
+  	v.DEVELOPER_PARAMETERS,
+  	v.ENV_FILE_NAME,          
+  	v.ALLOW_CREATE,        
+  	v.SERVICE_CLASS,       
+  	v.SERVICE_INSTANCE_CLASS,
+  	v.ALLOW_RCG,             
+  	v.OAM_DISPLAY_ORDER,     
+	v.DEBUG_CHANGE_ACTION,
+	v.ENABLED,
+	NVL(a.APPLICATION_SHORT_NAME, 'FND') CARTRIDGE_APPLICATION_SN,
+  	v.SERVICE_NAME,          
+        v.DESCRIPTION,  
+        v.DEBUG_TYPE,
+        nvl(v.ALLOW_MULTIPLE_PROC_SI, 'Y'),
+        v.DEFAULT_DEBUG_LEVEL,
+  	v.SERVICE_PLURAL_NAME,
+        to_char(v.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   fnd_cp_services_vl v, fnd_application a
+   where  ((:SERVICE_HANDLE is null) or
+           ((:SERVICE_HANDLE is not null) and
+            (v.SERVICE_HANDLE like :SERVICE_HANDLE))) and
+          a.APPLICATION_ID(+) = v.CARTRIDGE_APPLICATION_ID"
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD SERVICE
+  " begin  
+
+     declare
+      user_id  number := 0;
+      s_count  number := 0;
+      s_id     number := 0;
+      c_app_id number := 0;
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+
+     begin
+      if (:CARTRIDGE_APPLICATION_SN is not null) then	
+        select APPLICATION_ID
+        into c_app_id
+        from fnd_application
+        where application_short_name = :CARTRIDGE_APPLICATION_SN;
+      end if;
+
+      select count(*) 
+        into s_count
+        from fnd_cp_services
+       where service_handle = :SERVICE_HANDLE;
+
+      if ( s_count > 0 ) then
+        select service_id 
+          into s_id 
+          from fnd_cp_services
+         where service_handle = :SERVICE_HANDLE;
+      end if;
+
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.owner_id(:owner);
+
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+     begin
+
+      select last_updated_by, last_update_date
+      into db_luby, db_ludate
+      from fnd_cp_services 
+      where service_handle = :service_handle;  
+
+     if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                db_ludate, :CUSTOM_MODE)) then
+
+      if (:UPLOAD_MODE = 'NLS') then
+        update fnd_cp_services_tl set
+          source_lang=userenv('LANG'),
+          DESCRIPTION = nvl(:DESCRIPTION, DESCRIPTION),
+	    SERVICE_NAME = nvl(:SERVICE_NAME, SERVICE_NAME),
+          SERVICE_PLURAL_NAME = nvl(:SERVICE_PLURAL_NAME, SERVICE_NAME),
+          last_updated_by   = f_luby,
+          last_update_date  = f_ludate,
+          last_update_login = 0
+        where  SERVICE_ID = s_id
+        and userenv('LANG') in (language, source_lang);
+      else
+        if s_count > 0 then
+	   update fnd_cp_services_tl set
+	          source_lang = userenv('LANG'),
+		  DESCRIPTION = nvl(:DESCRIPTION, DESCRIPTION),
+		  SERVICE_NAME = nvl(:SERVICE_NAME, SERVICE_NAME),
+		  SERVICE_PLURAL_NAME =
+              nvl(:SERVICE_PLURAL_NAME, SERVICE_PLURAL_NAME),
+		  last_updated_by   = f_luby,
+		  last_update_date  = f_ludate,
+		  last_update_login = 0
+	   where SERVICE_ID = s_id
+	     and userenv('LANG') in (language, source_lang);
+
+  	   update fnd_cp_services set
+		  CARTRIDGE_HANDLE = :CARTRIDGE_HANDLE,
+		  ALLOW_MULTIPLE_PROC_INSTANCE = :ALLOW_MULTIPLE_PROC_INSTANCE,
+		  ALLOW_MULTIPLE_PROC_NODE = :ALLOW_MULTIPLE_PROC_NODE,
+		  MIGRATE_ON_FAILURE = :MIGRATE_ON_FAILURE,
+		  SERVER_TYPE = :SERVER_TYPE,
+		  ALLOW_SUSPEND = :ALLOW_SUSPEND,
+		  ALLOW_VERIFY = :ALLOW_VERIFY,
+		  ALLOW_PARAMETER = :ALLOW_PARAMETER,
+		  ALLOW_START = :ALLOW_START,
+		  ALLOW_RESTART = :ALLOW_RESTART,
+		  ALLOW_EDIT = NVL(:ALLOW_EDIT,'Y'),
+		  PARAMETER_CHANGE_ACTION  = :PARAMETER_CHANGE_ACTION,
+		  DEVELOPER_PARAMETERS = :DEVELOPER_PARAMETERS,
+		  ENV_FILE_NAME = :ENV_FILE_NAME,
+		  ALLOW_CREATE = :ALLOW_CREATE,
+		  SERVICE_CLASS = :SERVICE_CLASS,
+		  SERVICE_INSTANCE_CLASS = :SERVICE_INSTANCE_CLASS,
+		  ALLOW_RCG = :ALLOW_RCG,
+		  OAM_DISPLAY_ORDER = :OAM_DISPLAY_ORDER,
+		  DEBUG_CHANGE_ACTION = NVL(:DEBUG_CHANGE_ACTION,'Y'),
+		  ENABLED = NVL(:ENABLED, 'Y'),
+		  CARTRIDGE_APPLICATION_ID = c_app_id,
+		  DEBUG_TYPE = :DEBUG_TYPE,
+		  ALLOW_MULTIPLE_PROC_SI = NVL(:ALLOW_MULTIPLE_PROC_SI, 'Y'),
+		  DEFAULT_DEBUG_LEVEL = :DEFAULT_DEBUG_LEVEL,
+                  last_updated_by   = f_luby,
+                  last_update_date  = f_ludate,
+                  last_update_login = 0
+           where SERVICE_HANDLE = :SERVICE_HANDLE;
+        else
+	    fnd_manager.register_svc(
+		:SERVICE_NAME,
+		:SERVICE_HANDLE,
+		:DESCRIPTION,
+		:CARTRIDGE_HANDLE,
+		:ALLOW_MULTIPLE_PROC_INSTANCE,
+		:ALLOW_MULTIPLE_PROC_NODE,
+		:MIGRATE_ON_FAILURE,
+		:ALLOW_SUSPEND,
+		:ALLOW_VERIFY,
+		:ALLOW_PARAMETER,
+		:ALLOW_START,
+		:ALLOW_RESTART,
+		:ALLOW_RCG,
+		:ALLOW_CREATE,
+		nvl(:ALLOW_EDIT,'Y'),
+		:PARAMETER_CHANGE_ACTION,
+		:DEVELOPER_PARAMETERS,
+		:SERVER_TYPE,
+		userenv('LANG'),
+		:ENV_FILE_NAME,
+		:SERVICE_CLASS,
+		:SERVICE_INSTANCE_CLASS,
+		:OAM_DISPLAY_ORDER,
+		nvl(:DEBUG_CHANGE_ACTION,'Y'),
+		nvl(:ENABLED,'Y'),
+		nvl(:CARTRIDGE_APPLICATION_SN, 'FND'),
+		:DEBUG_TYPE,
+		:SERVICE_PLURAL_NAME,
+		nvl(:ALLOW_MULTIPLE_PROC_SI,'Y'),
+		:DEFAULT_DEBUG_LEVEL,
+		f_luby);
+        end if;
+       end if;
+      end if;
+      exception
+       when no_data_found then 
+	    fnd_manager.register_svc(
+		:SERVICE_NAME,
+		:SERVICE_HANDLE,
+		:DESCRIPTION,
+		:CARTRIDGE_HANDLE,
+		:ALLOW_MULTIPLE_PROC_INSTANCE,
+		:ALLOW_MULTIPLE_PROC_NODE,
+		:MIGRATE_ON_FAILURE,
+		:ALLOW_SUSPEND,
+		:ALLOW_VERIFY,
+		:ALLOW_PARAMETER,
+		:ALLOW_START,
+		:ALLOW_RESTART,
+		:ALLOW_RCG,
+		:ALLOW_CREATE,
+		nvl(:ALLOW_EDIT,'Y'),
+		:PARAMETER_CHANGE_ACTION,
+		:DEVELOPER_PARAMETERS,
+		:SERVER_TYPE,
+		userenv('LANG'),
+		:ENV_FILE_NAME,
+		:SERVICE_CLASS,
+		:SERVICE_INSTANCE_CLASS,
+		:OAM_DISPLAY_ORDER,
+		nvl(:DEBUG_CHANGE_ACTION,'Y'),
+		nvl(:ENABLED,'Y'),
+		nvl(:CARTRIDGE_APPLICATION_SN, 'FND'),
+		:DEBUG_TYPE,
+		:SERVICE_PLURAL_NAME,
+		nvl(:ALLOW_MULTIPLE_PROC_SI,'Y'),
+		:DEFAULT_DEBUG_LEVEL,
+		f_luby);
+      end;
+     end;
+    end; "
+

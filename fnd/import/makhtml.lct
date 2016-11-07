@@ -1,0 +1,41 @@
+#
+# $Header: makhtml.lct 120.0 2005/05/07 16:19:12 appldev noship $
+#
+# icxfwkmsg, based on afmdmsg.lct -  Messages
+#
+# Entities
+#    FND_NEW_MESSAGES
+#
+# Note: This is a modified version of afmdmsg.lct for FWK messages
+#
+# Note: to change the language you are downloading, setenv NLS_LANG before 
+#       running the loader.
+#
+# If you want your messages validated for correctness, pass the VALIDATION
+# parameter.  It has one of three modes:
+# VALIDATION=PATCH (the default) No errors announced.
+#   To be used in applying patches.
+# VALIDATION=POST_TRANSLATE      Announces all errors
+#   To be used when uploading messages after translation.  This mode will 
+#   will allow messages to use the full buffer sizes, and will not require
+#   them to leave space for translation.
+# VALIDATION=STRICT              Announces all errors
+#   To be used when creating new messages or editing non-translated 
+#   messages using the loader files.  This mode will announce errors 
+#   if messages do not leave enough room for translation.  
+#
+#
+# When downloading messages, you can use the parameters 
+# APPLICATION_SHORT_NAME and MESSAGE_NAME to limit which messages you get.
+#
+
+DEFINE FND_NEW_MESSAGES
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  KEY   MESSAGE_NAME            VARCHAR2(30)
+  CTX   OWNER                   VARCHAR2(7)
+  CTX   MESSAGE_NUMBER          VARCHAR2(50)
+  TRANS MESSAGE_TEXT            VARCHAR2(2000)
+  CTX   DESCRIPTION             VARCHAR2(240)
+  CTX   TYPE                    VARCHAR2(30)
+  CTX   MAX_LENGTH              NUMBER
+END FND_NEW_MESSAGES

@@ -1,0 +1,105 @@
+#
+# $Header: afpvalue.lct 120.1 2005/07/08 10:13:26 skghosh noship $
+#
+# afpvalue.lct - Form Customizations Property Values Loader Configuration
+#
+# Entities -
+#
+#   PROP_VALUE
+#
+# Parameters -
+#       (1) PROPERTY_NAME=VALUE     (WHILE DOWNLOAD ONLY)
+#       (2) PROPERTY_VALUE=VALUE    (WHILE DOWNLOAD ONLY)
+#
+
+#
+# To download all form customizations property values rows use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/afpvalue.lct <name of file>.ldt PROP_VALUE 
+#
+# To download just certain rows use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/afpvalue.lct <name of file>.ldt PROP_VALUE PROPERTY_NAME="<any property name>" PROPERTY_VALUE="<any property value>"
+#
+#   Note that the values of property_name and property_value are case sensitive.
+#   Possible values of property_name include CASE RESTRICTION, WINDOW_STATE 
+#   Possible values of property_value include UPPERCASE, LOWERCASE, MINIMIZE, MAXIMIZE 
+#
+# To upload the form customizations property values use this command -
+#   FNDLOAD username/password@database 0 Y UPLOAD $FND_TOP/patch/115/import/afpvalue.lct <name of file>.ldt
+#
+
+#
+# -- DEFINE SECTION --
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afpvalue.lct @~PROD:~PATH/~FILE" 
+DEFINE PROP_VALUE
+
+  KEY   PROPERTY_NAME 	 VARCHAR2(80)
+  KEY   PROPERTY_VALUE	 VARCHAR2(240)
+  BASE  PROPERTY_ID 	 VARCHAR2(100) ## The number stored in this column is portable
+  BASE  OWNER            VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE VARCHAR2(11)
+
+END PROP_VALUE 
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD PROP_VALUE 
+  "select PROPERTY_NAME,  
+          PROPERTY_VALUE,  
+          PROPERTY_ID,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_FORM_CUSTOM_PROP_VALUES  
+   where (:PROPERTY_NAME is null or (:PROPERTY_NAME is not null and PROPERTY_NAME like :PROPERTY_NAME))
+   and   (:PROPERTY_VALUE is null or (:PROPERTY_VALUE is not null and PROPERTY_VALUE like :PROPERTY_VALUE))
+   order by PROPERTY_NAME, PROPERTY_VALUE"
+
+#
+# -- UPLOAD section -- 
+# 
+
+UPLOAD PROP_VALUE 
+  "DECLARE
+      f_luby         number; -- entity owner in file
+      f_ludate       date;   -- entity update date in file
+
+   BEGIN
+
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+    UPDATE FND_FORM_CUSTOM_PROP_VALUES SET
+      property_id = :PROPERTY_ID,
+      last_update_date  = f_ludate,
+      last_updated_by   = f_luby,
+      last_update_login = 0
+    WHERE property_name = :PROPERTY_NAME 
+      AND property_value = :PROPERTY_VALUE;
+
+    if SQL%NOTFOUND then
+      INSERT INTO FND_FORM_CUSTOM_PROP_VALUES (
+        property_name,
+        property_value,
+        property_id,
+        CREATED_BY,
+        CREATION_DATE,
+        LAST_UPDATED_BY,
+        LAST_UPDATE_DATE,
+        LAST_UPDATE_LOGIN)
+      VALUES (
+        :PROPERTY_NAME,
+        :PROPERTY_VALUE,
+        :PROPERTY_ID,
+        f_luby,
+        f_ludate,
+        f_luby,
+        f_ludate,
+        0 );
+    end if;
+    END; "
+

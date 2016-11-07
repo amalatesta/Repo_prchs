@@ -1,0 +1,174 @@
+# $Header: afoamcgp.lct 120.0 2005/05/07 16:15:53 appldev noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afoamcgp.lct @~PROD:~PATH/~FILE"
+
+DEFINE OAM_CHART_GRPS
+	KEY	CHART_GROUP_ID		VARCHAR2(50)
+	BASE	CHART_GROUP_SHORT_NAME	VARCHAR2(128)
+        BASE    PARENT_GROUP_ID	    	VARCHAR2(50)
+        BASE    DISPLAY_ORDER  	    	VARCHAR2(50) 
+        TRANS   CHART_GROUP_NAME	VARCHAR2(256)
+	TRANS	DESCRIPTION		VARCHAR2(1024)
+	CTX 	OWNER			VARCHAR2(4000)
+	BASE	LAST_UPDATE_DATE	VARCHAR2(11)
+END OAM_CHART_GRPS
+
+
+DEFINE OAM_CHARTS
+    KEY	    CHART_ID		  VARCHAR2(50)
+    BASE    CHART_GROUP_ID	  VARCHAR2(50)
+    BASE    DISPLAY_ORDER  	  VARCHAR2(50)
+    BASE    ALLOW_CONFIG          VARCHAR2(1)
+    BASE    REFRESH_INTERVAL      VARCHAR2(50)
+    BASE    REFRESH_TYPE          VARCHAR2(1)
+    BASE    CHART_TYPE            VARCHAR2(16)
+    TRANS   CHART_NAME	          VARCHAR2(256)
+    TRANS    DESCRIPTION		  VARCHAR2(1024)
+    CTX     OWNER		  VARCHAR2(4000)
+    BASE    LAST_UPDATE_DATE	  VARCHAR2(11)
+END OAM_CHARTS
+
+DEFINE OAM_CHART_ITEMS
+    KEY     CHART_ITEM_SHORT_NAME       VARCHAR2(32)
+    KEY     USER_ID	                VARCHAR2(50)
+    KEY     CHART_ID  		       	VARCHAR2(50)
+    BASE    SELECTED    	      	VARCHAR2(1)
+    TRANS   CHART_ITEM_NAME	        VARCHAR2(256)
+    TRANS   DESCRIPTION			VARCHAR2(1024)
+    CTX     OWNER			VARCHAR2(4000)
+    BASE    LAST_UPDATE_DATE		VARCHAR2(11)
+END OAM_CHART_ITEMS
+
+# --- End Entity Definitions ---
+
+DOWNLOAD OAM_CHART_GRPS 
+	"SELECT cg.chart_group_id, cg.chart_group_short_name, cg.parent_group_id,
+        cg.display_order,
+        cgt.chart_group_name,
+	  cgt.description, 
+	  fnd_load_util.OWNER_NAME(cg.last_updated_by),
+	  to_char(cg.last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_chart_grps cg, fnd_oam_chart_grps_tl cgt 
+	 WHERE  cg.chart_group_id = cgt.chart_group_id AND
+            ((:CHART_GROUP_ID is null) OR 
+			( (:CHART_GROUP_ID is not null) AND
+			  (cg.chart_group_id = :CHART_GROUP_ID)))"
+
+DOWNLOAD OAM_CHARTS 
+	"SELECT c.chart_id, c.chart_group_id,
+        c.display_order,
+        c.allow_config,
+        c.refresh_interval,
+        c.refresh_type,
+        c.chart_type,
+        ct.chart_name,
+	  ct.description, 
+	  fnd_load_util.OWNER_NAME(c.last_updated_by),
+	  to_char(c.last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_charts c, fnd_oam_charts_tl ct 
+	 WHERE  c.chart_id = ct.chart_id AND
+            ((:CHART_ID is null) OR 
+			( (:CHART_ID is not null) AND
+			  (c.chart_id = :CHART_ID)))"
+
+
+DOWNLOAD OAM_CHART_ITEMS 
+	"SELECT ci.chart_item_short_name, 
+        ci.user_id,
+        ci.chart_id,
+        ci.selected,
+        cit.chart_item_name,
+	  cit.description, 
+	  fnd_load_util.OWNER_NAME(ci.last_updated_by),
+	  to_char(ci.last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_chart_items ci, fnd_oam_chart_items_tl cit 
+	 WHERE  ci.chart_item_short_name = cit.chart_item_short_name 
+        AND ((:CHART_ITEM_SHORT_NAME is null) OR 
+			( (:CHART_ITEM_SHORT_NAME is not null) AND
+			  (ci.chart_item_short_name = :CHART_ITEM_SHORT_NAME)))
+        AND ((:USER_ID is null) OR 
+			( (:USER_ID is not null) AND
+			  (ci.user_id = :USER_ID)))
+        AND ((:CHART_ID is null) OR 
+			( (:CHART_ID is not null) AND
+			  (ci.chart_id = :CHART_ID)))"
+
+
+
+UPLOAD OAM_CHART_GRPS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			FND_OAM_CHART_GRPS_PKG.TRANSLATE_ROW(   
+              X_CHART_GROUP_ID => :CHART_GROUP_ID,
+              X_CHART_GROUP_NAME => :CHART_GROUP_NAME,
+              x_description => :description,
+              x_owner => :owner,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		else
+			FND_OAM_CHART_GRPS_PKG.LOAD_ROW(
+              X_CHART_GROUP_ID => :CHART_GROUP_ID,
+              X_CHART_GROUP_SHORT_NAME => :CHART_GROUP_SHORT_NAME, 
+              X_PARENT_GROUP_ID => :PARENT_GROUP_ID,
+              X_DISPLAY_ORDER => :DISPLAY_ORDER,
+              X_OWNER   => :OWNER,
+              X_CHART_GROUP_NAME => :CHART_GROUP_NAME, 
+              X_DESCRIPTION => :DESCRIPTION,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+	
+UPLOAD OAM_CHARTS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			FND_OAM_CHARTS_PKG.TRANSLATE_ROW(
+              X_CHART_ID => :CHART_ID,
+              X_CHART_NAME => :CHART_NAME,
+              x_description => :description,
+              x_owner => :owner,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		else
+			FND_OAM_CHARTS_PKG.LOAD_ROW(
+              X_CHART_ID => :CHART_ID,
+              X_CHART_GROUP_ID => :CHART_GROUP_ID,
+              X_DISPLAY_ORDER => :DISPLAY_ORDER,
+              X_ALLOW_CONFIG       => :ALLOW_CONFIG,
+              X_REFRESH_INTERVAL       => :REFRESH_INTERVAL,
+              X_REFRESH_TYPE       => :REFRESH_TYPE,
+              X_CHART_TYPE       => :CHART_TYPE,
+              X_OWNER       => :OWNER,
+              X_CHART_NAME => :CHART_NAME, 
+              X_DESCRIPTION => :DESCRIPTION,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+
+
+UPLOAD OAM_CHART_ITEMS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			FND_OAM_CHART_ITEMS_PKG.TRANSLATE_ROW(
+              X_CHART_ITEM_SHORT_NAME => :CHART_ITEM_SHORT_NAME,
+              X_CHART_ITEM_NAME => :CHART_ITEM_NAME,
+              x_description => :description,
+              x_owner => :owner,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		else
+			FND_OAM_CHART_ITEMS_PKG.LOAD_ROW(
+              X_CHART_ITEM_SHORT_NAME => :CHART_ITEM_SHORT_NAME,
+              X_USER_ID => :USER_ID,
+              X_CHART_ID => :CHART_ID,
+              X_SELECTED       => :SELECTED,
+              X_OWNER       => :OWNER,
+              X_CHART_ITEM_NAME => :CHART_ITEM_NAME, 
+              X_DESCRIPTION => :DESCRIPTION,
+              x_custom_mode => :CUSTOM_MODE,
+              x_last_update_date => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+

@@ -1,0 +1,585 @@
+#
+# $Header: afumsaru.lct 120.1 2005/05/21 00:51:19 golgun noship $
+#
+# ARU replaces APPS Header text (ARCS) with their own Header text (ClearCase).
+# Revision is only used by ARCS and is not touched by ClearCase.
+#
+# $Revision: 120.1 $
+#
+# afumsaru.lct - Update Management System Loader Configuration File
+#                (ARU Download Only)
+#
+# History:
+#
+#   YYYY/MM/DD  userid    comment
+#   ----------  --------  ------------------------------------------------------
+#   2001/06/14  gashford  Created
+#   2001/07/10  gashford  Added FND_UMS_BUGFIX_FILE to FND_UMS_BUGFIX
+#   2001/08/02  gashford  Added FND_UMS_BUGFIX.last_update_date
+#   2001/09/05  gashford  Added FND_UMS_BUGFIX.product_abbreviation
+#   2001/09/07  gashford  Added support for IN_PROGRESS bugs
+#   2001/09/12  gashford  Stopped downloading latest replacement
+#   2001/09/28  gashford  Switched from using product_abbreviation to
+#                         application_short_name
+#   2001/10/01  gashford  Switched object_name from source extension to
+#                         compiled extension
+#   2001/10/22  gashford  Switched from source object location to compiled
+#                         object location
+#   2001/11/12  gashford  Added INCLUDED patches
+#   2001/11/30  gashford  Added COMMENT describing purpose of dependency .ldt
+#                         file
+#   2001/11/30  gashford  Removed LIKEs from FND_UMS_BUGFIX download SQL to
+#                         improve performance
+#   2001/11/30  gashford  Switched FND_UMS_BUGFIX_FILE and
+#                         FND_UMS_BUGFIX_RELATIONSHIP attributes from BASE to
+#                         KEY
+#   2002/04/08  gashford  Added DOWNLOAD_MODE
+#   2002/04/17  golgun    Added FND_UMS_ONE_BUGFIX, FND_UMS_ALL_BUGFIXES,
+#                         and their REFERENCE entities to FND_UMS_BUGFIX.
+#                         Redesigned the download select statements.
+#                         Added :download_mode check where clauses.
+#                         Added forward/backward replacement link download.
+#   2002/04/24  golgun    Replaced IN_PROGRESS with RELEASED.
+#   2002/04/30  golgun    Added PREREQS_FILES, REPLACEMENTS_ONLY download
+#                         modes.
+#                         Added in_progress bugfix download support.
+#                         Increased the entity attribute sizes as a workaround
+#                         to FNDLOAD and/or database issue.
+#   2002/05/06  golgun    Removed the same release restriction.
+#   2002/06/13  gashford  Removed EXPANDED download mode.
+#   2002/06/13  gashford  Added SUPERSEDED status code.
+#   2002/06/19  golgun    Added INDIRECTLY_PREREQS.
+#   2002/06/28  golgun    Added LINKS_ONLY, LINKS_FILES download modes.
+#                         Added DIP, D-P, -IP to file download list.
+#   2003/01/15  golgun    Removed FND_UMS_ONE_BUGFIX and FND_UMS_ALL_BUGFIXES
+#                         Added FND_UMS_BUGFIXES.(Handles ONE, UPDATED, and ALL)
+#   2003/01/20  golgun    Re-added FND_UMS_ONE_BUGFIX for backward compatibility
+#   2003/01/22  golgun    Re-added FND_UMS_ONE_BUGFIX documentation
+#   2003/02/17  golgun    Size of FND_UMS_FILES.LOCATION column is increased 
+#                         from 80 to 160.
+#   2003/02/17  golgun    Replacement links to IN_PROGRESS patches are 
+#                         downloaded, only in the ONE entity download mode.
+#   2003/03/03  golgun    Size of FND_UMS_BUGFIXES.ABSTRACT column is increased 
+#                         from 80 to 240.
+#                         Removed BUGFIX_ONLY. BUGFIX_ONLY bugfixes do not
+#                         have full data represented by LAST_UPDATE_DATE.
+#                         Stopped aliasing release status IN_PROGRESS to 
+#                         RELEASED.
+#   2003/03/04  golgun    Replacement links to IN_PROGRESS patches are 
+#                         downloaded, in all entity download modes.
+#   2003/08/19  golgun    Performance improvement.
+#   2003/11/14  golgun    Fixed bug 3254984: aru_extensions table is dropped.
+#   2003/11/17  golgun    Updated comment to prevent confusion.
+#   2004/01/09  golgun    Added revision and entity name comment to select
+#                         statements for easy sql identification.
+#   2004/01/12  golgun    Actual column sizes are restored.
+#                         Commented out file download.
+#   2004/01/14  golgun    Improved direct/indirect prereq check for 
+#                         direct include download.
+#                         Removed LINKS_FILES, PREREQS_FILES download modes
+#   2004/01/19  golgun    Removed redundant exists statements
+#   2004/04/20  golgun    Classification_Id related changes.
+#   2005/05/20  golgun    Derive bugfix_type locally. Bug 4304995.
+#
+# Entities:
+#
+#  FND_UMS_BUGFIX                      -- Bugfixes
+#  |                                      - ARU_BUGFIXES
+#  +- FND_UMS_BUGFIX_FILE              -- File versions
+#  |                                      - ARU_BUGFIX_OBJECT_VERSIONS
+#  |                                      - ARU_OBJECT_VERSIONS
+#  |                                      - ARU_OBJECTS
+#  +- FND_UMS_BUGFIX_RELATIONSHIP      -- Bugfix relationships
+#                                         - ARU_BUGFIX_RELATIONSHIPS
+#
+#  FND_UMS_ONE_BUGFIX                  -- One bugfix
+#  |
+#  +- FND_UMS_ONE_BUGFIX_REFERENCE     -- Reference to FND_UMS_BUGFIX
+#                                         - ARU_BUGFIXES
+#
+#  FND_UMS_BUGFIXES                    -- One or more bugfixes
+#  |
+#  +- FND_UMS_BUGFIXES_REFERENCE       -- Reference to FND_UMS_BUGFIX
+#                                         - ARU_BUGFIXES
+#
+# ------------------------------------------------------------------------------
+# Notes:
+#   - afumsaru.lct and afums.lct DEFINE sections must be identical.
+#
+# Parameters:
+#   FND_UMS_BUGFIX
+#      Cannot be downloaded standalone
+#
+#   FND_UMS_ONE_BUGFIX
+#      RELEASE_NAME         : Release name (e.g., '11i')
+#      BUG_NUMBER           : Bug number (e.g., '1234567')
+#
+#   FND_UMS_BUGFIXES
+#      ENTITY_DOWNLOAD_MODE : Entity download mode
+#                             (e.g., 'ONE', 'UPDATED', 'ALL')
+#      RELEASE_NAME         : Release name (e.g., '11i')
+#      BUG_NUMBER           : Bug number (e.g., '1234567')
+#      START_DATE           : Earliest LAST_UPDATED_DATE to be downloaded
+#                             (YYYY/MM/DD format)
+#      END_DATE             : Latest LAST_UPDATED_DATE to be downloaded
+#                             (YYYY/MM/DD format)
+#
+#
+# Release Status & Classification Matrix:
+# Related Documents:
+#    http://aru.us.oracle.com:8080/help/Aruchkin/PatchClassForm.html
+#    http://arudev.us.oracle.com/specs/ARU_Checkin/Patch_Lifecycle_Fs.html
+#    http://arudev.us.oracle.com/specs/ARU_Checkin/Patch_Lifecycle_Sd.html
+# 
+# Release Status                Classification
+# (status_id)                   (classification_id)  Aliased To
+# ----------------------------- -------------------- -----------------------
+#  72 / IN_PROGRESS             170 / OPEN           IN_PROGRESS
+#                               171 / CLOSED         IN_PROGRESS
+#                               else                 IN_PROGRESS
+#
+#  73 / RELEASED                172 / INTERNAL       RELEASED
+#                               173 / CONTROLLED     RELEASED
+#                               174 / GENERAL        RELEASED
+#                               175 / RECOMMENDED    RELEASED
+#                               176 / CRITICAL       RELEASED_HIGH_PRIORITY
+#                               177 / DEPRECATED     RELEASED  (not used)
+#                               178 / SUPERSEDED     SUPERSEDED
+#                               183 / LEGISLATIVE    RELEASED
+#                               else                 RELEASED
+#                                                  
+#  74 / OBSOLETED               179 / ERROR          OBSOLETED
+#                               180 / RETIRED        OBSOLETED
+#                               else                 OBSOLETED
+#                                              
+#  75 / RELEASED_HIGH_PRIORITY  any                  RELEASED_HIGH_PRIORITY
+#  
+# 280 / SUPERSEDED              any                  SUPERSEDED
+#
+# else                          any                  RELEASED
+#
+COMMENT="THIS FILE CONTAINS META-INFORMATION THAT WILL BE USED BY ADPATCH. PLEASE DO NOT EDIT OR REMOVE THIS FILE. (Generated by UMS $Revision: 120.1 $)"
+
+DEFINE FND_UMS_BUGFIX
+   KEY     RELEASE_NAME              varchar2(30)
+   KEY     BUG_NUMBER                varchar2(50)
+   KEY     DOWNLOAD_MODE             varchar2(30) #Actual column size 30
+   BASE    APPLICATION_SHORT_NAME    varchar2(50) #Actual column size 50
+   BASE    RELEASE_STATUS            varchar2(30) #Actual column size 30
+   BASE    TYPE                      varchar2(30) #Actual column size 30
+   BASE    ABSTRACT                  varchar2(240)
+   BASE    LAST_UPDATE_DATE          varchar2(30) #Actual column size 30
+
+#   DEFINE FND_UMS_BUGFIX_FILE
+#      KEY    APPLICATION_SHORT_NAME     varchar2(50)  #Actual column size 50
+#      KEY    LOCATION                   varchar2(160) #Actual column size 160
+#      KEY    NAME                       varchar2(90)  #Actual column size 90
+#      KEY    VERSION                    varchar2(30)
+#   END FND_UMS_BUGFIX_FILE
+#
+   DEFINE FND_UMS_BUGFIX_RELATIONSHIP
+      KEY    RELATION_TYPE              varchar2(30) #Actual column size 30
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_BUGFIX_RELATIONSHIP
+END FND_UMS_BUGFIX
+
+DEFINE FND_UMS_ONE_BUGFIX
+   KEY     RELEASE_NAME              varchar2(30) #Actual column size 30
+   KEY     BUG_NUMBER                varchar2(50)
+   BASE    ENTITY_DOWNLOAD_MODE      varchar2(30) #Actual column size 30
+
+   DEFINE FND_UMS_ONE_BUGFIX_REFERENCE
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_ONE_BUGFIX_REFERENCE
+END FND_UMS_ONE_BUGFIX
+
+DEFINE FND_UMS_BUGFIXES
+   KEY     ENTITY_DOWNLOAD_MODE      varchar2(30) #Actual column size 30
+   KEY     RELEASE_NAME              varchar2(30) #Actual column size 30
+   KEY     BUG_NUMBER                varchar2(50)
+   KEY     START_DATE                varchar2(30) #Actual column size 30
+   KEY     END_DATE                  varchar2(30) #Actual column size 30
+
+   DEFINE FND_UMS_BUGFIXES_REFERENCE
+      KEY    PARENT                     REFERENCES FND_UMS_BUGFIX
+   END FND_UMS_BUGFIXES_REFERENCE
+END FND_UMS_BUGFIXES
+
+DOWNLOAD FND_UMS_BUGFIX
+"select /* $Revision: 120.1 $ FND_UMS_BUGFIX */
+        ar.release_name,
+        ab.bugfix_rptno bug_number,
+        substrb(:download_mode, 1, 30),
+        substrb(fnd_ums_util.get_application_short_name(ap.product_abbreviation),
+                1, 50) application_short_name,
+        decode(ab.status_id,
+                72, 'IN_PROGRESS',                         -- in progress
+                73,                                        -- released
+                    decode(ab.classification_id,
+                           176, 'RELEASED_HIGH_PRIORITY',  -- released/critical
+                           178, 'SUPERSEDED',              -- released/superseded
+                           'RELEASED'),
+                75, 'RELEASED_HIGH_PRIORITY',              -- released high priority
+               280, 'SUPERSEDED',                          -- superseded
+                74, 'OBSOLETED',                           -- obsoleted
+               'RELEASED')                                 -- else
+           release_status,
+        decode(ab.patch_type,
+               99, 'PATCHSET', 
+               'BUGFIX') type,
+        ab.abstract,
+        to_char(ab.last_updated_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date
+   from aru_releases ar,
+        aru_bugfixes ab,
+        aru_products ap
+  where :download_mode <> 'NONE'
+    and ar.release_name = :release_name
+    and ab.bugfix_rptno = :bug_number
+    and ab.release_id = ar.release_id
+    and ab.status_id in ( 72,  -- in progress
+                          73,  -- released
+                          75,  -- released high priority
+                         280,  -- superseded
+                          74)  -- obsoleted
+    and ap.product_id = ab.product_id
+"
+
+#DOWNLOAD FND_UMS_BUGFIX_FILE
+#"select /* $Revision: 120.1 $ FND_UMS_BUGFIX_FILE */
+#        substrb(fnd_ums_util.get_application_short_name(ap.product_abbreviation),
+#                1, 50) application_short_name,
+#        -- ao.object_location converted from source object location
+#        -- (e.g., 'src/flex') to compiled object location (e.g., 'lib')
+#        substrb(fnd_ums_util.get_compiled_object_location(ao.object_location,
+#                                                          ao.object_name,
+#                                                          ao.filetype_id), 
+#                1, 160) location,
+#        -- ao.object_name converted from source object name (e.g., 'fdfapi.lc')
+#        -- to compiled object name (e.g., 'fdfapi.o')
+#        substrb(fnd_ums_util.get_compiled_object_name(ao.object_name,
+#                                                      ao.filetype_id), 
+#                1, 90) name,
+#        abov.rcs_version
+#   from aru_releases ar,
+#        aru_bugfixes ab,
+#        aru_bugfix_object_versions abov,
+#        aru_objects ao,
+#        aru_product_releases apr,
+#        aru_products ap
+#  where ar.release_name = :release_name
+#    and ab.bugfix_rptno = :bug_number
+#    and ab.release_id = ar.release_id
+#    and :download_mode in ('PREREQS_FILES', 'LINKS_FILES')
+#    and abov.bugfix_id = ab.bugfix_id
+#    -- Source Codes:
+#    --   D-- : File appears only in this bugfix.
+#    --   DI- : File appears in this bugfix and in an included bugfix
+#    --         regardless of version numbers. Final version number is the
+#    --         max(version(I), version(D)).
+#    --   -I- : File appears only in an included bugfix.
+#    --   --P : NOT_USED. File appears only in a prereqed bugfix.
+#    --   D-P : File appears in this bugfix and in a prereqed bugfix,
+#    --         version(P) >= version(D). 
+#    --         Final version number is the version(P).
+#    --   DIP : File appears in this bugfix, in an included bugfix, and 
+#    --         in a prereqed bugfix, where version(P) >= version(D) and
+#    --         version(P) >= version(I).
+#    --         Final version number is the version(P).
+#    --   -IP : File appears in an included bugfix and in a prereqed bugfix but
+#    --         not in this bugfix, where version(P) >= version(I).
+#    --         Final version number is the version(P).
+#    --
+#    --         The source code gets P if and only if a prereqed file has the
+#    --         same or higher version than a directly listed or included file.
+#    --         If the source code has P in it then that file is not zipped.
+#    --
+#    --    Ex.:
+#    --                         I                        P
+#    --            A <--------------------- B ---------------------> C
+#    --
+#    --    file version source      file version source      file version source
+#    --    ---  ------- ------      ---- ------- ------      ---- ------- ------
+#    --    fA1  115.2   D--         fB1  115.3               fC1  115.3   D--
+#    --    fA2  115.3   D--         fA1  115.3               fC2  115.3   D--
+#    --    fX1  115.3   D--         fC2  115.4               fX1  115.3   D--
+#    --    fX2  115.3   D--         fX2  115.4               fX2  115.5   D--
+#    --                             fC1  115.2
+#    --                                                      
+#    --                             fB1  115.3   D--
+#    --                             fA1  115.3   DI-
+#    --                             fA2  115.3   -I-
+#    --                             fC2  115.4   D--
+#    --                             fC1  115.3   D-P
+#    --                             fX1  115.3   -IP
+#    --                             fX2  115.5   DIP
+#    --
+#    -- Download the zipped files (D--, DI-, -I-, DIP, D-P, -IP) 
+#    and abov.source in ('D--', 'DI-', '-I-', 'DIP', 'D-P', '-IP')
+#    and ao.object_id = abov.object_id
+#--
+#-- Can't use noship constraint since java files are marked as noship 
+#--    and ao.object_type <> 'noship'
+#--
+#    and apr.release_id = ar.release_id
+#    and apr.product_release_id = ao.product_release_id
+#    and ap.product_id = apr.product_id
+#"
+#
+
+# Downloading INCLUDE links in PREREQS_ONLY mode
+# ----------------------------------------------
+#
+# --
+# --     X                       Y
+# --   |   \                   /   | 
+# --   |    \ P/P'       P/P' /    |
+# --   |     \abr2       abr2/     |
+# --   |      \             /      |
+# --   |P'     B           C       |I/I'
+# --   |abr1    \         /        |
+# --   |       I \       /I        |
+# --   |       abr\     / abr      |
+# --   |           \   /           |
+# --   \-----------  A  -----------/
+# --
+# --   A -- I --> B is downloaded :
+# --   -----------------
+# --   - the bugfix has indirect prereqs : A -- P' --> X
+# --   - the related bugfix has direct or indirect prereqs : B -- P/P' --> X
+# --   - one of the the related bugfix's direct/indirect prereqs 
+# --     show up as the bugfix's indirect prereq : A -- P' --> X
+# --  
+# --   A -- I --> C is not downloaded :
+# --   -----------------
+# --   - the bugfix has indirect prereqs : A -- P' --> X
+# --   - the related bugfix has direct or indirect prereqs : C -- P/P' --> Y
+# --   - BUT none of the related bugfix's direct/indirect prereqs
+# --     show up as the bugfix's indirect prereq.
+# --     Because of the A -- I/I' --> Y link, A -- P' --> Y link was dropped
+# --     by ARU.
+#
+
+DOWNLOAD FND_UMS_BUGFIX_RELATIONSHIP
+"select /* $Revision: 120.1 $ FND_UMS_BUGFIX_RELATIONSHIP */
+        decode(alias_relation_type,
+               601, 'INCLUDES',
+               602, 'INDIRECTLY_INCLUDES',
+               603, 'PREREQS',
+               604, 'INDIRECTLY_PREREQS',
+               620, 'REPLACED_BY',
+              -620, 'REPLACES',
+                -1, 'REPLACED_BY_FIRST_NON_OBSOLETE'),
+        alias_release_name,
+        alias_bugfix_rptno,
+        substrb(fnd_ums_util.get_download_mode(decode(alias_relation_type,
+                                                      601, 'INCLUDES',
+                                                      602, 'INDIRECTLY_INCLUDES',
+                                                      603, 'PREREQS',
+                                                      604, 'INDIRECTLY_PREREQS',
+                                                      620, 'REPLACED_BY',
+                                                     -620, 'REPLACES',
+                                                       -1, 'REPLACED_BY_FIRST_NON_OBSOLETE'),
+                                               alias_bugfix_id, 
+                                               :download_mode), 
+                1, 30) download_mode
+   from (    -- Prereqs and Includes
+         select abr.relation_type alias_relation_type,
+                ar.release_name alias_release_name,
+                ab.bugfix_rptno alias_bugfix_rptno,
+                ab.bugfix_id alias_bugfix_id
+           from aru_releases ar0,
+                aru_bugfixes ab0,
+                aru_bugfix_relationships abr,
+                aru_bugfixes ab,
+                aru_releases ar
+          where ar0.release_name = :release_name
+            and ab0.bugfix_rptno = :bug_number
+            and ab0.release_id = ar0.release_id
+            and abr.bugfix_id = ab0.bugfix_id
+            and (   (    :download_mode = 'PREREQS_ONLY'
+                     -- In PREREQS_ONLY mode
+                     -- - All Direct and Indirect Prereq links are downloaded
+                     -- - A Direct Include link is downloaded If
+                     --   - the bugfix has indirect prereqs (abr1)
+                     --   - the related bugfix has direct or indirect prereqs (abr2)
+                     --   - at least one of the bugfix's indirect prereqs is coming
+                     --     from the related bugfix's direct/indirect prereqs
+                     --     (See picture above.)
+                     and (   (abr.relation_type in (603,  -- prereq
+                                                    604)  -- indirect prereq
+                             )
+                          or (    abr.relation_type = 601 -- include
+                              and exists (select null
+                                            from aru_bugfix_relationships abr1,
+                                                 aru_bugfix_relationships abr2
+                                           where abr1.bugfix_id = ab0.bugfix_id
+                                             and abr1.relation_type = 604  -- indirect prereq
+                                             and abr2.bugfix_id = abr.related_bugfix_id
+                                             and abr2.relation_type in (603,  -- prereq
+                                                                        604)  -- indirect prereq
+                                             and abr2.related_bugfix_id = abr1.related_bugfix_id)
+                             )
+                         )
+                    )
+                 or (    :download_mode = 'LINKS_ONLY'
+                     -- In LINKS_ONLY mode all direct/indirect 
+                     -- prereqs/includes are downloaded
+                     and abr.relation_type in (601,   -- include
+                                               602,   -- indirect include
+                                               603,   -- prereq
+                                               604)   -- indirect prereq
+                    )
+                )
+            and ab.bugfix_id = abr.related_bugfix_id
+            and ar.release_id = ab.release_id
+            -- During patch development, it is possible to have links to 
+            -- in_progress bugfixes
+            and ab.status_id in ( 72,  -- in_progress
+                                  73,  -- released
+                                  75,  -- released high priority
+                                 280,  -- superseded
+                                  74)  -- obsoleted
+          union
+             -- First Non-Obsolete Replacement Link
+         select -1 alias_relation_type,
+                ar.release_name alias_release_name,
+                ab.bugfix_rptno alias_bugfix_rptno,
+                ab.bugfix_id alias_bugfix_id
+           from aru_releases ar0,
+                aru_bugfixes ab0,
+                aru_bugfixes ab,
+                aru_releases ar
+          where ar0.release_name = :release_name
+            and ab0.bugfix_rptno = :bug_number
+            and ab0.release_id = ar0.release_id
+            and ab0.status_id = 74  -- obsoleted
+            and ab.bugfix_id = fnd_ums_util.get_first_non_obs_bugfix_id(ab0.bugfix_id)
+            and ar.release_id = ab.release_id    
+            and ab.status_id in ( 72,  -- in_progress
+                                  73,  -- released
+                                  75,  -- released high priority
+                                 280)  -- superseded
+          union
+             -- Forward Original Replacement Link
+         select abr.relation_type alias_relation_type,
+                ar.release_name alias_release_name,
+                ab.bugfix_rptno alias_bugfix_rptno,
+                ab.bugfix_id alias_bugfix_id
+           from aru_releases ar0,
+                aru_bugfixes ab0,
+                aru_bugfix_relationships abr,
+                aru_bugfixes ab,
+                aru_releases ar
+          where ar0.release_name = :release_name
+            and ab0.bugfix_rptno = :bug_number
+            and ab0.release_id = ar0.release_id
+            and abr.bugfix_id = ab0.bugfix_id  -- Forward link
+            and abr.relation_type = 620  -- original replacement
+            and ab.bugfix_id = abr.related_bugfix_id
+            and ar.release_id = ab.release_id    
+            and ab.status_id in ( 72,  -- in_progress
+                                  73,  -- released
+                                  75,  -- released high priority
+                                 280,  -- superseded
+                                  74)  -- obsoleted
+          union
+             -- Backward Original Replacement Links
+         select -1 * abr.relation_type alias_relation_type,
+                ar.release_name alias_release_name,
+                ab.bugfix_rptno alias_bugfix_rptno,
+                ab.bugfix_id alias_bugfix_id
+           from aru_releases ar0,
+                aru_bugfixes ab0,
+                aru_bugfix_relationships abr,
+                aru_bugfixes ab,
+                aru_releases ar
+          where ar0.release_name = :release_name
+            and ab0.bugfix_rptno = :bug_number
+            and ab0.release_id = ar0.release_id
+            and abr.related_bugfix_id = ab0.bugfix_id  -- Backward link
+            and abr.relation_type = 620  -- original replacement
+            and ab.bugfix_id = abr.bugfix_id
+            and ar.release_id = ab.release_id    
+            and ab.status_id in ( 72,  -- in_progress
+                                  73,  -- released
+                                  75,  -- released high priority
+                                 280,  -- superseded
+                                  74)  -- obsoleted
+        )
+"
+
+DOWNLOAD FND_UMS_ONE_BUGFIX
+"select /* $Revision: 120.1 $ FND_UMS_ONE_BUGFIX */
+        substrb(:release_name, 1, 30),
+        substrb(:bug_number, 1, 50),
+        substrb(fnd_ums_util.set_entity_download_mode('ONE'), 1, 30)
+   from dual
+"
+
+DOWNLOAD FND_UMS_ONE_BUGFIX_REFERENCE
+"select /* $Revision: 120.1 $ FND_UMS_ONE_BUGFIX_REFERENCE */
+        ar.release_name,
+        ab.bugfix_rptno bug_number,
+        substrb(fnd_ums_util.get_download_mode('REFERENCES',
+                                               ab.bugfix_id, null), 
+                1, 30) download_mode
+   from aru_releases ar,
+        aru_bugfixes ab
+  where ar.release_name = :release_name
+    and ab.bugfix_rptno = :bug_number
+    and ab.release_id = ar.release_id
+    and ab.status_id in ( 72,  -- in progress
+                          73,  -- released
+                          75,  -- released high priority
+                         280,  -- superseded
+                          74)  -- obsoleted
+"
+
+DOWNLOAD FND_UMS_BUGFIXES
+"select /* $Revision: 120.1 $ FND_UMS_BUGFIXES */
+        substrb(fnd_ums_util.set_entity_download_mode(:entity_download_mode), 1, 30),
+        substrb(:release_name, 1, 30),
+        substrb(:bug_number, 1, 50),
+        substrb(fnd_ums_util.set_start_date(:start_date), 1, 30),
+        substrb(fnd_ums_util.set_end_date(:end_date), 1, 30)
+   from dual
+"
+
+DOWNLOAD FND_UMS_BUGFIXES_REFERENCE
+"select /* $Revision: 120.1 $ FND_UMS_BUGFIXES_REFERENCE */
+        ar.release_name,
+        ab.bugfix_rptno bug_number,
+        substrb(fnd_ums_util.get_download_mode('REFERENCES',
+                                               ab.bugfix_id, null), 
+                1, 30) download_mode
+   from aru_releases ar,
+        aru_bugfixes ab
+  where ar.release_name = :release_name
+    and ab.release_id = ar.release_id
+    and ((    :entity_download_mode = 'ONE'
+          and ab.bugfix_rptno = :bug_number
+          and ab.status_id in ( 72,  -- in progress
+                                73,  -- released
+                                75,  -- released high priority
+                               280,  -- superseded
+                                74)  -- obsoleted
+         )
+        or
+         (    :entity_download_mode = 'UPDATED'
+          and (   ab.status_id in (280,                                -- superseded
+                                    74)                                -- obsoleted
+               or (ab.status_id = 73 and ab.classification_id = 178))  -- released/superseded
+          and ab.last_updated_date between to_date(:start_date, 'YYYY/MM/DD HH24:MI:SS')
+                                       and to_date(:end_date, 'YYYY/MM/DD HH24:MI:SS')
+         )
+        or
+         (    :entity_download_mode = 'ALL'
+          and ab.status_id in ( 73,  -- released
+                                75,  -- released high priority
+                               280,  -- superseded
+                                74)  -- obsoleted
+          and ab.last_updated_date between to_date(:start_date, 'YYYY/MM/DD HH24:MI:SS')
+                                       and to_date(:end_date, 'YYYY/MM/DD HH24:MI:SS')
+         )
+        )
+"

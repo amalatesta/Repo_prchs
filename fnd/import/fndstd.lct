@@ -1,0 +1,200 @@
+#
+# $Header: fndstd.lct 120.0 2005/05/07 16:18:53 appldev ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+#
+#    ENTITY
+#       CHILD_ENTITY
+#
+
+#
+# This comment should specify the dbdrv command to upload using this
+# config file.  The phase and file location should be adjusted appropriately.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/fndstd.lct @~PROD:~PATH/~FILE
+
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+DEFINE ENTITY
+  KEY   KEY1 		 VARCHAR2(30)
+  KEY   KEY2		 VARCHAR2(50)
+  CTX   OWNER          	 VARCHAR2(7)
+  CTX   LAST_UPDATE_DATE VARCHAR2(10)    
+  BASE  DEFINE 		 VARCHAR2(32000)
+  BASE  DOWNLOAD 	 VARCHAR2(32000)
+  BASE  UPLOAD 		 VARCHAR2(32000)
+  TRANS DESCRIPTION      VARCHAR2(256)
+
+#  CHILD_ENTITY is a child of ENTITY.  Show this relationship by nesting
+#  its definition inside that of its parent.  The child automatically
+#  inherits the key fields of its parent and they should not be duplicated in
+#  the child's definition even though the actual underlying data model
+#  may have columns for those key values.
+
+  DEFINE CHILD_ENTITY
+    KEY   CHILD_NAME	   VARCHAR2(30)
+    CTX   OWNER		   VARCHAR2(7)
+    CTX   LAST_UPDATE_DATE VARCHAR2(10)    
+    BASE  VALUE		   VARCHAR2(25)
+  END CHILD_ENTITY
+END ENTITY
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Protect against null parameter passing using 
+#       and (:parm is null or (:parm is not null and col like :parm))
+#
+
+DOWNLOAD ENTITY
+  "select KEY1,  
+          KEY2,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,  
+          DEFINE,  
+          DOWNLOAD,  
+   	  UPLOAD,  
+          DESCRIPTION  
+   from   ENTITIES_TABLE  
+   where (:KEY1 is null or (:KEY1 is not null and KEY1 like :KEY1))
+   and   (:KEY2 is null or (:KEY2 is not null and KEY2 like :KEY2))
+
+DOWNLOAD CHILD_ENTITY
+  "select CHILD_NAME,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,  
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,  
+          VALUE	 
+   from   CHILDREN_ENTITES  
+   where  KEY1 = :KEY1  
+   and    KEY2 = :KEY2 "
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD ENTITY
+  BEGIN
+  " begin  
+     
+      if (:UPLOAD_MODE = 'NLS') then  
+        entities_table_pkg.TRANSLATE_ROW (  
+          :KEY1,  
+          :KEY2,  
+          :OWNER,
+	  :LAST_UPDATE_DATE,  
+          :DESCRIPTION );  
+     
+      else  
+        entities_table_pkg.LOAD_ROW (  
+          :KEY1,  
+          :KEY2,  
+          :OWNER,  
+	  :LAST_UPDATE_DATE,  
+          :DEFINE,  
+          :DOWNLOAD,  
+          :UPLOAD,  
+          :DESCRIPTION );  
+      end if;  
+     
+    end; "
+
+UPLOAD CHILD_ENTITY
+  " begin  
+      declare  
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+      begin  
+        -- No translated columns, do nothing in NLS mode.
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+     
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+	-- Get current owner of row in database
+        begin
+  	  select LAST_UPDATED_BY, LAST_UPDATE_DATE
+	  into db_luby, db_ludate
+          from child_entity
+          where child_name = :CHILD_NAME
+          and key1 = :KEY1
+          and key2 = :KEY2
+
+          -- Row exists, test if it should be over-written.
+          if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                   db_ludate, :CUSTOM_MODE)) then
+    
+            update children_entity set  
+               value = :VALUE,  
+               last_update_date = sysdate,  
+               last_updated_by = user_id,  
+               last_update_login = 0  
+            where child_name = :CHILD_NAME  
+            and key1 = :KEY1  
+            and key2 = :KEY2;  
+          end if;
+        exception
+          when no_data_found then
+            -- Row doesn't exist yet.  Insert it.
+              child_name,  
+              key1,  
+              key2,  
+              value,  
+              last_update_date,  
+              last_updated_by,  
+              creation_date,  
+              created_by,  
+              last_update_login )  
+           values (  
+              :CHILD_NAME,  
+              :KEY1,  
+              :KEY2,  
+              :VALUE,  
+	      f_ludate,
+              f_luby,
+	      f_ludate,
+              f_luby,
+              0 );  
+         end;
+    end; "

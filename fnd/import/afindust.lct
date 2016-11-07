@@ -1,0 +1,72 @@
+# $Header: afindust.lct 120.1 2005/07/08 10:12:58 skghosh noship $
+# afindust.lct -  FND INDUSTRIES Loader Configuration
+#
+# Entities -
+#
+#    FND_INDUSTRIES
+#
+# Note: to change the language you are downloading, setenv NLS_LANG before 
+#       running the loader.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+70 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afindust.lct @~PROD:~PATH/~FILE" 
+
+DEFINE FND_INDUSTRIES
+  KEY   INDUSTRY_ID              VARCHAR2(50)   
+  TRANS INDUSTRY_NAME            VARCHAR2(80)  
+  TRANS DESCRIPTION              VARCHAR2(240) 
+  CTX   CREATED_BY               VARCHAR2(50)
+  BASE  CREATION_DATE            VARCHAR2(11)           
+  BASE  LAST_UPDATED_BY          VARCHAR2(4000) 
+  BASE  LAST_UPDATE_DATE         VARCHAR2(11)          
+  BASE  LAST_UPDATE_LOGIN        VARCHAR2(50)
+END FND_INDUSTRIES  
+  
+  
+DOWNLOAD FND_INDUSTRIES
+  "select  INDUSTRY_ID,
+           INDUSTRY_NAME,
+           DESCRIPTION,
+           CREATED_BY,
+           CREATION_DATE,
+           fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+           to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+           LAST_UPDATE_LOGIN
+   from    fnd_industries  
+   where   LANGUAGE = userenv('LANG') "
+
+UPLOAD FND_INDUSTRIES
+
+
+  "
+  BEGIN
+    if (:UPLOAD_MODE = 'NLS') then
+      fnd_industries_pkg.TRANSLATE_ROW(
+        x_industry_id        => :INDUSTRY_ID,
+        x_industry_name      => :INDUSTRY_NAME,
+        x_description        => :DESCRIPTION,
+        x_created_by         => :CREATED_BY,
+        x_creation_date      => :CREATION_DATE,
+        x_owner              => :OWNER,
+        x_last_update_date   => :LAST_UPDATE_DATE,
+        x_last_update_login  => :LAST_UPDATE_LOGIN,
+        x_custom_mode        => :CUSTOM_MODE);
+    else
+      fnd_industries_pkg.LOAD_ROW(
+        x_industry_id        => :INDUSTRY_ID,
+        x_industry_name      => :INDUSTRY_NAME,
+        x_description        => :DESCRIPTION,
+        x_created_by         => :CREATED_BY,
+        x_creation_date      => :CREATION_DATE,
+        x_owner              => :OWNER,
+        x_last_update_date   => :LAST_UPDATE_DATE,
+        x_last_update_login  => :LAST_UPDATE_LOGIN,
+        x_custom_mode        => :CUSTOM_MODE);
+    end if;
+  END;"
+  
+  
+ 
+ 
+ 
+ 
+ 

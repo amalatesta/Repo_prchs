@@ -1,0 +1,129 @@
+# $Header: afoammet.lct 120.0 2005/05/07 16:15:58 appldev noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afoammet.lct @~PROD:~PATH/~FILE"
+
+DEFINE OAM_MET_GRPS
+   	KEY	METRIC_GROUP_ID			VARCHAR2(50)
+	BASE	SEQUENCE			VARCHAR2(50)
+	TRANS 	METRIC_GROUP_DISPLAY_NAME	VARCHAR2(256)
+	TRANS	DESCRIPTION			VARCHAR2(1024)
+	CTX 	OWNER				VARCHAR2(4000)
+	BASE	LAST_UPDATE_DATE		VARCHAR2(11)		 
+END OAM_MET_GRPS
+
+DEFINE OAM_METS
+	KEY	METRIC_SHORT_NAME	VARCHAR2(30)
+	BASE	METRIC_VALUE		VARCHAR2(256)
+	BASE 	STATUS_CODE		VARCHAR2(50)
+	BASE	GROUP_ID		REFERENCES OAM_MET_GRPS AS GROUP_ID
+	BASE    SEQUENCE 	        VARCHAR2(50)
+	KEY	NODE_NAME		VARCHAR2(30)
+	BASE    METRIC_TYPE             VARCHAR2(1)
+        BASE    THRESHOLD_OPERATOR      VARCHAR2(1)
+	BASE    THRESHOLD_VALUE	        VARCHAR2(256)
+        BASE    ALERT_ENABLED_FLAG      VARCHAR2(1)
+	BASE 	COLLECTION_ENABLED_FLAG VARCHAR2(1)
+	BASE 	LAST_COLLECTED_DATE	VARCHAR2(11)
+	BASE 	IS_SUPPORTED		VARCHAR2(1)
+	BASE 	IS_CUSTOMIZED		VARCHAR2(1)
+        BASE	INTERVAL_COUNTER	VARCHAR2(50)
+	TRANS 	METRIC_DISPLAY_NAME	VARCHAR2(256)	
+	TRANS	DESCRIPTION		VARCHAR2(1024)
+	CTX 	OWNER			VARCHAR2(4000)
+	BASE 	LAST_UPDATE_DATE	VARCHAR2(11)
+END OAM_METS
+
+
+# --- End Entity Definitions ---
+
+DOWNLOAD OAM_MET_GRPS 
+	"SELECT metric_group_id, sequence, metric_group_display_name,
+		description, 
+		fnd_load_util.OWNER_NAME(last_updated_by),
+		to_char(last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_met_grps_vl
+	 WHERE ((:METRIC_GROUP_ID is null) OR 
+			( (:METRIC_GROUP_ID is not null) AND
+			  (metric_group_id = :METRIC_GROUP_ID)))"
+
+DOWNLOAD OAM_METS
+	"SELECT metric_short_name, metric_value, status_code, group_id,
+		sequence, node_name, metric_type, threshold_operator,
+		threshold_value, alert_enabled_flag, collection_enabled_flag,
+		to_char(last_collected_date, 'YYYY/MM/DD'), 
+		is_supported, is_customized, interval_counter,
+		metric_display_name, description,
+		fnd_load_util.OWNER_NAME(last_updated_by),
+		to_char(last_update_date, 'YYYY/MM/DD')
+	 FROM fnd_oam_metval_vl
+	 WHERE metric_short_name like nvl(:METRIC_SHORT_NAME, '%')
+	 AND   ((:NODE_NAME is null) OR 
+		((:NODE_NAME is not null) AND (node_name like :NODE_NAME)))"
+
+
+UPLOAD OAM_METS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			fnd_oam_metval_pkg.TRANSLATE_ROW(
+			  x_metric_short_name   => :METRIC_SHORT_NAME,
+			  x_owner		=> :OWNER,
+			  x_metric_display_name => :METRIC_DISPLAY_NAME,
+			  x_description	        => :DESCRIPTION,
+			  x_custom_mode	        => :CUSTOM_MODE,
+			  x_last_update_date    => :LAST_UPDATE_DATE);
+		else
+			fnd_oam_metval_pkg.LOAD_ROW(
+			  x_metric_short_name   => :METRIC_SHORT_NAME,
+			  x_metric_value	=> :METRIC_VALUE,
+			  x_status_code	        => :STATUS_CODE,
+			  x_group_id	        => :GROUP_ID,
+			  x_sequence	        => :SEQUENCE,
+			  x_node_name	        => :NODE_NAME,
+			  x_metric_type		=> :METRIC_TYPE,
+			  x_threshold_operator	=> :THRESHOLD_OPERATOR,
+			  x_threshold_value	=> :THRESHOLD_VALUE,
+			  x_alert_enabled_flag	=> :ALERT_ENABLED_FLAG,
+			  x_collection_enabled_flag => :COLLECTION_ENABLED_FLAG,
+			  x_last_collected_date	=> :LAST_COLLECTED_DATE,
+			  x_is_supported	=> :IS_SUPPORTED,
+			  x_is_customized	=> :IS_CUSTOMIZED,
+			  x_interval_counter	=> :INTERVAL_COUNTER,
+			  x_owner		=> :OWNER,
+			  x_metric_display_name => :METRIC_DISPLAY_NAME,
+			  x_description	        => :DESCRIPTION,
+			  x_custom_mode	        => :CUSTOM_MODE,
+			  x_last_update_date    => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+
+UPLOAD OAM_MET_GRPS
+	"begin
+		if (:UPLOAD_MODE = 'NLS') then
+			fnd_oam_met_grps_pkg.TRANSLATE_ROW(
+			  x_metric_group_id	      => :METRIC_GROUP_ID,
+			  x_owner		      => :OWNER,
+			  x_metric_group_display_name => :METRIC_GROUP_DISPLAY_NAME,
+			  x_description		      => :DESCRIPTION,
+			  x_custom_mode               => :CUSTOM_MODE,
+			  x_last_update_date          => :LAST_UPDATE_DATE);
+		else
+			fnd_oam_met_grps_pkg.LOAD_ROW(
+			  x_metric_group_id           => :METRIC_GROUP_ID,
+			  x_sequence		      => :SEQUENCE,
+			  x_owner		      => :OWNER,
+			  x_metric_group_display_name => :METRIC_GROUP_DISPLAY_NAME,
+			  x_description		      => :DESCRIPTION,
+			  x_custom_mode               => :CUSTOM_MODE,
+			  x_last_update_date          => :LAST_UPDATE_DATE);
+		end if;
+	 end;"
+	
+
+
+
+
+
+
+
+

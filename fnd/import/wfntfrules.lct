@@ -1,0 +1,99 @@
+# $Header: wfntfrules.lct 120.1 2005/12/15 21:58:25 hgandiko noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+54 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/wfdpview.lct @~PROD:~PATH/~FILE"
+
+DEFINE WF_NTF_RULES
+  KEY   RULE_NAME               VARCHAR2(30)
+  BASE  OWNER_TAG               VARCHAR2(5)
+  TRANS USER_RULE_NAME          VARCHAR2(80)
+  TRANS DESCRIPTION             VARCHAR2(240)
+  BASE  CUSTOMIZATION_LEVEL     VARCHAR2(1)
+  BASE  PHASE                   NUMBER
+  BASE  STATUS                  VARCHAR2(8)
+  BASE  CREATION_DATE           VARCHAR2(10)
+
+  DEFINE WF_NTF_RULE_CRITERIA
+    KEY   RULE_NAME               REFERENCES WF_NTF_RULES as RULE_NAME
+    KEY   MESSAGE_TYPE            VARCHAR2(8)
+    BASE  CREATION_DATE           VARCHAR2(11)
+  END WF_NTF_RULE_CRITERIA
+
+  DEFINE WF_NTF_RULE_MAPS
+      KEY   RULE_NAME               REFERENCES WF_NTF_RULES as RULE_NAME
+      KEY   COLUMN_NAME             VARCHAR2(30)
+      BASE  ATTRIBUTE_NAME          VARCHAR2(30)
+      BASE  CREATION_DATE           VARCHAR2(11)
+  END WF_NTF_RULE_MAPS
+
+END WF_NTF_RULES
+
+DOWNLOAD WF_NTF_RULES
+  "select B.RULE_NAME,
+  	  B.OWNER_TAG,
+	  TL.USER_RULE_NAME,
+	  TL.DESCRIPTION,
+	  B.CUSTOMIZATION_LEVEL,
+	  B.PHASE,
+	  B.STATUS,
+	  B.CREATION_DATE
+   from   WF_NTF_RULES B, WF_NTF_RULES_TL TL
+   where  (B.OWNER_TAG = :OWNER_TAG OR B.RULE_NAME = :RULE_NAME)
+   and    B.RULE_NAME = TL.RULE_NAME          
+" 
+
+DOWNLOAD WF_NTF_RULE_CRITERIA
+  " select RULE_NAME,
+	   MESSAGE_TYPE,
+           CREATION_DATE
+   from   WF_NTF_RULE_CRITERIA
+   where  RULE_NAME = :RULE_NAME
+"
+
+DOWNLOAD WF_NTF_RULE_MAPS
+  "select RULE_NAME,
+          COLUMN_NAME,
+          ATTRIBUTE_NAME,
+   	  CREATION_DATE
+   from   WF_NTF_RULE_MAPS
+   where  RULE_NAME = :RULE_NAME
+  "
+
+UPLOAD WF_NTF_RULES
+BEGIN
+ "  
+  begin
+    if (:UPLOAD_MODE = 'NLS') then
+        wf_ntf_rules_pkg.translate_row(:RULE_NAME,
+                                       :USER_RULE_NAME,
+                                       :DESCRIPTION);
+    else
+	wf_ntf_rules_pkg.load_row(:OWNER_TAG,
+	                          :RULE_NAME,
+			          :USER_RULE_NAME,
+			          :DESCRIPTION,
+			          :CUSTOMIZATION_LEVEL,
+			          :PHASE,
+			          :STATUS,
+				  :CUSTOM_MODE);
+    end if;
+  end;  
+ "
+
+UPLOAD WF_NTF_RULE_CRITERIA
+ "
+  begin 
+       wf_ntf_rulecriteria_pkg.load_row(:RULE_NAME,
+ 				        :MESSAGE_TYPE);
+  end; 
+ "
+
+UPLOAD WF_NTF_RULE_MAPS
+ " 
+  begin
+       wf_ntf_rulemaps_pkg.load_row(:RULE_NAME,
+          			    :ATTRIBUTE_NAME,
+          		            :COLUMN_NAME);
+  end; 
+ "
+

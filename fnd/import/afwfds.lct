@@ -1,0 +1,231 @@
+#
+# $Header: afwfds.lct 120.1 2005/08/02 07:13:15 hgandiko noship $
+#
+# afwfds.lct - WF_ROLE Loader Configuration
+#
+# Entities -
+#
+#   WF_ROLE                                -- Workflow Roles
+#   |                                         - WF_LOCAL_ROLES
+#   +--WF_ROLE_HIERARCHIES                 -- Hierarchial relationships
+#   |  |                                     - WF_ROLE_HIERARCHIES
+#   |  |                                    
+#   |  +--SUPER_ROLE_DEPENDENTS            -- Workflow Roles referenced by
+#   |  |                                   -- super side of the hierarchy nodes
+#   |  |                                     - WF_LOCAL_ROLES
+#   |  |
+#   |  +--SUB_ROLE_DEPENDENTS              -- Workflow Roles referenced by
+#   |                                      -- sub side of the hierarchy nodes
+#   |                                         - WF_LOCAL_ROLES
+#   |
+#   +--WF_USER_ROLES                       -- User/Role Relationships
+#                                            - WF_LOCAL_USER_ROLES
+#
+#
+# Parameters -
+# 
+#   TARGET_NAME               - Used to download a specific role.
+#   TARGET_ORIGSYS            - Used with  to download all roles for a 
+#                               specific orig_system.
+#   OWNER_TAG                 - Used with TARGET_ORIGSYS to specify a subset to
+#                               download.
+#   INCLUDE_USER_ROLES - If "Y", will include user/role relationships including
+#                        the referenced user/role relationships for 
+#                        TARGET_ORIG_SYSTEM or ORIG_SYSTEM of TARGET_NAME
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afwfds.lct @~PROD:~PATH/~FILE"
+
+DEFINE WF_ROLE
+  KEY   NAME                    VARCHAR2(320)
+  CTX   OWNER                   VARCHAR2(4000)
+  CTX   LAST_UPDATE_DATE        VARCHAR2(10)
+  CTX   OWNER_TAG               VARCHAR2(50)
+  TRANS DISPLAY_NAME            VARCHAR2(360)
+  TRANS DESCRIPTION             VARCHAR2(1000)
+  BASE  NOTIFICATION_PREFERENCE VARCHAR2(8)
+  BASE  LANGUAGE                VARCHAR2(30)
+  BASE  TERRITORY               VARCHAR2(30)
+  BASE  EMAIL_ADDRESS           VARCHAR2(320)
+  BASE  FAX                     VARCHAR2(240)
+  KEY   ORIG_SYSTEM             VARCHAR2(30)
+  KEY   ORIG_SYSTEM_ID          NUMBER 
+  BASE  START_DATE              VARCHAR2(10)
+  BASE  STATUS                  VARCHAR2(8)
+  BASE  EXPIRATION_DATE         VARCHAR2(20)
+  BASE  SECURITY_GROUP_ID       VARCHAR2(32)
+  BASE  USER_FLAG               VARCHAR2(1)
+
+
+
+  DEFINE WF_ROLE_HIERARCHIES
+    KEY   SUPER_NAME         VARCHAR2(320)
+    KEY   SUB_NAME           VARCHAR2(320)
+    CTX   OWNER              VARCHAR2(4000)
+    CTX   LAST_UPDATE_DATE   VARCHAR2(10)
+    BASE  ENABLED_FLAG       VARCHAR2(1)
+
+    DEFINE SUPER_ROLE_DEPENDENTS
+      KEY   NAME                    VARCHAR2(320)
+      CTX   OWNER                   VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE        VARCHAR2(10)
+      CTX   OWNER_TAG               VARCHAR2(50)
+      TRANS DISPLAY_NAME            VARCHAR2(360)
+      TRANS DESCRIPTION             VARCHAR2(1000)
+      BASE  NOTIFICATION_PREFERENCE VARCHAR2(8)
+      BASE  LANGUAGE                VARCHAR2(30)
+      BASE  TERRITORY               VARCHAR2(30)
+      BASE  EMAIL_ADDRESS           VARCHAR2(320)
+      BASE  FAX                     VARCHAR2(240)
+      BASE  START_DATE              VARCHAR2(10)
+      BASE  STATUS                  VARCHAR2(8)
+      BASE  EXPIRATION_DATE         VARCHAR2(20)
+      BASE  SECURITY_GROUP_ID       VARCHAR2(32)
+      BASE  USER_FLAG               VARCHAR2(1)
+    END SUPER_ROLE_DEPENDENTS
+
+    DEFINE SUB_ROLE_DEPENDENTS
+      KEY   NAME                    VARCHAR2(320)
+      CTX   OWNER                   VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE        VARCHAR2(10)
+      CTX   OWNER_TAG               VARCHAR2(50)
+      TRANS DISPLAY_NAME            VARCHAR2(360)
+      TRANS DESCRIPTION             VARCHAR2(1000)
+      BASE  NOTIFICATION_PREFERENCE VARCHAR2(8)
+      BASE  LANGUAGE                VARCHAR2(30)
+      BASE  TERRITORY               VARCHAR2(30)
+      BASE  EMAIL_ADDRESS           VARCHAR2(320)
+      BASE  FAX                     VARCHAR2(240)
+      BASE  START_DATE              VARCHAR2(10)
+      BASE  STATUS                  VARCHAR2(8)
+      BASE  EXPIRATION_DATE         VARCHAR2(20)
+      BASE  SECURITY_GROUP_ID       VARCHAR2(32)
+      BASE  USER_FLAG               VARCHAR2(1)
+    END SUB_ROLE_DEPENDENTS
+  END WF_ROLE_HIERARCHIES
+
+
+  DEFINE WF_USER_ROLES
+    KEY   USER_NAME             VARCHAR2(360)
+    KEY   ROLE_NAME             VARCHAR2(360)
+    CTX   OWNER                 VARCHAR2(4000)
+    CTX   LAST_UPDATE_DATE      VARCHAR2(10)
+  END WF_USER_ROLES
+END WF_ROLE
+
+
+#
+# --DOWNLOADS--
+#
+#
+
+# -- WF_ROLE
+# --
+# -- We download by owner_tag, and orig_system, or by name.
+DOWNLOAD WF_ROLE
+  "select WR.NAME,
+          FND_LOAD_UTIL.Owner_Name(WR.LAST_UPDATED_BY) OWNER,
+          to_char(WR.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          WR.OWNER_TAG,
+          WR.DISPLAY_NAME,
+          WR.DESCRIPTION,
+          WR.NOTIFICATION_PREFERENCE,
+          WR.LANGUAGE,
+          WR.TERRITORY,
+          WR.EMAIL_ADDRESS,
+          WR.FAX,
+          WR.ORIG_SYSTEM,
+          WR.ORIG_SYSTEM_ID,
+          WR.START_DATE,
+          WR.STATUS,
+          WR.EXPIRATION_DATE,
+          WR.SECURITY_GROUP_ID,
+          WR.USER_FLAG
+   from   WF_LOCAL_ROLES WR
+   where  WR.OWNER_TAG = :OWNER_TAG
+   and    WR.ORIG_SYSTEM = :TARGET_ORIGSYS
+   and    WR.NAME like nvl(:TARGET_NAME, '%')"
+
+   
+# -- WF_ROLE_HIERARCHIES
+# --
+# -- Downloading all hierarchies that this role participates in.
+DOWNLOAD WF_ROLE_HIERARCHIES
+  "select     WRH.SUPER_NAME,
+              WRH.SUB_NAME,
+              FND_LOAD_UTIL.Owner_Name(WRH.LAST_UPDATED_BY) OWNER,
+              to_char(WRH.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+              WRH.ENABLED_FLAG
+   from       WF_ROLE_HIERARCHIES WRH
+   connect by WRH.SUPER_NAME = WRH.SUB_NAME
+   start with WRH.SUB_NAME = :NAME
+   union  
+   select     WRH.SUPER_NAME,
+              WRH.SUB_NAME,
+              FND_LOAD_UTIL.Owner_Name(WRH.LAST_UPDATED_BY) OWNER,
+              to_char(WRH.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+              WRH.ENABLED_FLAG
+   from       WF_ROLE_HIERARCHIES WRH
+   connect by WRH.SUB_NAME = WRH.SUPER_NAME
+   start with WRH.SUPER_NAME = :NAME"
+
+
+# -- WF_ROLES (dependent roles)
+# --
+# -- Picking up any dependent roles that are referenced by WF_ROLE_HIERARCHIES
+DOWNLOAD SUPER_ROLE_DEPENDENTS
+  "select WR.NAME,
+          FND_LOAD_UTIL.Owner_Name(WR.LAST_UPDATED_BY) OWNER,
+          to_char(WR.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          WR.OWNER_TAG,
+          WR.DISPLAY_NAME,
+          WR.DESCRIPTION,
+          WR.NOTIFICATION_PREFERENCE,
+          WR.LANGUAGE,
+          WR.TERRITORY,
+          WR.EMAIL_ADDRESS,
+          WR.FAX,
+          WR.START_DATE,
+          WR.STATUS,
+          WR.EXPIRATION_DATE,
+          WR.SECURITY_GROUP_ID,
+          WR.USER_FLAG
+   from   WF_LOCAL_ROLES WR
+   where  WR.NAME = :SUPER_NAME
+   and    WR.ORIG_SYSTEM = :TARGET_ORIGSYS"
+
+
+DOWNLOAD SUB_ROLE_DEPENDENTS
+  "select WR.NAME,
+          FND_LOAD_UTIL.Owner_Name(WR.LAST_UPDATED_BY) OWNER,
+          to_char(WR.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          WR.OWNER_TAG,
+          WR.DISPLAY_NAME,
+          WR.DESCRIPTION,
+          WR.NOTIFICATION_PREFERENCE,
+          WR.LANGUAGE,
+          WR.TERRITORY,
+          WR.EMAIL_ADDRESS,
+          WR.FAX,
+          WR.START_DATE,
+          WR.STATUS,
+          WR.EXPIRATION_DATE,
+          WR.SECURITY_GROUP_ID,
+          WR.USER_FLAG
+   from   WF_LOCAL_ROLES WR
+   where  WR.NAME = :SUB_NAME
+   and    WR.ORIG_SYSTEM = :TARGET_ORIGSYS"
+
+# -- WF_USER_ROLES
+# --
+# -- Downloading all user/role relationships that this role participates in.
+DOWNLOAD WF_USER_ROLES
+  "select WUR.USER_NAME,
+          WUR.ROLE_NAME,
+          FND_LOAD_UTIL.Owner_Name(WUR.LAST_UPDATED_BY) OWNER,
+          to_char(WUR.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   WF_LOCAL_USER_ROLES WUR
+   where  (WUR.ROLE_NAME = :NAME)
+   and    nvl(:INCLUDE_USER_ROLES, 'N') = 'Y'
+   and    WUR.DIRECT_ASSIGNMENT = 'Y'"
+   
+

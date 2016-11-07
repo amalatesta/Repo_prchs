@@ -1,0 +1,739 @@
+#
+# $Header: afcpque.lct 120.0.12000000.1 2007/01/18 12:40:53 appldev ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+#
+#	QUEUE
+#          QUEUE_CONTENT
+#	   QUEUE_PARAMS
+#
+# Parameters :
+#    APPLICATION_SHORT_NAME
+#    CONCURRENT_QUEUE_NAME
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+66 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcpque.lct @~PROD:~PATH/~FILE" 
+DEFINE  QUEUE
+  KEY   APPLICATION_SHORT_NAME	VARCHAR2(50)
+  KEY   CONCURRENT_QUEUE_NAME	VARCHAR2(30)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(75)
+  BASE  PROCESSOR_APP_SHORT_NAME  VARCHAR2(50)
+  BASE  CONCURRENT_PROCESSOR_NAME VARCHAR2(30)
+  TRANS DESCRIPTION             VARCHAR2(240)
+  BASE  CACHE_SIZE              VARCHAR2(50)
+  BASE  MANAGER_TYPE            VARCHAR2(30)
+  BASE  SERVICE_HANDLE          VARCHAR2(8)
+  BASE  NODE_NAME               VARCHAR2(30)
+  BASE  NODE_NAME2              VARCHAR2(30)
+  BASE  OS_QUEUE                VARCHAR2(30)
+  BASE  OS_QUEUE2               VARCHAR2(30)
+  BASE  DATA_GROUP_NAME         VARCHAR2(30)
+  BASE  RESTART_TYPE            VARCHAR2(1)
+  BASE  RESTART_INTERVAL        VARCHAR2(50)
+  BASE  ATTRIBUTE_CATEGORY      VARCHAR2(30)
+  BASE  ATTRIBUTE		VARCHAR2(2000)
+  BASE  ATTRIBUTE1              VARCHAR2(30)
+  BASE  ATTRIBUTE2              VARCHAR2(30)
+  BASE  ATTRIBUTE3              VARCHAR2(30)
+  BASE  ATTRIBUTE4              VARCHAR2(30)
+  BASE  ATTRIBUTE5              VARCHAR2(30)
+  BASE  ATTRIBUTE6              VARCHAR2(30)
+  BASE  ATTRIBUTE7              VARCHAR2(30)
+  BASE  ATTRIBUTE8              VARCHAR2(30)
+  BASE  ATTRIBUTE9              VARCHAR2(30)
+  BASE  ATTRIBUTE10             VARCHAR2(30)
+  BASE  ATTRIBUTE11             VARCHAR2(30)
+  BASE  ATTRIBUTE12             VARCHAR2(30)
+  BASE  ENABLED_FLAG            VARCHAR2(1)
+  BASE  RESOURCE_CONSUMER_GROUP VARCHAR2(30)
+  TRANS USER_CONCURRENT_QUEUE_NAME VARCHAR2(240)
+
+  DEFINE QUEUE_CONTENT
+    KEY  RULE_TYPE_CODE         VARCHAR2(1)
+    KEY  RULE_APPLICATION       VARCHAR2(50)
+    KEY  RULE_NAME              VARCHAR2(100)
+    CTX  OWNER                  VARCHAR2(4000)
+    BASE LAST_UPDATE_DATE       VARCHAR2(75)
+    BASE INCLUDE_FLAG           VARCHAR2(1)
+  END QUEUE_CONTENT
+
+  DEFINE QUEUE_PARAMS
+    KEY  PARAM_APPLICATION      VARCHAR2(50)
+    KEY  PARAM_NAME             VARCHAR2(50)
+    CTX  OWNER                  VARCHAR2(4000)
+    BASE LAST_UPDATE_DATE       VARCHAR2(75)
+    BASE MIN_PROCESSES          VARCHAR2(30)
+    BASE MAX_PROCESSES          VARCHAR2(30)
+    BASE SLEEP_SECONDS          VARCHAR2(30)
+    BASE SERVICE_PARAMETERS     VARCHAR2(2000)
+  END QUEUE_PARAMS
+
+END QUEUE
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD QUEUE
+  "select
+   a1.APPLICATION_SHORT_NAME,
+   v.CONCURRENT_QUEUE_NAME, 
+   fnd_load_util.OWNER_NAME(v.LAST_UPDATED_BY) OWNER,
+   to_char(v.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+   a2.APPLICATION_SHORT_NAME PROCESSOR_APP_SHORT_NAME,
+   p.CONCURRENT_PROCESSOR_NAME,
+   v.DESCRIPTION,
+   v.CACHE_SIZE,
+   v.MANAGER_TYPE,
+   s.SERVICE_HANDLE,
+   v.NODE_NAME,
+   v.NODE_NAME2,
+   v.OS_QUEUE,
+   v.OS_QUEUE2,
+   d.DATA_GROUP_NAME,
+   v.RESTART_TYPE,  
+   v.RESTART_INTERVAL,
+   v.ATTRIBUTE_CATEGORY,
+   v.ATTRIBUTE,
+   v.ATTRIBUTE1,
+   v.ATTRIBUTE2,
+   v.ATTRIBUTE3,
+   v.ATTRIBUTE4,
+   v.ATTRIBUTE5,
+   v.ATTRIBUTE6,
+   v.ATTRIBUTE7,
+   v.ATTRIBUTE8,
+   v.ATTRIBUTE9,
+   v.ATTRIBUTE10,
+   v.ATTRIBUTE11,
+   v.ATTRIBUTE12,
+   v.ENABLED_FLAG,
+   v.RESOURCE_CONSUMER_GROUP,
+   v.USER_CONCURRENT_QUEUE_NAME
+  FROM fnd_concurrent_queues_vl V,
+   fnd_application a1,
+   fnd_application a2,
+   fnd_concurrent_processors p,
+   fnd_data_groups d,
+   fnd_cp_services s
+  WHERE a1.APPLICATION_ID = v.APPLICATION_ID
+   and  a2.APPLICATION_ID = v.PROCESSOR_APPLICATION_ID
+   and  p.CONCURRENT_PROCESSOR_ID = v.CONCURRENT_PROCESSOR_ID
+   and  p.APPLICATION_ID = v.PROCESSOR_APPLICATION_ID
+   and  d.DATA_GROUP_ID (+) = v.DATA_GROUP_ID
+   and  s.service_id(+)  = v.manager_type
+   and  	((:CONCURRENT_QUEUE_NAME is null) or
+                 ((:CONCURRENT_QUEUE_NAME is not null) and
+                  (v.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+   and          ((:APPLICATION_SHORT_NAME is null) or
+                 ((:APPLICATION_SHORT_NAME is not null) and
+                  (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME))) "
+
+DOWNLOAD QUEUE_CONTENT
+  " select qc.TYPE_CODE RULE_TYPE_CODE,
+	   a.APPLICATION_SHORT_NAME RULE_APPLICATION,
+           cr.COMPLEX_RULE_NAME RULE_NAME,
+           fnd_load_util.OWNER_NAME(qc.LAST_UPDATED_BY) OWNER,
+           to_char(qc.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   include_flag
+      from fnd_concurrent_queue_content qc,
+	   fnd_application a,
+	   fnd_application a1,
+	   fnd_concurrent_complex_rules cr,
+	   fnd_concurrent_queues q
+     where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qc.queue_application_id
+       and q.concurrent_queue_id = qc.concurrent_queue_id
+       and cr.application_id = qc.type_application_id
+       and cr.complex_rule_id = qc.type_id
+       and qc.type_code = 'C'
+       and a.application_id = cr.application_id
+     union
+    select qc.TYPE_CODE RULE_TYPE_CODE,
+	   null,
+           u.oracle_username RULE_NAME,
+           fnd_load_util.OWNER_NAME(qc.LAST_UPDATED_BY) OWNER,
+           to_char(qc.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   include_flag
+      from fnd_concurrent_queue_content qc,
+	   fnd_application a1,
+	   fnd_concurrent_queues q,
+	   fnd_oracle_userid u
+      where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qc.queue_application_id
+       and q.concurrent_queue_id = qc.concurrent_queue_id
+       and u.oracle_id = qc.type_id
+       and qc.type_code = 'O'
+     UNION
+    select qc.TYPE_CODE RULE_TYPE_CODE,
+           a.APPLICATION_SHORT_NAME RULE_APPLICATION,
+	   cp.CONCURRENT_PROGRAM_NAME RULE_NAME,
+           fnd_load_util.OWNER_NAME(qc.LAST_UPDATED_BY) OWNER,
+           to_char(qc.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   include_flag
+      from fnd_concurrent_queue_content qc,
+	   fnd_application a,
+	   fnd_application a1,
+	   fnd_concurrent_queues q,
+	   fnd_concurrent_programs cp
+      where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qc.queue_application_id
+       and q.concurrent_queue_id = qc.concurrent_queue_id
+       and cp.application_id (+) = qc.type_application_id
+       and cp.concurrent_program_id (+) = qc.type_id
+       and qc.type_code = 'P'
+       and qc.type_application_id = a.application_id
+     UNION
+    select qc.TYPE_CODE RULE_TYPE_CODE,
+           a.APPLICATION_SHORT_NAME RULE_APPLICATION,
+	   rc.REQUEST_CLASS_NAME RULE_NAME,
+           fnd_load_util.OWNER_NAME(qc.LAST_UPDATED_BY) OWNER,
+           to_char(qc.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   include_flag
+      from fnd_concurrent_queue_content qc,
+	   fnd_application a,
+	   fnd_application a1,
+	   fnd_concurrent_queues q,
+	   fnd_concurrent_request_class rc
+      where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qc.queue_application_id
+       and q.concurrent_queue_id = qc.concurrent_queue_id
+       and rc.application_id = qc.type_application_id
+       and rc.request_class_id = qc.type_id
+       and qc.type_code = 'R'
+       and rc.application_id = a.application_id
+     UNION
+    select qc.TYPE_CODE RULE_TYPE_CODE,
+	   null,
+           u.user_name RULE_NAME ,
+           fnd_load_util.OWNER_NAME(qc.LAST_UPDATED_BY) OWNER,
+           to_char(qc.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   include_flag
+      from fnd_concurrent_queue_content qc,
+	   fnd_application a1,
+	   fnd_concurrent_queues q,
+	   fnd_user u
+      where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qc.queue_application_id
+       and q.concurrent_queue_id = qc.concurrent_queue_id
+       and u.user_id = qc.type_id
+       and qc.type_code = 'U' "
+
+DOWNLOAD QUEUE_PARAMS
+  " Select a.APPLICATION_SHORT_NAME PARAM_APPLICATION,
+	   tp.concurrent_time_period_name PARAM_NAME,
+           fnd_load_util.OWNER_NAME(qs.LAST_UPDATED_BY) OWNER,
+           to_char(qs.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	   qs.MIN_PROCESSES,
+	   qs.MAX_PROCESSES,
+	   qs.SLEEP_SECONDS,
+	   qs.SERVICE_PARAMETERS
+      from fnd_concurrent_queue_size qs,
+	   fnd_concurrent_queues q,
+	   fnd_application a,
+	   fnd_application a1,
+	   fnd_concurrent_time_periods tp
+      where ((:CONCURRENT_QUEUE_NAME is null) or
+             ((:CONCURRENT_QUEUE_NAME is not null) and
+               (q.CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME)))
+       and ((:APPLICATION_SHORT_NAME is null) or
+             ((:APPLICATION_SHORT_NAME is not null) and
+                (a1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+       and q.application_id = qs.queue_application_id
+       and q.concurrent_queue_id = qs.concurrent_queue_id
+       and qs.period_application_id = tp.application_id
+       and qs.concurrent_time_period_id = tp.concurrent_time_period_id
+       and qs.period_application_id = a.application_id "
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+# NOTE:  VERIFY CONSUMER GROUP ON UPLOAD!! IF NOT THERE, CHANGE TO NULL
+
+UPLOAD QUEUE 
+ BEGIN
+  " begin  -- UPLOAD QUEUE
+     declare
+      app_id   number := 0;
+      chgdb     boolean := FALSE;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      key_id   number;
+      dg_id    number := null;
+      rcg_c    number := 0;
+      lib_appl_id number := 0;
+      lib_id   number := 0;
+      rcg_name varchar2(30) := null;
+      manager_name varchar2(80) := null;
+
+     begin
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+      select application_id into app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+
+      begin
+         select CONCURRENT_QUEUE_ID, LAST_UPDATED_BY, LAST_UPDATE_DATE
+           into key_id, db_luby, db_ludate
+           from  fnd_concurrent_queues
+          where application_id = app_id
+            and CONCURRENT_QUEUE_NAME = :CONCURRENT_QUEUE_NAME;
+
+         --Added to fix the bug 2573738. When upload mode is NLS
+         --LAST_UPDATED_BY and LAST_UPDATE_DATE will be taken form 
+         --fnd_concurrent_queues_tl  table.
+	 if (:UPLOAD_MODE = 'NLS') then
+           select LAST_UPDATED_BY, LAST_UPDATE_DATE
+             into db_luby, db_ludate
+             from fnd_concurrent_queues_tl
+            where application_id = app_id
+              and CONCURRENT_QUEUE_NAME = :CONCURRENT_QUEUE_NAME
+              and LANGUAGE = userenv('LANG');
+	 end if;
+         --end of the changes for the bug 2573738
+
+         -- Update record, honoring customization mode.
+         -- Record should be updated only if:
+         -- a. CUSTOM_MODE = FORCE, or
+         -- b. file owner is USER, db owner is SEED
+         -- c. owners are the same, and file_date > db_date
+
+         if (fnd_load_util.UPLOAD_TEST(
+               p_file_id     => f_luby,
+               p_file_lud    => f_ludate,
+               p_db_id       => db_luby,
+               p_db_lud      => db_ludate,
+               p_custom_mode => :CUSTOM_MODE))
+         then
+           chgdb := TRUE;
+         end if;
+
+      exception
+         when no_data_found then
+             chgdb := TRUE;  -- change is needed if no matching db rows
+      end;
+
+      if (NOT chgdb) then
+        return;
+      end if;
+
+      if (:UPLOAD_MODE = 'NLS') then
+        update fnd_concurrent_queues_tl set
+        source_lang=userenv('LANG'),
+        USER_CONCURRENT_QUEUE_NAME =
+		nvl(:USER_CONCURRENT_QUEUE_NAME, USER_CONCURRENT_QUEUE_NAME),
+        DESCRIPTION = nvl(:DESCRIPTION, DESCRIPTION),
+          last_updated_by   = f_luby,
+          last_update_date  = f_ludate,
+          last_update_login = 0
+        where application_id = app_id
+        and userenv('LANG') in (language, source_lang)
+        and   CONCURRENT_QUEUE_ID = key_id;
+      else
+        begin
+            if ( :MANAGER_TYPE = 3 ) then
+    		select fdg.data_group_id
+        	  into dg_id
+        	  from fnd_data_groups fdg
+       		 where data_group_name = :DATA_GROUP_NAME;
+	    else
+	        dg_id := null;
+	    end if;
+
+	    if ( :RESOURCE_CONSUMER_GROUP is not null ) then
+	       select count(*)
+		 into rcg_c
+		 from dba_rsrc_consumer_group_privs
+	        where GRANTEE in (USER, 'PUBLIC')
+		  and GRANTED_GROUP = :RESOURCE_CONSUMER_GROUP;
+	       if ( rcg_c > 0 ) then
+		 rcg_name := :RESOURCE_CONSUMER_GROUP;
+	       else
+		 rcg_name := null;
+	       end if;
+	    end if; -- rcg is not null
+
+	    select application_id 
+	      into lib_appl_id
+	      from fnd_application
+	     where application_short_name = :PROCESSOR_APP_SHORT_NAME;
+
+	    select concurrent_processor_id
+	      into lib_id
+	      from fnd_concurrent_processors
+	     where application_id = lib_appl_id
+	       and concurrent_processor_name  = :CONCURRENT_PROCESSOR_NAME;
+
+	    update fnd_concurrent_queues
+	       set data_group_id = dg_id,
+		   cache_size = to_number(:CACHE_SIZE),
+		   node_name = :NODE_NAME,
+		   NODE_NAME2 = :NODE_NAME2,
+		   OS_QUEUE = :OS_QUEUE,
+		   OS_QUEUE2 = :OS_QUEUE,
+		   enabled_flag = nvl(:ENABLED_FLAG, ENABLED_FLAG),
+		   processor_application_id = lib_appl_id,
+		   concurrent_processor_id = lib_id,
+                   last_updated_by   = f_luby,
+                   last_update_date  = f_ludate,
+                   last_update_login = 0
+             where application_id = app_id
+               and CONCURRENT_QUEUE_ID = key_id;
+
+            if (SQL%NOTFOUND) then
+              raise no_data_found;
+            end if;
+
+           update fnd_concurrent_queues_tl
+              set source_lang=userenv('LANG'),
+                  USER_CONCURRENT_QUEUE_NAME =
+		     nvl(:USER_CONCURRENT_QUEUE_NAME, 
+			USER_CONCURRENT_QUEUE_NAME),
+                  DESCRIPTION = nvl(:DESCRIPTION, DESCRIPTION),
+                  last_updated_by   = f_luby,
+                  last_update_date  = f_ludate,
+                  last_update_login = 0
+            where application_id = app_id
+              and userenv('LANG') in (language, source_lang)
+              and CONCURRENT_QUEUE_ID = key_id;
+
+        exception
+          when no_data_found then
+
+           if (:OWNER = 'SEED') then fnd_manager.set_session_mode('seed_data');
+           else fnd_manager.set_session_mode('customer_data');
+           end if;
+
+          if ( :MANAGER_TYPE < 1000 ) then 
+           select meaning 
+             into manager_name
+             from fnd_lookup_values_vl
+            where lookup_type = 'CP_MANAGER_TYPE'
+              and lookup_code = :MANAGER_TYPE
+	      and rownum = 1;
+
+	   fnd_manager.register(:USER_CONCURRENT_QUEUE_NAME,
+				:APPLICATION_SHORT_NAME,:CONCURRENT_QUEUE_NAME,
+				:DESCRIPTION, manager_name, 
+				to_number(:CACHE_SIZE), :DATA_GROUP_NAME,
+				:NODE_NAME, :OS_QUEUE, :NODE_NAME2, :OS_QUEUE2,
+				:CONCURRENT_PROCESSOR_NAME, 
+				:PROCESSOR_APP_SHORT_NAME, null,
+				userenv('LANG'), f_ludate, f_luby);
+          else
+            fnd_manager.register_si(:USER_CONCURRENT_QUEUE_NAME,
+				:APPLICATION_SHORT_NAME,
+				:CONCURRENT_QUEUE_NAME,
+				:DESCRIPTION, :SERVICE_HANDLE,
+				:NODE_NAME, :OS_QUEUE, :NODE_NAME2, :OS_QUEUE2,
+				userenv('LANG'), f_ludate, f_luby);
+	  end if; -- CP Services or other service
+        end; -- update or insert ?
+      end if; -- NLS_MODE
+     end;
+    end; "
+
+UPLOAD QUEUE_CONTENT
+  " begin  -- UPLOAD QUEUE_CONTENT
+     declare
+      chgdb        boolean := FALSE;  -- true if DB should change
+      f_luby       number;            -- entity owner in file
+      f_ludate     date;              -- entity update date in file
+      db_luby      number;            -- entity owner in db
+      db_ludate    date;              -- entity update date in db
+      mgr_appl_id  number;            -- queue application id
+      mgr_id       number;            -- concurrent queue id 
+      obj_appl_id  number;            -- type application id
+      obj_id       number;            -- type id
+      include_name varchar2(80) := null;
+      object_type  varchar2(80) := null;
+    begin
+    
+      if ( :UPLOAD_MODE = 'NLS' ) then
+          return;
+      end if;
+
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER); 
+    
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+    
+      select meaning
+        into include_name
+        from fnd_lookup_values_vl
+       where lookup_type = 'INCLUDE_EXCLUDE'
+         and lookup_code = :INCLUDE_FLAG
+         and rownum = 1;
+
+      select meaning
+        into object_type
+        from fnd_lookup_values_vl
+       where lookup_type = 'CP_SPECIAL_RULES'
+         and lookup_code = :RULE_TYPE_CODE
+         and lookup_code in ('C','O','P','R','U')
+         and rownum = 1;
+
+      select fcq.APPLICATION_ID, fcq.CONCURRENT_QUEUE_ID
+        into mgr_appl_id, mgr_id
+        from FND_CONCURRENT_QUEUES fcq, FND_APPLICATION fa
+       where CONCURRENT_QUEUE_NAME like :CONCURRENT_QUEUE_NAME
+         and fa.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME
+         and fcq.APPLICATION_ID = fa.APPLICATION_ID;
+    
+      if (:RULE_APPLICATION is not null) then
+        select APPLICATION_ID
+          into obj_appl_id
+          from FND_APPLICATION
+         where APPLICATION_SHORT_NAME like :RULE_APPLICATION;
+      end if;
+           
+      obj_id := fnd_manager.get_specialization_type_id(:RULE_NAME, 
+                                                       obj_appl_id, 
+                                                       :RULE_TYPE_CODE);
+    
+      begin
+        select LAST_UPDATE_DATE, LAST_UPDATED_BY
+          into db_ludate, db_luby 
+          from FND_CONCURRENT_QUEUE_CONTENT
+         where CONCURRENT_QUEUE_ID = mgr_id
+           and QUEUE_APPLICATION_ID = mgr_appl_id
+           and TYPE_CODE = :RULE_TYPE_CODE
+           and ((obj_id is null and TYPE_ID is null)
+                or TYPE_ID = obj_id)
+           and ((obj_appl_id is null and TYPE_APPLICATION_ID is null)
+                or obj_appl_id = TYPE_APPLICATION_ID);
+    
+      -- Update record, honoring customization mode.
+      -- Record should be updated only if:
+      -- a. CUSTOM_MODE = FORCE, or
+      -- b. file owner is USER, db owner is SEED
+      -- c. owners are the same, and file_date > db_date
+    
+      if (fnd_load_util.UPLOAD_TEST(
+                 p_file_id     => f_luby,
+                 p_file_lud    => f_ludate,
+                 p_db_id       => db_luby,
+                 p_db_lud      => db_ludate,
+                 p_custom_mode => :CUSTOM_MODE))
+      then
+        chgdb := TRUE;
+      end if;
+    
+      exception
+        when no_data_found then
+           chgdb := TRUE;  -- change is needed if no matching db rows
+      end;
+    
+      if (NOT chgdb) then 
+        return;
+      end if;
+    
+       if (:OWNER = 'SEED') then fnd_manager.set_session_mode('seed_data');
+       else fnd_manager.set_session_mode('customer_data');
+       end if;
+
+      if (NOT fnd_manager.specialization_exists(
+	  :CONCURRENT_QUEUE_NAME, :APPLICATION_SHORT_NAME,
+	  object_type, :RULE_NAME, :RULE_APPLICATION)) then
+		fnd_manager.specialize(
+		    :CONCURRENT_QUEUE_NAME, :APPLICATION_SHORT_NAME,
+		    include_name, object_type, :RULE_NAME, :RULE_APPLICATION,
+                    f_ludate, f_luby);
+      else 
+        update FND_CONCURRENT_QUEUE_CONTENT
+           set LAST_UPDATE_DATE = f_ludate, 
+               LAST_UPDATED_BY = f_luby, 
+               LAST_UPDATE_LOGIN = 0
+         where CONCURRENT_QUEUE_ID = mgr_id
+           and QUEUE_APPLICATION_ID = mgr_appl_id
+           and TYPE_CODE = :RULE_TYPE_CODE
+           and ((obj_id is null and TYPE_ID is null)
+                or TYPE_ID = obj_id)
+           and ((obj_appl_id is null and TYPE_APPLICATION_ID is null)
+                or obj_appl_id = TYPE_APPLICATION_ID);
+      end if; -- chgdb
+    end;
+    end; "
+
+UPLOAD QUEUE_PARAMS
+ " begin  -- UPLOAD QUEUE_PARAMS
+     declare
+	app_id    number := 0;
+	key_id    number := 0;
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+	tp_app_id number := 0;
+	tp_id     number := 0;
+     begin
+
+       if ( :UPLOAD_MODE = 'NLS' ) then
+           return;
+       end if;
+
+      select application_id into app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+
+      select CONCURRENT_QUEUE_ID into key_id
+        from  fnd_concurrent_queues
+       where application_id = app_id
+         and CONCURRENT_QUEUE_NAME = :CONCURRENT_QUEUE_NAME;
+
+      select application_id into tp_app_id
+	from fnd_application
+       where application_short_name = :PARAM_APPLICATION;
+
+      select count(*) into tp_id
+	from fnd_concurrent_time_periods
+       where application_id = tp_app_id
+	 and concurrent_time_period_name = :PARAM_NAME;
+
+      /* If we don't have a match use 'Standard' Workshift */
+      if (tp_id = 0) then
+         tp_id := 0;
+         tp_app_id := 0;
+      else 
+         select concurrent_time_period_id into tp_id
+	  from fnd_concurrent_time_periods
+         where application_id = tp_app_id
+	 and concurrent_time_period_name = :PARAM_NAME;
+      end if;
+
+       -- Translate owner to file_last_updated_by
+       f_luby := fnd_load_util.OWNER_ID(:OWNER);
+    
+       -- Translate char last_update_date to date
+       f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       begin
+         select LAST_UPDATED_BY, LAST_UPDATE_DATE
+           into db_luby, db_ludate
+           from FND_CONCURRENT_QUEUE_SIZE
+          where QUEUE_APPLICATION_ID = app_id
+            and CONCURRENT_QUEUE_ID = key_id
+            and PERIOD_APPLICATION_ID = tp_app_id
+            and CONCURRENT_TIME_PERIOD_ID = tp_id;
+
+         -- Update record, honoring customization mode.
+         -- Record should be updated only if:
+         -- a. CUSTOM_MODE = FORCE, or
+         -- b. file owner is USER, db owner is SEED
+         -- c. owners are the same, and file_date > db_date
+
+         if (fnd_load_util.UPLOAD_TEST(
+                 p_file_id     => f_luby,
+                 p_file_lud    => f_ludate,
+                 p_db_id       => db_luby,
+                 p_db_lud      => db_ludate,
+                 p_custom_mode => :CUSTOM_MODE)) then
+
+         update fnd_concurrent_queue_size
+	    set min_processes = nvl(to_number(:MIN_PROCESSES), MIN_PROCESSES ),
+	        sleep_seconds = nvl(to_number(:SLEEP_SECONDS), SLEEP_SECONDS ),
+	        service_parameters = nvl(:SERVICE_PARAMETERS, SERVICE_PARAMETERS),
+	        last_updated_by   = f_luby,
+                last_update_date  = f_ludate,
+                last_update_login = 0
+          where queue_application_id = app_id
+	    and concurrent_queue_id = key_id
+	    and period_application_id = tp_app_id
+	    and concurrent_time_period_id = tp_id;
+
+         end if;
+
+      exception
+       when no_data_found then
+          if (:OWNER = 'SEED') then fnd_manager.set_session_mode('seed_data');
+          else fnd_manager.set_session_mode('customer_data');
+          end if;
+
+         /* bug 1876703 -- we don't use param_name for wkshift name
+	    instead we pass null and use the wkshft id that has been set to 
+	    zero if we couldn't find the name, and set correctly if we
+	    could */
+	 fnd_manager.assign_work_shift( :CONCURRENT_QUEUE_NAME,
+					:APPLICATION_SHORT_NAME, NULL,
+					to_number(:MIN_PROCESSES),
+					to_number(:SLEEP_SECONDS),
+					tp_id,
+					:SERVICE_PARAMETERS,
+                                        f_ludate,
+                                        f_luby);
+      end;  -- update or insert? 
+     end;
+   end; "
+

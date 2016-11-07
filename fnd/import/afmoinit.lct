@@ -1,0 +1,39 @@
+#
+# $Header: afmoinit.lct 120.0 2005/05/07 16:15:28 appldev noship $
+#
+# afmoinit.lct -  Multi-Org Access Enabled Info
+#
+# Entities
+#    FND_MO_PRODUCT_INIT
+#
+# When downloading Multi-Org access enabled data, you can use the parameters 
+# APPLICATION_SHORT_NAME to limit the fetch.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afmoinit.lct @~PROD:~PATH/~FILE"
+DEFINE FND_MO_PRODUCT_INIT
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50) 
+  CTX   OWNER                   VARCHAR2(4000)
+  CTX   LAST_UPDATE_DATE        VARCHAR2(10)
+  BASE  STATUS                  VARCHAR2(1)
+END FND_MO_PRODUCT_INIT
+
+DOWNLOAD FND_MO_PRODUCT_INIT
+  "select APPLICATION_SHORT_NAME,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          STATUS 
+   from FND_MO_PRODUCT_INIT
+   where :APPLICATION_SHORT_NAME is null 
+   or    (:APPLICATION_SHORT_NAME is not null
+          AND APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)"
+          
+
+UPLOAD FND_MO_PRODUCT_INIT 
+    "begin 
+       fnd_mo_product_init_pkg.register_application( 
+            p_appl_short_name => :APPLICATION_SHORT_NAME,
+            p_owner => :OWNER,
+            p_status => :STATUS,
+	    p_last_update_date => :LAST_UPDATE_DATE,
+	    p_custom_mode => :CUSTOM_MODE);
+    end; "

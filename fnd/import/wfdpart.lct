@@ -1,0 +1,62 @@
+# $Header: wfdpart.lct 120.1 2005/09/01 08:29:10 hgandiko noship $
+
+# --- Begin Entity Definitions ---
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/wfdpart.lct @~PROD:~PATH/~FILE"
+
+
+DEFINE DIRECTORYPARTITIONS
+   KEY   ORIG_SYSTEM     VARCHAR2(30)
+   BASE  PARTITION_ID    NUMBER
+   TRANS DISPLAY_NAME    VARCHAR2(80)
+   BASE  ROLE_VIEW       VARCHAR2(30)
+   BASE  USER_ROLE_VIEW  VARCHAR2(30)
+   CTX   LAST_UPDATE_DATE VARCHAR2(10)
+END DIRECTORYPARTITIONS
+
+# --- End Entity Definitions ---
+
+DOWNLOAD DIRECTORYPARTITIONS
+   "select B.ORIG_SYSTEM, B.PARTITION_ID, T.DISPLAY_NAME, B.ROLE_VIEW, B.USER_ROLE_VIEW,
+           to_char(B.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+    from   WF_DIRECTORY_PARTITIONS B, WF_DIRECTORY_PARTITIONS_TL T
+    where  B.ORIG_SYSTEM = T.ORIG_SYSTEM
+    and    T.LANGUAGE = userenv('LANG')
+    order by B.PARTITION_ID, B.ORIG_SYSTEM"
+
+UPLOAD DIRECTORYPARTITIONS
+   "declare
+      l_db_date   date;
+      l_ldt_date  date;
+    begin      
+ 
+       if (:UPLOAD_MODE = 'NLS') then
+          wf_directory_partitions_pkg.Translate_Row (
+             :ORIG_SYSTEM,
+             :DISPLAY_NAME);	     
+       elsif (:WFDS_MODE = 'OWF') then
+          wf_directory_partitions_pkg.Load_Row (
+             :ORIG_SYSTEM,
+             :PARTITION_ID,
+             :DISPLAY_NAME);
+       else
+          begin
+              select LAST_UPDATE_DATE
+              into   l_db_date
+              from   WF_DIRECTORY_PARTITIONS
+              where  ORIG_SYSTEM = :ORIG_SYSTEM;
+          exception
+            when no_data_found then 
+  	       null;
+          end;
+          l_ldt_date := trunc(nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate));
+          if ( (l_db_date is null) or (l_db_date <=l_ldt_date) or (:CUSTOM_MODE='FORCE'))  then
+            wf_directory_partitions_pkg.Update_View_Names (
+               :ORIG_SYSTEM,
+               :PARTITION_ID,
+               :ROLE_VIEW,
+               :USER_ROLE_VIEW,
+	       NULL,
+               l_ldt_date);
+          end if;
+       end if;
+    end;"

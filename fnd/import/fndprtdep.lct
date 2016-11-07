@@ -1,0 +1,69 @@
+#
+# $Header: fndprtdep.lct 120.0 2005/05/07 16:18:50 appldev noship $
+#
+# fndprtdep.lct - Portlet Dependency Loader
+#
+# Entities
+#      - Portlet Dependencies
+#        FND_PORTLET_DEPENDENCY 
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/fndprtdep.lct @~PROD:~PATH/~FILE"
+
+DEFINE  FND_PORTLET_DEPENDENCY
+  CTX   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  KEY   REFRESH_DEPENDENCY              VARCHAR2(30)
+  KEY   REFRESH_DEPENDENCY_CONTEXT      VARCHAR2(50)
+  KEY   FUNCTION_NAME                   VARCHAR2(30)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)  
+END  FND_PORTLET_DEPENDENCY
+
+
+DOWNLOAD FND_PORTLET_DEPENDENCY
+  "select REFRESH_DEPENDENCY_CONTEXT APPLICATION_SHORT_NAME,
+          REFRESH_DEPENDENCY,
+          REFRESH_DEPENDENCY_CONTEXT,
+          FUNCTION_NAME,          
+          fnd_load_util.owner_name(DEP.LAST_UPDATED_BY) OWNER,          
+          to_char(DEP.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_PORTLET_DEPENDENCY DEP,
+          FND_APPLICATION APP
+   where  (:APPLICATION_SHORT_NAME is null or
+            (:APPLICATION_SHORT_NAME is not null 
+                 and REFRESH_DEPENDENCY_CONTEXT like :APPLICATION_SHORT_NAME))
+   and  (:REFRESH_DEPENDENCY_CONTEXT is null or
+            (:REFRESH_DEPENDENCY_CONTEXT is not null 
+                 and REFRESH_DEPENDENCY_CONTEXT like :REFRESH_DEPENDENCY_CONTEXT))
+   and    (:REFRESH_DEPENDENCY is null or 
+             (:REFRESH_DEPENDENCY is not null 
+                 and REFRESH_DEPENDENCY like :REFRESH_DEPENDENCY))
+   and    (:FUNCTION_NAME is null or 
+             (:FUNCTION_NAME is not null and 
+              FUNCTION_NAME like :FUNCTION_NAME))
+   order by 1, 2 , 3"
+
+UPLOAD FND_PORTLET_DEPENDENCY
+   " declare  
+       l_rowid rowid;
+       f_luby  number;
+       f_ludate date;
+     begin
+
+     -- Translate owner to file_last_updated_by
+     f_luby := fnd_load_util.owner_id(:OWNER);
+
+     -- Translate char last_update_date to date
+     f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+     FND_PORTLET_DEPENDENCY_PKG.INSERT_ROW (
+       X_ROWID => l_rowid,
+       X_REFRESH_DEPENDENCY => :REFRESH_DEPENDENCY,
+       X_REFRESH_DEPENDENCY_CONTEXT => :REFRESH_DEPENDENCY_CONTEXT,
+       X_FUNCTION_NAME => :FUNCTION_NAME,
+       X_CREATION_DATE => sysdate,
+       X_CREATED_BY => f_luby ,
+       X_LAST_UPDATE_DATE => f_ludate,
+       X_LAST_UPDATED_BY =>  f_luby ,
+       X_LAST_UPDATE_LOGIN => 0);
+
+     end; "

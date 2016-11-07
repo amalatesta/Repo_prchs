@@ -1,0 +1,144 @@
+ # $Header: afoamdw.lct 120.1 2005/05/25 01:33:14 ppradhan noship $
+ 
+ # --- Begin Entity Definitions ---
+ COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afoamdw.lct @~PROD:~PATH/~FILE"
+ 
+ DEFINE FND_DEBUG_OPTIONS
+        KEY DEBUG_OPTION_NAME                          VARCHAR2(30)
+        BASE ENABLED_FLAG                               VARCHAR2(1)
+        BASE TYPE                                       VARCHAR2(1)
+        BASE SEPARATOR                                  VARCHAR2(1)
+        BASE TRACE_FILE_TOKEN                                   VARCHAR2(30)
+        TRANS DESCRIPTION                              VARCHAR2(240)
+        BASE CREATION_DATE                               VARCHAR2(11)
+        BASE CREATED_BY                                 NUMBER
+        BASE LAST_UPDATE_DATE                            VARCHAR2(11)
+        BASE LAST_UPDATED_BY                            NUMBER
+        BASE LAST_UPDATE_LOGIN                          NUMBER        
+        CTX   OWNER                           VARCHAR2(4000)
+
+ END FND_DEBUG_OPTIONS
+ 
+
+ DEFINE FND_DEBUG_OPTION_VALUES
+       
+        KEY DEBUG_OPTION_NAME                      REFERENCES FND_DEBUG_OPTIONS AS DEBUG_OPTION_NAME
+        KEY DEBUG_OPTION_VALUE                       VARCHAR2(80)
+        BASE ENABLE_ROUTINE                                     VARCHAR2(500)
+        BASE DISABLE_ROUTINE                                    VARCHAR2(500)
+        BASE IS_FILE_TOKEN                                      VARCHAR2(1)
+        BASE TRACE_FILE_ROUTINE                                 VARCHAR2(500)
+        BASE TRACE_FILE_NODE                                    VARCHAR2(500)
+        BASE CREATION_DATE                             VARCHAR2(11)
+        BASE CREATED_BY                                NUMBER
+        BASE LAST_UPDATE_DATE                          VARCHAR2(11)
+        BASE LAST_UPDATED_BY                           NUMBER
+        BASE LAST_UPDATE_LOGIN                         NUMBER
+        TRANS DESCRIPTION                              VARCHAR2(240)
+        CTX   OWNER                           VARCHAR2(4000)
+
+ END FND_DEBUG_OPTION_VALUES
+ 
+
+
+ 
+ 
+ # --- End Entity Definitions ---
+ 
+ DOWNLOAD FND_DEBUG_OPTIONS
+       
+       "SELECT DEBUG_OPTION_NAME,      
+              ENABLED_FLAG,  
+              TYPE,  
+              SEPARATOR,
+              TRACE_FILE_TOKEN,    
+              DESCRIPTION,
+              CREATION_DATE, 
+              CREATED_BY ,
+              TO_CHAR(LAST_UPDATE_DATE, 'YYYY/MM/DD'),      
+              LAST_UPDATED_BY  ,     
+              LAST_UPDATE_LOGIN,
+              fnd_load_util.OWNER_NAME(last_updated_by)
+
+       FROM FND_DEBUG_OPTIONS_VL
+         WHERE ((:DEBUG_OPTION_NAME is null) OR 
+                      ( (:DEBUG_OPTION_NAME is not null) AND
+                        (DEBUG_OPTION_NAME= :DEBUG_OPTION_NAME)))"
+
+  
+ 
+ UPLOAD FND_DEBUG_OPTIONS
+ 
+                        "begin
+                              if (:UPLOAD_MODE = 'NLS') then
+                                     FND_DEBUG_OPTIONS_PKG.TRANSLATE_ROW(X_DEBUG_OPTION_NAME=>:DEBUG_OPTION_NAME,
+                                           X_DESCRIPTION=>:DESCRIPTION,
+                                           x_custom_mode => :CUSTOM_MODE,
+                                           x_last_update_date => :LAST_UPDATE_DATE,
+                                           x_owner => :OWNER);
+                              else
+                                     FND_DEBUG_OPTIONS_PKG.LOAD_ROW(X_DEBUG_OPTION_NAME=>:DEBUG_OPTION_NAME,
+                                          X_ENABLED_FLAG=>:ENABLED_FLAG,
+                                          X_TYPE=>:TYPE,
+                                          X_SEPARATOR=>:SEPARATOR,
+                                          X_TRACE_FILE_TOKEN=>:TRACE_FILE_TOKEN,
+                                          X_DESCRIPTION=>:DESCRIPTION,
+                                          x_custom_mode => :CUSTOM_MODE,
+                                          x_last_update_date => :LAST_UPDATE_DATE,
+                                          x_owner => :OWNER
+                             
+                             );
+                              end if;
+                        end;"
+
+    
+ 
+ 
+  DOWNLOAD FND_DEBUG_OPTION_VALUES
+        
+               "SELECT  DEBUG_OPTION_NAME ,     
+                      DEBUG_OPTION_VALUE,     
+                      ENABLE_ROUTINE    ,     
+                      DISABLE_ROUTINE   ,     
+                      IS_FILE_TOKEN     ,     
+                      TRACE_FILE_ROUTINE,     
+                      TRACE_FILE_NODE   ,     
+                      CREATION_DATE     ,     
+                      CREATED_BY        ,     
+                      TO_CHAR(LAST_UPDATE_DATE, 'YYYY/MM/DD'),     
+                      LAST_UPDATED_BY   ,     
+                      LAST_UPDATE_LOGIN ,     
+                      DESCRIPTION         ,
+                      fnd_load_util.OWNER_NAME(last_updated_by)
+              FROM FND_DEBUG_OPTION_VALUES_VL
+                WHERE (((:DEBUG_OPTION_NAME is null) and (:DEBUG_OPTION_VALUE is null)) OR 
+                             ( ((:DEBUG_OPTION_NAME is not null)and(:DEBUG_OPTION_VALUE is not null)) AND
+                        (((DEBUG_OPTION_NAME= :DEBUG_OPTION_NAME))and(DEBUG_OPTION_VALUE= :DEBUG_OPTION_VALUE))))"
+                        
+                        
+                        
+         
+        UPLOAD FND_DEBUG_OPTION_VALUES
+              
+                       "begin
+                             if (:UPLOAD_MODE = 'NLS') then
+                                    FND_DEBUG_OPTION_VALUES_PKG.TRANSLATE_ROW(X_DEBUG_OPTION_NAME=>:DEBUG_OPTION_NAME,
+                                          X_DEBUG_OPTION_VALUE => :DEBUG_OPTION_VALUE,
+                                          X_DESCRIPTION=>:DESCRIPTION,
+                                          x_custom_mode => :CUSTOM_MODE,
+                                          x_last_update_date => :LAST_UPDATE_DATE,
+                                          x_owner => :OWNER);
+                             else
+                                    FND_DEBUG_OPTION_VALUES_PKG.LOAD_ROW(X_DEBUG_OPTION_NAME=>:DEBUG_OPTION_NAME,
+                                          X_DEBUG_OPTION_VALUE => :DEBUG_OPTION_VALUE,
+                                          X_TRACE_FILE_ROUTINE => :TRACE_FILE_ROUTINE,
+                                          X_TRACE_FILE_NODE =>:TRACE_FILE_NODE,
+                                          X_ENABLE_ROUTINE =>:ENABLE_ROUTINE,
+                                          X_DISABLE_ROUTINE=> :DISABLE_ROUTINE,
+                                          X_IS_FILE_TOKEN => :IS_FILE_TOKEN,
+                                          X_DESCRIPTION=>:DESCRIPTION,
+                                          x_custom_mode => :CUSTOM_MODE,x_last_update_date => :LAST_UPDATE_DATE,
+                                          x_owner => :OWNER);
+                             end if;
+                       end;"
+

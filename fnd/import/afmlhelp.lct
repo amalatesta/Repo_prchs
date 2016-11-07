@@ -1,0 +1,269 @@
+# $Header: afmlhelp.lct 120.0 2005/05/07 16:15:26 appldev ship $
+#
+# afmlhelp.lct -  Help Configuration File
+#
+# Entities
+#    FND_HELP_TREE
+#
+#    FND_HELP_DOCUMENTS
+#      FND_HELP_TARGETS
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afmlhelp.lct @~PROD:~PATH/~FILE"
+DEFINE FND_HELP_TREE
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  KEY   PARENT_KEY              VARCHAR2(32)
+  KEY   NODE_APP                VARCHAR2(50)
+  KEY   NODE_KEY                VARCHAR2(32)
+  KEY   CUSTOM_LEVEL            VARCHAR2(50)
+  BASE  DISPLAY_SEQUENCE        VARCHAR2(50)
+  BASE  TYPE                    VARCHAR2(8)
+  TRANS PROMPT                  VARCHAR2(80)
+  BASE  ICON                    VARCHAR2(30)
+  TRANS DESCRIPTION             VARCHAR2(256)
+  BASE  DATA                    VARCHAR2(2000)
+END FND_HELP_TREE
+
+DEFINE FND_HELP_DOCUMENTS
+  KEY  APPLICATION_SHORT_NAME   VARCHAR2(50)
+  KEY  FILE_NAME        	VARCHAR2(256)
+  KEY  CUSTOM_LEVEL     	VARCHAR2(50)
+  BASE TITLE            	VARCHAR2(256)
+  BASE VERSION          	VARCHAR2(256)
+
+  DEFINE FND_HELP_TARGETS
+    KEY  TARGET_NAME    VARCHAR2(256)
+
+  END FND_HELP_TARGETS
+END FND_HELP_DOCUMENTS
+
+DOWNLOAD FND_HELP_TREE
+  " select  parent_application,  
+            parent_key,  
+            node_application,  
+            node_key,  
+            to_char(custom_level),  
+            to_char(display_sequence),  
+            type,  
+            prompt,  
+            icon,  
+            description,  
+            data
+    from    fnd_help_tree  
+    where   ((:LANGUAGE is null and language = userenv('LANG')) or
+               (:LANGUAGE is not null and language = upper(:LANGUAGE)))
+    and     (:CUSTOM_LEVEL is null or 
+               (:CUSTOM_LEVEL is not null 
+                   and to_char(custom_level) like :CUSTOM_LEVEL))
+    connect by prior node_key          = parent_key  
+    and        prior node_application  = parent_application  
+    and        prior node_application  = upper(:NODE_APP)  
+    start   with node_application = upper(:NODE_APP)  
+    and     node_key              = upper(:NODE_KEY)  
+    and     parent_application    = upper(:APPLICATION_SHORT_NAME)  
+    and     parent_key            = upper(:PARENT_KEY) "
+
+DOWNLOAD FND_HELP_DOCUMENTS
+  " select application,  
+           file_name,  
+           to_char(custom_level),  
+           title,  
+           version  
+    from   fnd_help_documents  
+    where  (:FILE_NAME is null or 
+               (:FILE_NAME is not null and file_name like upper(:FILE_NAME)))
+    and    (:APPLICATION_SHORT_NAME is null or 
+               (:APPLICATION_SHORT_NAME is not null 
+                    and application like upper(:APPLICATION_SHORT_NAME)))
+    and    ((:LANGUAGE is null and language = userenv('LANG')) or
+               (:LANGUAGE is not null and language like upper(:LANGUAGE)))
+    and     (:CUSTOM_LEVEL is null or 
+               (:CUSTOM_LEVEL is not null 
+                   and to_char(custom_level) like :CUSTOM_LEVEL)) "
+
+DOWNLOAD FND_HELP_TARGETS
+  " select t.target_name  
+    from   fnd_help_targets t,  
+           fnd_help_documents d  
+    where  t.file_id = d.file_id  
+    and    d.file_name    = upper(:FILE_NAME)  
+    and    ((:LANGUAGE is null and language = userenv('LANG')) or
+               (:LANGUAGE is not null and language = upper(:LANGUAGE)))
+    and    d.application  = upper(:APPLICATION_SHORT_NAME)  
+    and    d.custom_level = to_number(:CUSTOM_LEVEL) "
+
+UPLOAD FND_HELP_TREE
+  " begin  
+     
+    if (:UPLOAD_MODE = 'NLS') then  
+      update fnd_help_tree set  
+        prompt      = :PROMPT,  
+        description = :DESCRIPTION,
+        session_id  = userenv('SESSIONID')
+      where language            = userenv('LANG')  
+      and   parent_application  = upper(:APPLICATION_SHORT_NAME)  
+      and   parent_key          = upper(:PARENT_KEY)  
+      and   node_application    = upper(:NODE_APP)  
+      and   node_key            = upper(:NODE_KEY)  
+      and   custom_level        = to_number(:CUSTOM_LEVEL);  
+     
+    elsif (:UPLOAD_MODE = 'DELETE') then
+      -- Delete previous children of this node at this custom level.
+      -- NOTE: The 
+      --   and   :NODE_APP = :APPLICATION_SHORT_NAME
+      -- clause is to prevent references to trees of other applications
+      -- from being deleted.  These should be dealt with in separate
+      -- data files.
+      delete from fnd_help_tree
+      where parent_application = :NODE_APP
+      and   parent_key         = :NODE_KEY
+      and   language           = userenv('LANG')
+      and   custom_level       = to_number(:CUSTOM_LEVEL)
+      and   :NODE_APP          = :APPLICATION_SHORT_NAME;
+
+    else
+      -- Delete previous children of this node at this custom level.
+      -- This is so the uploaded tree REPLACES the tree in the db
+      -- instead of merging tree in data file with db contents. 
+      -- NOTE: The 
+      --   and   :NODE_APP = :APPLICATION_SHORT_NAME
+      -- clause is to prevent references to trees of other applications
+      -- from being deleted.  These should be dealt with in separate
+      -- data files.
+      delete from fnd_help_tree
+      where parent_application   = :NODE_APP
+      and   parent_key           = :NODE_KEY
+      and   language             = userenv('LANG')
+      and   custom_level         = to_number(:CUSTOM_LEVEL)
+      and   :NODE_APP            = :APPLICATION_SHORT_NAME
+      and   nvl(session_id, -1) != userenv('SESSIONID');
+
+      -- Upload new node contents.
+      update fnd_help_tree set  
+        display_sequence = NVL(to_number(:DISPLAY_SEQUENCE),display_sequence), 
+        type             = upper(:TYPE),  
+        prompt           = :PROMPT,  
+        icon             = upper(:ICON),  
+        description      = :DESCRIPTION,  
+        data             = :DATA,
+        session_id       = userenv('SESSIONID')
+      where language            = userenv('LANG')  
+      and   parent_application  = upper(:APPLICATION_SHORT_NAME)  
+      and   parent_key          = upper(:PARENT_KEY)  
+      and   node_application    = upper(:NODE_APP)  
+      and   node_key            = upper(:NODE_KEY)  
+      and   custom_level        = to_number(:CUSTOM_LEVEL);  
+     
+      if SQL%NOTFOUND then 
+        begin 
+          insert into fnd_help_tree (  
+            language,  
+            parent_application,  
+            parent_key,  
+            node_application,  
+            node_key,  
+            custom_level,  
+            display_sequence,  
+            type,  
+            prompt,  
+            icon,  
+            description,  
+            data,
+            session_id)  
+          select  
+            userenv('LANG'),  
+            upper(:APPLICATION_SHORT_NAME),  
+            upper(:PARENT_KEY),  
+            upper(:NODE_APP),  
+            upper(:NODE_KEY),  
+            to_number(:CUSTOM_LEVEL),  
+            nvl(nvl(to_number(:DISPLAY_SEQUENCE),
+                    max(t.display_sequence)+10),0), 
+            upper(:TYPE),  
+            :PROMPT,  
+            upper(:ICON),  
+            :DESCRIPTION,  
+            :DATA,
+            userenv('SESSIONID')
+          from  fnd_help_tree t  
+          where parent_application = upper(:APPLICATION_SHORT_NAME)  
+          and   parent_key         = upper(:PARENT_KEY)  
+          and   language           = userenv('LANG'); 
+        exception
+          when dup_val_on_index then
+            -- Bug 1555608
+            -- This must be a duplicate on the PRIMARY key, which is
+            -- the only unique index. Assume this error must have been
+	    -- caused by multiple loaders running in parallel
+            -- uploading the same row.  This means the desired row has
+            -- already been uploaded by the other loader, so ignore.
+            null;
+        end; 
+      end if;  
+    end if;  
+    end; "
+
+UPLOAD FND_HELP_DOCUMENTS
+  BEGIN
+  " begin  
+
+    if (:UPLOAD_MODE = 'NLS') then  
+      null;
+    else
+
+      update fnd_help_documents set  
+        title   = :TITLE,  
+        version = :VERSION  
+      where language     = userenv('LANG')  
+      and   file_name    = upper(:FILE_NAME)  
+      and   application  = upper(:APPLICATION_SHORT_NAME)  
+      and   custom_level = to_number(:CUSTOM_LEVEL);  
+     
+      if SQL%NOTFOUND then  
+        insert into fnd_help_documents (  
+         file_id,  
+         language,  
+         application,  
+         file_name,  
+         custom_level,  
+         title,  
+         version)  
+        select  
+         max(l.file_id),  
+         userenv('LANG'), 
+         upper(:APPLICATION_SHORT_NAME),  
+         upper(:FILE_NAME),  
+         to_number(:CUSTOM_LEVEL),  
+         :TITLE,  
+         :VERSION  
+        from fnd_lobs l  
+        where upper(l.file_name) =  
+            upper(userenv('LANG')||'/'||:APPLICATION_SHORT_NAME||'/'||:FILE_NAME);  
+      end if;  
+
+    end if;
+    end; "
+
+UPLOAD FND_HELP_TARGETS
+  " begin  
+     
+    if (:UPLOAD_MODE = 'NLS') then  
+      null;
+    else
+      insert into fnd_help_targets (  
+        file_id,  
+        target_name )  
+      select  
+        file_id,  
+        upper(:TARGET_NAME)  
+      from  fnd_help_documents  
+      where file_name    = upper(:FILE_NAME)  
+      and   language     = upper(:LANGUAGE)  
+      and   application  = upper(:APPLICATION_SHORT_NAME)  
+      and   custom_level = to_number(:CUSTOM_LEVEL);  
+    end if;     
+
+    exception  
+      when DUP_VAL_ON_INDEX then  
+        return;  
+     
+    end; "

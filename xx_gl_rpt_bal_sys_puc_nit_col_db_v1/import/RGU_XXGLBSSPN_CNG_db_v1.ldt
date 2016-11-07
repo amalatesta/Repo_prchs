@@ -1,0 +1,44 @@
+# $Header$
+
+# dbdrv: exec fnd bin FNDLOAD bin &phase=daa+66 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcpreqg.lct @~PROD:~PATH/~FILE
+LANGUAGE = "US"
+LDRCONFIG = "afcpreqg.lct 120.0.12010000.1"
+
+#Source Database EBSD
+
+#RELEASE_NAME 12.1.3
+
+# -- Begin Entity Definitions -- 
+
+DEFINE REQUEST_GROUP
+  KEY   REQUEST_GROUP_NAME              VARCHAR2(30)
+  KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(75)
+  TRANS DESCRIPTION                     VARCHAR2(80)
+  BASE  REQUEST_GROUP_CODE              VARCHAR2(30)
+
+  DEFINE REQUEST_GROUP_UNIT
+    KEY   UNIT_TYPE                       VARCHAR2(1)
+    KEY   UNIT_APP                        VARCHAR2(50)
+    KEY   UNIT_NAME                       VARCHAR2(255)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(75)
+  END REQUEST_GROUP_UNIT
+END REQUEST_GROUP
+
+# -- End Entity Definitions -- 
+
+
+BEGIN REQUEST_GROUP "XX_GL_CONSULTAS" "SQLGL"
+  OWNER = "ORACLE12.1.3"
+  LAST_UPDATE_DATE = "2014/01/08"
+  DESCRIPTION = "XX Grupo de Solicitudes Consulta Contabilidad General"
+
+  BEGIN REQUEST_GROUP_UNIT "P" "XBOL" "XXGLBSSPN"
+    OWNER = "AMALATESTA"
+    LAST_UPDATE_DATE = "2016/11/07"
+  END REQUEST_GROUP_UNIT
+  
+END REQUEST_GROUP
+

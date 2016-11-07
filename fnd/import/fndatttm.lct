@@ -1,0 +1,302 @@
+# $Header: fndatttm.lct 120.0 2005/05/07 16:18:12 appldev noship $
+#
+# This Loader Files supports UPLOAD with Following Entities
+#
+# The Download Can be done for a Audit Templates and Look Up Seed Data
+#
+# Entities -
+#
+#   AUDIT_TEMPLATE
+#     |
+#     +--TEMPLATE_DETAILS
+#  Parameter (optional) : TEMPLATE_NAME      
+#        
+#  AUDIT_DISPLAY_COLUMNS 
+#  Parameter (optional ) : APPLICATION_SHORT_NAME and TABLE_NAME
+#
+#
+# History
+# Added Parameter to the downlaod command Srikanth Karimisetty
+# ==================================================
+# AUDIT_TEMPLATE
+# ==================================================
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+56 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/fndatttm.lct @~PROD:~PATH/~FILE"
+
+
+ 
+DEFINE AUDIT_TEMPLATE
+  KEY   TEMPLATE_NAME           VARCHAR2(80)
+  CTX   OWNER                   VARCHAR2(6)
+  BASE  TEMPLATE_DESC           VARCHAR2(240)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(75)
+
+  #==================================================
+  # TEMPLATE_DETAILS
+  # ==================================================
+
+  DEFINE TEMPLATE_DETAILS
+    KEY   TEMPLATE_NAME          VARCHAR2(80)
+    KEY   APPLICATION_SHORT_NAME VARCHAR2(100)
+    KEY   GROUP_NAME             VARCHAR2(240)
+    CTX   OWNER                  VARCHAR2(6)
+    BASE  LAST_UPDATE_DATE	 VARCHAR2(75)
+
+  
+  END TEMPLATE_DETAILS 
+
+END AUDIT_TEMPLATE
+
+# ==================================================
+# AUDIT_DISPLAY_COLUMNS
+# ==================================================
+
+DEFINE AUDIT_DISPLAY_COLUMNS
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(240)
+  KEY   TABLE_NAME              VARCHAR2(240)
+  CTX   OWNER                   VARCHAR2(6)
+  BASE  COL_DISP_IND            NUMBER
+  BASE  SELECT_CLAUSE           VARCHAR2(2000)
+  BASE  FROM_CLAUSE             VARCHAR2(2000)
+  BASE  WHERE_CLAUSE            VARCHAR2(2000)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(75)
+
+END AUDIT_DISPLAY_COLUMNS
+
+
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+
+# ==================================================
+# AUDIT_TEMPLATE
+# ==================================================
+
+DOWNLOAD AUDIT_TEMPLATE
+  "select TEMPLATE_NAME,
+          DECODE(LAST_UPDATED_BY,1,'SEED','CUSTOM') OWNER,
+          TEMPLATE_DESC,
+  	  to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_AUDIT_TMPLT_MST
+          where ((:TEMPLATE_NAME is null) or
+                 ((:TEMPLATE_NAME is not null) and
+                  (TEMPLATE_NAME like :TEMPLATE_NAME))) "
+
+
+
+# ==================================================
+# TEMPLATE_DETAILS
+# ==================================================
+#
+# DownLoad Only TEMPLATE Details fetched in AUDIT_TEMPLATES
+#
+
+DOWNLOAD TEMPLATE_DETAILS
+  "select a.TEMPLATE_NAME, 
+          c.APPLICATION_SHORT_NAME,
+          b.GROUP_NAME,
+          DECODE(a.LAST_UPDATED_BY,1,'SEED','CUSTOM') OWNER,
+  	  to_char(a.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_AUDIT_TMPLT_DTL a,
+          FND_AUDIT_GROUPS b, 
+          FND_APPLICATION  c
+          where a.TEMPLATE_NAME  =      :TEMPLATE_NAME 
+           AND  a.AUDIT_GROUP_ID =      b.AUDIT_GROUP_ID   
+           AND  a.APPLICATION_ID =      b.APPLICATION_ID
+           AND  a.APPLICATION_ID =      c.APPLICATION_ID "
+
+# ==================================================
+# AUDIT_DISPLAY_COLUMNS
+# ==================================================
+#
+# DOWN Load AUDIT_DISPLAY_COLUMNS
+#
+
+DOWNLOAD AUDIT_DISPLAY_COLUMNS
+  "select d.APPLICATION_SHORT_NAME,
+          c.TABLE_NAME,
+          'SEED' OWNER,
+          e.COL_DISP_IND, 
+          e.SELECT_CLAUSE,
+          e.FROM_CLAUSE,  
+          e.WHERE_CLAUSE,     
+  	  to_char(SYSDATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_TABLES            c,
+          FND_APPLICATION       d,
+          FND_AUDIT_DISP_COLS   e
+          where e.APPLICATION_ID  =      c.APPLICATION_ID
+           AND  e.TABLE_ID        =      c.TABLE_ID 
+           AND  e.APPLICATION_ID  =      d.APPLICATION_ID 
+           AND  ((:TABLE_NAME is null) or
+                 ((:TABLE_NAME is not null) and (c.TABLE_NAME like :TABLE_NAME)))
+           AND  ((:APPLICATION_SHORT_NAME is null) or
+                 ((:APPLICATION_SHORT_NAME is not null) and
+                  (d.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))"
+
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+
+
+UPLOAD AUDIT_TEMPLATE
+BEGIN
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_template_name varchar2(100); 
+     begin
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+       -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       select TEMPLATE_NAME,LAST_UPDATED_BY, LAST_UPDATE_DATE 
+         into l_template_name,db_luby, db_ludate
+          from   FND_AUDIT_TMPLT_MST
+      where  TEMPLATE_NAME = :TEMPLATE_NAME;
+   
+     -- Update record, honoring customization mode.
+        -- Record should be updated only if:
+        -- a. CUSTOM_MODE = FORCE, or
+        -- b. file owner is USER, db owner is SEED
+        -- c. owners are the same, and file_date > db_date
+        IF (fnd_load_util.UPLOAD_TEST(
+                     p_file_id     => f_luby, 
+                     p_file_lud    => f_ludate,
+                     p_db_id       => db_luby, 
+                     p_db_lud      => db_ludate, 
+                     p_custom_mode => :CUSTOM_MODE)) 
+        THEN
+      	update 	FND_AUDIT_TMPLT_MST
+          		set   TEMPLATE_DESC       = :TEMPLATE_DESC,
+                		LAST_UPDATE_DATE  = f_ludate,  
+				LAST_UPDATED_BY   = f_luby,
+                		LAST_UPDATE_LOGIN = 0  
+	  		where	TEMPLATE_NAME     = L_TEMPLATE_NAME;
+        END IF;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_TMPLT_MST 
+		(TEMPLATE_NAME,
+                 TEMPLATE_DESC, 
+                 CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		LAST_UPDATE_LOGIN)
+	   values (:TEMPLATE_NAME,:TEMPLATE_DESC,f_ludate, f_luby, f_ludate, f_luby, 0);
+   end;
+ end;"
+
+#
+
+UPLOAD TEMPLATE_DETAILS
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_grp_app_id         number := 0;
+      l_audit_group_id     number := 0;
+     begin
+
+     -- Translate owner to file_last_updated_by
+       f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+      select application_id,audit_group_id into l_grp_app_id,l_audit_group_id
+         from  fnd_audit_groups
+         WHERE GROUP_NAME = :GROUP_NAME;
+      begin
+         select LAST_UPDATED_BY, LAST_UPDATE_DATE
+         into db_luby, db_ludate
+         from FND_AUDIT_TMPLT_DTL
+	 where 
+          	AUDIT_GROUP_ID         = l_audit_group_id       
+	 AND	APPLICATION_ID         = l_grp_app_id
+	 AND	TEMPLATE_NAME          = :TEMPLATE_NAME;
+       exception
+         when no_data_found then
+           insert into FND_AUDIT_TMPLT_DTL 
+		( AUDIT_GROUP_ID,         
+                  APPLICATION_ID,
+                  TEMPLATE_NAME,           
+                 CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		LAST_UPDATE_LOGIN)
+	   values (l_audit_group_id,l_grp_app_id,:TEMPLATE_NAME,
+  		   f_ludate, f_luby, f_ludate, f_luby, 0);
+      end;
+   end;
+ end;"
+
+#
+
+UPLOAD AUDIT_DISPLAY_COLUMNS
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      l_tab_app_id         number := 0;
+      l_table_id           number := 0;
+      l_col_disp_ind        number :=0;
+     begin
+
+    -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      select application_id into l_tab_app_id
+      from   fnd_application
+      where  application_short_name = :APPLICATION_SHORT_NAME;
+      
+      select  table_id into l_table_id
+         from FND_TABLES
+         where TABLE_NAME =:TABLE_NAME
+          AND  APPLICATION_ID =l_tab_app_id;
+
+      begin 
+        select col_disp_ind
+        into l_col_disp_ind
+	from FND_AUDIT_DISP_COLS
+	where 
+          	APPLICATION_ID         = l_tab_app_id
+	AND	TABLE_ID               = l_table_id;
+      exception
+        when no_data_found then
+           insert into FND_AUDIT_DISP_COLS
+		( APPLICATION_ID,   
+		  TABLE_ID,       
+		  COL_DISP_IND,     
+		  SELECT_CLAUSE,
+                  FROM_CLAUSE,          
+		  WHERE_CLAUSE)
+	   values (l_tab_app_id,l_table_id,:COL_DISP_IND,:SELECT_CLAUSE,:FROM_CLAUSE,:WHERE_CLAUSE);
+     end;
+   end;
+ end;"

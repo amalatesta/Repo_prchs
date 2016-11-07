@@ -1,0 +1,195 @@
+#
+# $Header: fndpipur.lct 120.0 2005/05/07 16:18:43 appldev noship $
+#
+# Entities
+#        FND_BUSINESS_PURPOSES 
+#
+
+  DEFINE  FND_BUSINESS_PURPOSES
+    KEY   PURPOSE_CODE                    VARCHAR2(30)
+    CTX   OWNER                           VARCHAR2(30)
+    BASE  APPLICATION_ID                  NUMBER
+    BASE  SEEDED_FLAG                     VARCHAR2(3)
+    BASE  PURPOSE_NAME                    VARCHAR2(240)
+    BASE  DESCRIPTION                     VARCHAR2(2000)
+    BASE  DESCRIPTION_INT                 VARCHAR2(2000)
+    BASE  OBJECT_VERSION_NUMBER           NUMBER
+    BASE  ATTRIBUTE_CATEGORY              VARCHAR2(450)
+    BASE  ATTRIBUTE1                      VARCHAR2(450)
+    BASE  ATTRIBUTE2                      VARCHAR2(450)
+    BASE  ATTRIBUTE3                      VARCHAR2(450)
+    BASE  ATTRIBUTE4                      VARCHAR2(450)
+    BASE  ATTRIBUTE5                      VARCHAR2(450)
+    BASE  ATTRIBUTE6                      VARCHAR2(450)
+    BASE  ATTRIBUTE7                      VARCHAR2(450)
+    BASE  ATTRIBUTE8                      VARCHAR2(450)
+    BASE  ATTRIBUTE9                      VARCHAR2(450)
+    BASE  ATTRIBUTE10                     VARCHAR2(450)
+    BASE  ATTRIBUTE11                     VARCHAR2(450)
+    BASE  ATTRIBUTE12                     VARCHAR2(450)
+    BASE  ATTRIBUTE13                     VARCHAR2(450)
+    BASE  ATTRIBUTE14                     VARCHAR2(450)
+    BASE  ATTRIBUTE15                     VARCHAR2(450)
+    BASE  PURPOSE_DEFAULT_CODE            VARCHAR2(450)
+    CTX   LAST_UPDATE_DATE                VARCHAR2(20)
+  END FND_BUSINESS_PURPOSES 
+
+DOWNLOAD FND_BUSINESS_PURPOSES
+  "select 
+    B.PURPOSE_CODE,
+    decode(B.LAST_UPDATED_BY,1,'SEED',0, 'SEED', 'CUSTOM') OWNER,
+    B.APPLICATION_ID ,
+    B.SEEDED_FLAG,
+    T.PURPOSE_NAME,
+    T.DESCRIPTION,
+    T.DESCRIPTION_INT,
+    B.OBJECT_VERSION_NUMBER,          
+    B.ATTRIBUTE_CATEGORY   ,       
+    B.ATTRIBUTE1  ,      
+    B.ATTRIBUTE2  ,     
+    B.ATTRIBUTE3  ,    
+    B.ATTRIBUTE4  ,   
+    B.ATTRIBUTE5  ,  
+    B.ATTRIBUTE6  , 
+    B.ATTRIBUTE7  , 
+    B.ATTRIBUTE8  , 
+    B.ATTRIBUTE9  , 
+    B.ATTRIBUTE10 , 
+    B.ATTRIBUTE11 , 
+    B.ATTRIBUTE12 , 
+    B.ATTRIBUTE13 , 
+    B.ATTRIBUTE14 , 
+    B.ATTRIBUTE15  ,
+    B.PURPOSE_DEFAULT_CODE,
+    to_char(B.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+  FROM    FND_BUSINESS_PURPOSES_B B, FND_BUSINESS_PURPOSES_TL T 
+  WHERE B.PURPOSE_CODE = T.PURPOSE_CODE
+  AND   (
+          ( :PURPOSE_CODE IS NULL)
+           OR 
+           ( (:PURPOSE_CODE IS NOT NULL)
+              AND 
+             (B.PURPOSE_CODE = :PURPOSE_CODE)
+            )
+         )
+  AND   T.LANGUAGE = userenv('LANG')
+"
+
+
+UPLOAD FND_BUSINESS_PURPOSES
+   " DECLARE  
+       x  	                 number;  
+       l_purpose_code        	 varchar2(30);  
+       l_object_version_number   number;  
+       l_user_id 	         number;  
+       l_row_id                  rowid;  
+
+       f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+     BEGIN  
+ 
+       IF (:OWNER = 'ORACLE') THEN
+          l_user_id := 1;
+       ELSE
+          l_user_id := 0;
+       END IF;
+
+
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       IF (:UPLOAD_MODE = 'NLS') then
+            FND_BUSINESS_PURPOSES_PKG.TRANSLATE_ROW(
+                X_PURPOSE_CODE           => :PURPOSE_CODE,
+                X_PURPOSE_NAME         => :PURPOSE_NAME,
+                X_LAST_UPDATE_DATE      => f_ludate,
+                X_LAST_UPDATED_BY       => f_luby,
+                X_LAST_UPDATE_LOGIN     => 0);
+       ELSE
+        BEGIN
+          SELECT purpose_code,object_version_number, last_updated_by, last_update_date
+          INTO   l_purpose_code, l_object_version_number,db_luby,  db_ludate
+          FROM   fnd_business_purposes_b
+          WHERE  purpose_code = :purpose_code;
+          EXCEPTION WHEN no_data_found THEN
+            l_purpose_code := NULL;
+        END;
+
+        IF (l_purpose_code IS NULL) THEN
+
+          FND_BUSINESS_PURPOSES_PKG.INSERT_ROW(  
+                X_ROWID                => l_row_id,
+                X_PURPOSE_CODE          => :PURPOSE_CODE,
+                X_APPLICATION_ID        => :APPLICATION_ID, 
+                X_SEEDED_FLAG           => :SEEDED_FLAG,
+                X_ATTRIBUTE1    	=> NULL ,
+                X_ATTRIBUTE2     	=> NULL ,
+                X_ATTRIBUTE3     	=> NULL ,
+                X_ATTRIBUTE4    	=> NULL ,
+                X_ATTRIBUTE5    	=> NULL ,
+                X_ATTRIBUTE6    	=> NULL ,
+                X_ATTRIBUTE7    	=> NULL ,
+                X_ATTRIBUTE8    	=> NULL ,
+                X_ATTRIBUTE9    	=> NULL ,
+                X_ATTRIBUTE10     	=> NULL ,
+                X_ATTRIBUTE11    	=> NULL ,
+                X_ATTRIBUTE12   	=> NULL ,
+                X_ATTRIBUTE13  		=> NULL ,
+                X_ATTRIBUTE14 		=> NULL ,
+                X_ATTRIBUTE15     	=> NULL ,
+	        X_ATTRIBUTE_CATEGORY	=> NULL ,
+                X_OBJECT_VERSION_NUMBER => 1, 
+                X_PURPOSE_NAME          => :PURPOSE_NAME,
+                X_DESCRIPTION           => :DESCRIPTION,
+                X_DESCRIPTION_INT       => :DESCRIPTION_INT,
+                X_CREATION_DATE         => f_ludate,
+                X_CREATED_BY            => f_luby ,
+                X_LAST_UPDATE_DATE      => f_ludate ,
+                X_LAST_UPDATED_BY       => f_luby ,
+                X_LAST_UPDATE_LOGIN     => 0,
+	        X_PURPOSE_DEFAULT_CODE	=> :PURPOSE_DEFAULT_CODE );
+
+        ELSE 
+
+         --  IF (l_last_updated_by = 1) THEN
+          if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+             FND_BUSINESS_PURPOSES_PKG.UPDATE_ROW(  
+                X_PURPOSE_CODE          => :PURPOSE_CODE,
+                X_APPLICATION_ID        => :APPLICATION_ID, 
+                X_SEEDED_FLAG           => :SEEDED_FLAG,
+                X_PURPOSE_NAME          => :PURPOSE_NAME,
+                X_DESCRIPTION           => :DESCRIPTION,
+                X_DESCRIPTION_INT       => :DESCRIPTION_INT,
+                X_LAST_UPDATE_DATE      =>  f_ludate ,
+                X_LAST_UPDATED_BY       => f_luby ,
+                X_LAST_UPDATE_LOGIN     => 0,
+                X_ATTRIBUTE1    	=> NULL ,
+                X_ATTRIBUTE2     	=> NULL ,
+                X_ATTRIBUTE3     	=> NULL ,
+                X_ATTRIBUTE4    	=> NULL ,
+                X_ATTRIBUTE5    	=> NULL ,
+                X_ATTRIBUTE6    	=> NULL ,
+                X_ATTRIBUTE7    	=> NULL ,
+                X_ATTRIBUTE8    	=> NULL ,
+                X_ATTRIBUTE9    	=> NULL ,
+                X_ATTRIBUTE10     	=> NULL ,
+                X_ATTRIBUTE11    	=> NULL ,
+                X_ATTRIBUTE12   	=> NULL ,
+                X_ATTRIBUTE13  		=> NULL ,
+                X_ATTRIBUTE14 		=> NULL ,
+                X_ATTRIBUTE15     	=> NULL ,
+	        X_ATTRIBUTE_CATEGORY	=> NULL ,
+                X_OBJECT_VERSION_NUMBER => l_object_version_number + 1,
+                X_PURPOSE_DEFAULT_CODE  => :PURPOSE_DEFAULT_CODE);
+
+           END IF;  -- last updated by check
+        END IF;     -- purpose code is null check
+      END IF;       -- upload mode is NLS check
+
+     END; "

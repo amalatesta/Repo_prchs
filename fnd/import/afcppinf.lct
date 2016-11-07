@@ -1,0 +1,1875 @@
+# $Header: afcppinf.lct 120.3.12010000.1 2008/07/25 13:39:42 appldev ship $
+#
+# 
+# Printer Entities -  
+# Synchronization maintenance is required for parent entities which are 
+# also children of other entities. Currently,
+#   1.  Printer Types:
+#       FND_PRINTER_TYPES (parent)
+#       PRINTER_TYPES (child of FND_PRINTER_INFORMATION)
+#   2.  Printer Drivers:
+#       FND_PRINTER_DRIVERS (parent)
+#       PRINTER_DRIVERS (child of FND_PRINTER_INFORMATION)
+#       FP_PRINTER_DRIVERS (child of FND_PRINTER)
+#   3.  Printer Styles:
+#       FND_PRINTER_STYLES (parent)
+#       PRINTER_STYLES (child of FND_PRINTER_INFORMATION)
+#   4.  Printer Information:
+#       FND_PRINTER_PRINTER_INFORMATION (parent)
+#       FP_PRINTER_INFOMRATION (child of FND_PRINTER) 
+#       ** Only synchronize at the top level, since
+#        a FP_PRINTER_INFORMATION replaces PRINTER_STYLES and PRINTER_TYPES
+#          from FND_PRINTER_INFORMATION with references 
+#        b FND_PRINTER needs no grandchildren entities
+#   Note the following for synchronization, when one of the affected 
+#    parent entities is changed:
+#   - For ENTITY sections, the new definition of the parent is copied as 
+#     is for the definition of the child (with the proper child entity name),
+#     but WITHOUT making grandchildren entities -- for example, 
+#     FP_PRINTER_INFORMATION should not have PRINTER_DRIVERS
+#     as a child entity, since FND_PRINTER has FP_PRINTER_DRIVERS as a 
+#     child already. (This prevents redundancy in uploads.)
+#   - For DOWNLOAD sections, the new download code of the parent must 
+#     be propagated to the child but there are slight differences that 
+#     must be considered, such as the where clause(s).  But, code that
+#     would imply grandchildren entities not propagated.
+#   - For the UPLOAD sections, the new upload code of the parent is copied
+#     as is for the upload of the child (with the proper child entity name)
+#     But, code that  would imply grandchildren entities not propagated.
+#     
+#   Where possible, while maintaining backward compatibility, dependencies 
+#   have been implemented by references.   Those require no synchronization.
+#
+#  Entity Dependency Mapping:
+#
+#  FND_PRINTER_TYPES                    -- parent entity
+#
+#  FND_PRINTER_STYLES                   -- parent entity
+#  
+#  FND_PRINTER_DRIVERS                  -- parent entity
+#
+#  FND_PRINTER_INFORMATION              -- parent entity
+#   |  
+#   +--PRINTER_TYPES                    -- child entity
+#   |                                        
+#   +--PRINTER_STYLES                   -- child entity
+#   |                                        
+#   +--PRINTER_DRIVERS                  -- child entity
+#
+#  FND_PRINTER                          -- parent entity
+#   |
+#   +--FP_TYPE                          -- reference to FND_PRINTER_TYPES
+#   |
+#   +--FP_PRINTER_DRIVERS               -- child entity
+#   |
+#   +--FP_PRINTER_INFORMATION           -- child entity
+#      |
+#      +--FPI_TYPE                      -- reference to FND_PRINTER_TYPES
+#      |                                        
+#      +--FPI_STYLE                     -- reference to FND_PRINTER_STYLES
+#
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcppinf.lct @~PROD:~PATH/~FILE"
+DEFINE FND_PRINTER_INFORMATION
+  KEY   PRINTER_TYPE                  VARCHAR2(30)
+  KEY   PRINTER_STYLE                 VARCHAR2(30)
+  CTX   OWNER                         VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE              VARCHAR2(75)
+  BASE  PRINTER_DRIVER                VARCHAR2(30)
+
+  DEFINE PRINTER_TYPES
+       KEY   PRINTER_TYPE             VARCHAR2(30)
+       CTX   OWNER                    VARCHAR2(4000)
+       BASE  LAST_UPDATE_DATE         VARCHAR2(75)
+       BASE  DESCRIPTION              VARCHAR2(240)
+       BASE  RESET_STRING             VARCHAR2(240)
+  END PRINTER_TYPES
+
+  DEFINE PRINTER_STYLES
+       KEY   PRINTER_STYLE_NAME       VARCHAR2(30)
+       CTX   OWNER          	      VARCHAR2(4000)
+       BASE  LAST_UPDATE_DATE         VARCHAR2(75)
+       BASE  WIDTH		      VARCHAR2(50)
+       BASE  LENGTH		      VARCHAR2(50)
+       BASE  ORIENTATION              VARCHAR2(255)
+       BASE  SRW_DRIVER	              VARCHAR2(255)
+       BASE  HEADER_FLAG	      VARCHAR2(1)
+       BASE  DESCRIPTION              VARCHAR2(255)
+       BASE  SEQUENCE                 VARCHAR2(50)  
+       TRANS USER_PRINTER_STYLE_NAME  VARCHAR2(80)
+  END PRINTER_STYLES
+
+  DEFINE   PRINTER_DRIVERS
+     KEY   PRINTER_DRIVER_NAME        VARCHAR2(30)
+     BASE  USER_PRINTER_DRIVER_NAME   VARCHAR2(80)
+     KEY   PLATFORM_CODE              VARCHAR2(30)
+     CTX   OWNER                      VARCHAR2(4000)
+     BASE  LAST_UPDATE_DATE           VARCHAR2(75)
+     BASE  SPOOL_FLAG                 VARCHAR2(1)
+     BASE  STDIN_FLAG                 VARCHAR2(1)
+     BASE  PRINTER_DRIVER_METHOD_CODE VARCHAR2(30)
+     BASE  SRW_DRIVER                 VARCHAR2(255)
+     BASE  HEADER_FLAG                VARCHAR2(1)
+     BASE  DESCRIPTION                VARCHAR2(255)
+     BASE  COMMAND_NAME               VARCHAR2(255)
+     BASE  ARGUMENTS                  VARCHAR2(255)
+     BASE  INITIALIZATION             VARCHAR2(255)
+     BASE  RESET                      VARCHAR2(255)
+     BASE  ATTR_CATEGORY              VARCHAR2(30)
+     BASE  ATTRIBUTE1                 VARCHAR2(150)
+     BASE  ATTRIBUTE2                 VARCHAR2(150)
+     BASE  ATTRIBUTE3                 VARCHAR2(150)
+     BASE  ATTRIBUTE4                 VARCHAR2(150)
+     BASE  ATTRIBUTE5                 VARCHAR2(150)
+     BASE  ATTRIBUTE6                 VARCHAR2(150)
+     BASE  ATTRIBUTE7                 VARCHAR2(150)
+     BASE  ATTRIBUTE8                 VARCHAR2(150)
+     BASE  ATTRIBUTE9                 VARCHAR2(150)
+     BASE  ATTRIBUTE10                VARCHAR2(150)
+     BASE  ATTRIBUTE11                VARCHAR2(150)
+     BASE  ATTRIBUTE12                VARCHAR2(150)
+     BASE  ATTRIBUTE13                VARCHAR2(150)
+     BASE  ATTRIBUTE14                VARCHAR2(150)
+     BASE  ATTRIBUTE15                VARCHAR2(150)
+  END PRINTER_DRIVERS
+
+END FND_PRINTER_INFORMATION  
+   
+DEFINE FND_PRINTER_TYPES
+     KEY   PRINTER_TYPE               VARCHAR2(30)
+     CTX   OWNER                      VARCHAR2(4000)
+     BASE  LAST_UPDATE_DATE           VARCHAR2(75)
+     BASE  DESCRIPTION                VARCHAR2(240)
+     BASE  RESET_STRING               VARCHAR2(240)
+END FND_PRINTER_TYPES
+
+DEFINE FND_PRINTER_STYLES
+     KEY   PRINTER_STYLE_NAME         VARCHAR2(30)
+     CTX   OWNER          	      VARCHAR2(4000)
+     BASE  LAST_UPDATE_DATE           VARCHAR2(75)
+     BASE  WIDTH		      VARCHAR2(50)
+     BASE  LENGTH		      VARCHAR2(50)
+     BASE  ORIENTATION	              VARCHAR2(255)
+     BASE  SRW_DRIVER	              VARCHAR2(255)
+     BASE  HEADER_FLAG	              VARCHAR2(1)
+     BASE  DESCRIPTION                VARCHAR2(255)
+     BASE  SEQUENCE                   VARCHAR2(50)  
+     TRANS USER_PRINTER_STYLE_NAME    VARCHAR2(80)
+END FND_PRINTER_STYLES
+  
+DEFINE FND_PRINTER_DRIVERS
+     KEY   PRINTER_DRIVER_NAME        VARCHAR2(30)      
+     BASE  USER_PRINTER_DRIVER_NAME   VARCHAR2(80)
+     KEY   PLATFORM_CODE              VARCHAR2(30)
+     CTX   OWNER                      VARCHAR2(4000)
+     BASE  LAST_UPDATE_DATE           VARCHAR2(75)
+     BASE  SPOOL_FLAG                 VARCHAR2(1)
+     BASE  STDIN_FLAG                 VARCHAR2(1)
+     BASE  PRINTER_DRIVER_METHOD_CODE VARCHAR2(30)
+     BASE  SRW_DRIVER                 VARCHAR2(255)
+     BASE  HEADER_FLAG                VARCHAR2(1)
+     BASE  DESCRIPTION                VARCHAR2(255)
+     BASE  COMMAND_NAME               VARCHAR2(255)
+     BASE  ARGUMENTS                  VARCHAR2(255)
+     BASE  INITIALIZATION             VARCHAR2(255)
+     BASE  RESET                      VARCHAR2(255)
+     BASE  ATTR_CATEGORY              VARCHAR2(30)
+     BASE  ATTRIBUTE1                 VARCHAR2(150)
+     BASE  ATTRIBUTE2                 VARCHAR2(150)
+     BASE  ATTRIBUTE3                 VARCHAR2(150)
+     BASE  ATTRIBUTE4                 VARCHAR2(150)
+     BASE  ATTRIBUTE5                 VARCHAR2(150)
+     BASE  ATTRIBUTE6                 VARCHAR2(150)
+     BASE  ATTRIBUTE7                 VARCHAR2(150)
+     BASE  ATTRIBUTE8                 VARCHAR2(150)
+     BASE  ATTRIBUTE9                 VARCHAR2(150)
+     BASE  ATTRIBUTE10                VARCHAR2(150)
+     BASE  ATTRIBUTE11                VARCHAR2(150)
+     BASE  ATTRIBUTE12                VARCHAR2(150)
+     BASE  ATTRIBUTE13                VARCHAR2(150)
+     BASE  ATTRIBUTE14                VARCHAR2(150)
+     BASE  ATTRIBUTE15                VARCHAR2(150)
+END FND_PRINTER_DRIVERS
+  
+
+DEFINE FND_PRINTER
+  KEY   PRINTER_NAME                  VARCHAR2(30)
+  CTX   OWNER                         VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE              VARCHAR2(75)
+  BASE  FP_TYPE         REFERENCES FND_PRINTER_TYPES
+  # KEY   PRINTER_TYPE                VARCHAR2(30)
+  TRANS DESCRIPTION                   VARCHAR2(240)
+
+  DEFINE FP_PRINTER_DRIVERS
+     KEY   PRINTER_DRIVER_NAME        VARCHAR2(30)
+     BASE  USER_PRINTER_DRIVER_NAME   VARCHAR2(80)
+     KEY   PLATFORM_CODE              VARCHAR2(30)
+     CTX   OWNER                      VARCHAR2(4000)
+     BASE  LAST_UPDATE_DATE           VARCHAR2(75)
+     BASE  SPOOL_FLAG                 VARCHAR2(1)
+     BASE  STDIN_FLAG                 VARCHAR2(1)
+     BASE  PRINTER_DRIVER_METHOD_CODE VARCHAR2(30)
+     BASE  SRW_DRIVER                 VARCHAR2(255)
+     BASE  HEADER_FLAG                VARCHAR2(1)
+     BASE  DESCRIPTION                VARCHAR2(255)
+     BASE  COMMAND_NAME               VARCHAR2(255)
+     BASE  ARGUMENTS                  VARCHAR2(255)
+     BASE  INITIALIZATION             VARCHAR2(255)
+     BASE  RESET                      VARCHAR2(255)
+     BASE  ATTR_CATEGORY              VARCHAR2(30)
+     BASE  ATTRIBUTE1                 VARCHAR2(150)
+     BASE  ATTRIBUTE2                 VARCHAR2(150)
+     BASE  ATTRIBUTE3                 VARCHAR2(150)
+     BASE  ATTRIBUTE4                 VARCHAR2(150)
+     BASE  ATTRIBUTE5                 VARCHAR2(150)
+     BASE  ATTRIBUTE6                 VARCHAR2(150)
+     BASE  ATTRIBUTE7                 VARCHAR2(150)
+     BASE  ATTRIBUTE8                 VARCHAR2(150)
+     BASE  ATTRIBUTE9                 VARCHAR2(150)
+     BASE  ATTRIBUTE10                VARCHAR2(150)
+     BASE  ATTRIBUTE11                VARCHAR2(150)
+     BASE  ATTRIBUTE12                VARCHAR2(150)
+     BASE  ATTRIBUTE13                VARCHAR2(150)
+     BASE  ATTRIBUTE14                VARCHAR2(150)
+     BASE  ATTRIBUTE15                VARCHAR2(150)
+  END FP_PRINTER_DRIVERS
+  DEFINE FP_PRINTER_INFORMATION
+    KEY   FPI_TYPE          REFERENCES FND_PRINTER_TYPES
+    # KEY   PRINTER_TYPE                VARCHAR2(30)
+    KEY   FPI_STYLE         REFERENCES FND_PRINTER_STYLES
+    # KEY PRINTER_STYLE_NAME            VARCHAR2(30)
+    CTX   OWNER                         VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE              VARCHAR2(75)
+    BASE  PRINTER_DRIVER                VARCHAR2(30)
+  
+  END FP_PRINTER_INFORMATION  
+
+END FND_PRINTER
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+DOWNLOAD FND_PRINTER_INFORMATION
+  "select PRINTER_TYPE,
+          PRINTER_STYLE,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          PRINTER_DRIVER
+   from   fnd_printer_information
+          where  ((:PRINTER_TYPE is null) or
+                    ((:PRINTER_TYPE is not null) and
+                     (PRINTER_TYPE like :PRINTER_TYPE)))
+          and ((:PRINTER_STYLE is null) or
+                 ((:PRINTER_STYLE is not null) and
+                  (PRINTER_STYLE like :PRINTER_STYLE)))
+          and  ((:PRINTER_DRIVER is null) or
+                   ((:PRINTER_DRIVER is not null) and
+                    (PRINTER_DRIVER like :PRINTER_DRIVER)))"
+
+  DOWNLOAD PRINTER_TYPES
+    "select fpt.PRINTER_TYPE PRINTER_TYPE,  
+	    fnd_load_util.owner_name(fpt.LAST_UPDATED_BY) OWNER,
+            to_char(fpt.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+            DESCRIPTION,
+            RESET_STRING
+     from   fnd_printer_types fpt, fnd_printer_information fpi
+     where  fpt.printer_type = fpi.printer_type
+       and  ((:PRINTER_TYPE is null) or
+                     ((:PRINTER_TYPE is not null) and
+                      (fpt.PRINTER_TYPE like :PRINTER_TYPE)))
+         and ((:PRINTER_STYLE is null) or
+                 ((:PRINTER_STYLE is not null) and
+                  (PRINTER_STYLE like :PRINTER_STYLE)))
+         and  ((:PRINTER_DRIVER is null) or
+                   ((:PRINTER_DRIVER is not null) and
+                    (PRINTER_DRIVER like :PRINTER_DRIVER)))"
+
+   DOWNLOAD PRINTER_STYLES
+    "select PRINTER_STYLE_NAME,  
+	    fnd_load_util.owner_name(fps.LAST_UPDATED_BY) OWNER,
+            to_char(fps.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+            WIDTH,
+            LENGTH,
+            ORIENTATION,
+            SRW_DRIVER,
+            HEADER_FLAG,
+            DESCRIPTION,
+            SEQUENCE,
+            USER_PRINTER_STYLE_NAME
+     from   fnd_printer_styles_vl fps,
+            fnd_printer_information fpi
+     where  fpi.printer_style = fps.printer_style_name
+       and  ((:PRINTER_TYPE is null) or
+                   ((:PRINTER_TYPE is not null) and
+                    (PRINTER_TYPE like :PRINTER_TYPE)))
+       and ((:PRINTER_STYLE is null) or
+                 ((:PRINTER_STYLE is not null) and
+                  (PRINTER_STYLE like :PRINTER_STYLE)))
+       and  ((:PRINTER_DRIVER is null) or
+                   ((:PRINTER_DRIVER is not null) and
+                    (PRINTER_DRIVER like :PRINTER_DRIVER)))"
+
+   DOWNLOAD PRINTER_DRIVERS
+     "select PRINTER_DRIVER_NAME,
+          USER_PRINTER_DRIVER_NAME,
+          PLATFORM_CODE,
+	  fnd_load_util.owner_name(fpd.LAST_UPDATED_BY) OWNER,
+          to_char(fpd.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          SPOOL_FLAG,
+          STDIN_FLAG,
+          PRINTER_DRIVER_METHOD_CODE,
+          SRW_DRIVER,
+          HEADER_FLAG,
+          DESCRIPTION,
+          COMMAND_NAME,
+          ARGUMENTS,
+          INITIALIZATION,
+          RESET,
+          ATTR_CATEGORY,
+          ATTRIBUTE1,
+          ATTRIBUTE2,
+          ATTRIBUTE3,
+          ATTRIBUTE4,
+          ATTRIBUTE5,
+          ATTRIBUTE6,
+          ATTRIBUTE7,
+          ATTRIBUTE8,
+          ATTRIBUTE9,
+          ATTRIBUTE10,
+          ATTRIBUTE11,
+          ATTRIBUTE12,
+          ATTRIBUTE13,
+          ATTRIBUTE14,
+          ATTRIBUTE15
+     from   fnd_printer_drivers fpd, fnd_printer_information fpi
+     where  fpi.printer_driver = fpd.printer_driver_name 
+       and  ((:PRINTER_TYPE is null) or
+                   ((:PRINTER_TYPE is not null) and
+                    (PRINTER_TYPE like :PRINTER_TYPE)))
+       and ((:PRINTER_STYLE is null) or
+                 ((:PRINTER_STYLE is not null) and
+                  (PRINTER_STYLE like :PRINTER_STYLE)))
+       and  ((:PRINTER_DRIVER is null) or
+                   ((:PRINTER_DRIVER is not null) and
+                    (PRINTER_DRIVER like :PRINTER_DRIVER)))"
+                    
+DOWNLOAD FND_PRINTER_STYLES
+  "select PRINTER_STYLE_NAME,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,         
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	  WIDTH,
+	  LENGTH,
+	  ORIENTATION,
+	  SRW_DRIVER,
+	  HEADER_FLAG,
+	  DESCRIPTION,
+          SEQUENCE,
+	  USER_PRINTER_STYLE_NAME
+   from   fnd_printer_styles_vl
+          where ((:PRINTER_STYLE_NAME is null) or
+                 ((:PRINTER_STYLE_NAME is not null) and
+                  (PRINTER_STYLE_NAME like :PRINTER_STYLE_NAME)))  "
+                  
+DOWNLOAD FND_PRINTER_DRIVERS
+  "select PRINTER_DRIVER_NAME,  
+          USER_PRINTER_DRIVER_NAME,
+          PLATFORM_CODE,
+	  fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          SPOOL_FLAG,
+          STDIN_FLAG,
+          PRINTER_DRIVER_METHOD_CODE,
+          SRW_DRIVER,
+          HEADER_FLAG,
+          DESCRIPTION,
+          COMMAND_NAME,
+          ARGUMENTS,
+          INITIALIZATION,
+          RESET,
+          ATTR_CATEGORY,
+          ATTRIBUTE1,
+          ATTRIBUTE2,
+          ATTRIBUTE3,
+          ATTRIBUTE4,
+          ATTRIBUTE5,
+          ATTRIBUTE6,
+          ATTRIBUTE7,
+          ATTRIBUTE8,
+          ATTRIBUTE9,
+          ATTRIBUTE10,
+          ATTRIBUTE11,
+          ATTRIBUTE12,
+          ATTRIBUTE13,
+          ATTRIBUTE14,
+          ATTRIBUTE15
+   from   fnd_printer_drivers
+          where ((:PRINTER_DRIVER_NAME is null) or
+                   ((:PRINTER_DRIVER_NAME is not null) and
+                    (PRINTER_DRIVER_NAME like :PRINTER_DRIVER_NAME)))"
+                    
+DOWNLOAD FND_PRINTER_TYPES
+  "select PRINTER_TYPE,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          DESCRIPTION,
+          RESET_STRING
+   from   fnd_printer_types
+          where ((:PRINTER_TYPE is null) or
+                   ((:PRINTER_TYPE is not null) and
+                    (PRINTER_TYPE like :PRINTER_TYPE))) "                                   
+
+DOWNLOAD FND_PRINTER 
+  "select PRINTER_NAME,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          PRINTER_TYPE FP_TYPE_PRINTER_TYPE,
+          DESCRIPTION
+   from   fnd_printer_vl
+   where  ((:PRINTER_NAME is null) or
+           ((:PRINTER_NAME is not null) and
+            (PRINTER_NAME like :PRINTER_NAME)))
+       and  ((:FP_TYPE is null) or
+             ((:FP_TYPE is not null) and
+              (PRINTER_TYPE like :FP_TYPE)))"
+
+  DOWNLOAD FP_PRINTER_DRIVERS
+  "select PRINTER_DRIVER_NAME,
+          USER_PRINTER_DRIVER_NAME,
+          PLATFORM_CODE,
+	  fnd_load_util.owner_name(fpd.LAST_UPDATED_BY) OWNER,
+          to_char(fpd.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          SPOOL_FLAG,
+          STDIN_FLAG,
+          PRINTER_DRIVER_METHOD_CODE,
+          SRW_DRIVER,
+          HEADER_FLAG,
+          DESCRIPTION,
+          COMMAND_NAME,
+          ARGUMENTS,
+          INITIALIZATION,
+          RESET,
+          ATTR_CATEGORY,
+          ATTRIBUTE1,
+          ATTRIBUTE2,
+          ATTRIBUTE3,
+          ATTRIBUTE4,
+          ATTRIBUTE5,
+          ATTRIBUTE6,
+          ATTRIBUTE7,
+          ATTRIBUTE8,
+          ATTRIBUTE9,
+          ATTRIBUTE10,
+          ATTRIBUTE11,
+          ATTRIBUTE12,
+          ATTRIBUTE13,
+          ATTRIBUTE14,
+          ATTRIBUTE15
+   from   fnd_printer_drivers fpd, fnd_printer_information fpi,fnd_printer fp
+   where fp.printer_type = fpi.printer_type 
+     and fpi.printer_driver = fpd.printer_driver_name 
+     and ((:PRINTER_NAME is null) or
+           ((:PRINTER_NAME is not null) and
+            (PRINTER_NAME like :PRINTER_NAME)))"
+
+  DOWNLOAD FP_PRINTER_INFORMATION
+    "select fpi.PRINTER_TYPE FPI_TYPE,  
+            PRINTER_STYLE FPI_STYLE, 
+	    fnd_load_util.owner_name(fpi.LAST_UPDATED_BY) OWNER,
+            to_char(fpi.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+            PRINTER_DRIVER
+     from   fnd_printer_information fpi,
+            fnd_printer fp
+     where  fp.printer_type (+)= fpi.printer_type
+       and  ((:PRINTER_NAME is null) or
+             ((:PRINTER_NAME is not null) and
+              (PRINTER_NAME like :PRINTER_NAME)))"
+                    
+  
+
+#
+# -- UPLOAD section --
+#
+#   For each entity, specify the pl/sql block to use to upload the
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+#
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+UPLOAD FND_PRINTER_INFORMATION
+  BEGIN
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+          into db_luby, db_ludate
+          from FND_PRINTER_INFORMATION
+          where printer_type = :PRINTER_TYPE
+          and printer_style = :PRINTER_STYLE_NAME;
+
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate)))
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+          when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+ 
+        if not chgdb then 
+          return;
+       
+        else
+             update FND_PRINTER_INFORMATION set
+             printer_type = :PRINTER_TYPE,
+             printer_style = :PRINTER_STYLE,
+             printer_driver = :PRINTER_DRIVER,
+             last_update_date = f_ludate,
+             last_updated_by = f_luby,
+             last_update_login = 0
+             where printer_type = :PRINTER_TYPE
+             and printer_style = :PRINTER_STYLE;
+
+             if SQL%NOTFOUND then
+               insert into FND_PRINTER_INFORMATION (
+                 printer_type,
+                 printer_style,
+                 printer_driver,
+                 last_update_date,
+                 last_updated_by,
+                 creation_date,
+                 created_by,
+                 last_update_login)
+               values (
+                 :PRINTER_TYPE,
+                 :PRINTER_STYLE,
+                 :PRINTER_DRIVER,
+                 f_ludate,
+                 f_luby,
+                 f_ludate,
+                 f_luby,
+                 0);
+             end if;
+        end if;
+      end; "
+
+  UPLOAD PRINTER_TYPES 
+    "declare
+        chgdb     boolean := false;  -- true if DB should change
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+        begin
+  
+          if (:UPLOAD_MODE = 'NLS') then
+            return;
+          end if;
+  
+          -- Translate owner to file_last_updated_by
+          if (:OWNER = 'SEED') then
+            f_luby := 1;
+          else
+            f_luby := 0;
+          end if;
+   
+          -- Translate char last_update_date to date
+          f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+        
+          begin
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_TYPES
+            where printer_type = :PRINTER_TYPE;
+        
+            -- Update record, honoring customization mode.
+            -- Record should be updated only if:
+            -- a. CUSTOM_MODE = FORCE, or
+            -- b. file owner is CUSTOM, db owner is SEED
+            -- c. owners are the same, and file_date > db_date
+            if ((:CUSTOM_MODE = 'FORCE') or
+               ((f_luby = 0) and (db_luby = 1)) or
+               ((f_luby = db_luby) and (f_ludate > db_ludate)))
+            then
+              chgdb := true;
+            end if;
+   
+          exception
+            when no_data_found then
+              chgdb := true;  -- change is needed if no matching db rows
+          end;
+   
+          if not chgdb then 
+            return;
+         
+          else 
+              update FND_PRINTER_TYPES set
+                printer_type = :PRINTER_TYPE,
+                description = :DESCRIPTION,
+                reset_string = :RESET_STRING,
+                last_update_date = f_ludate,
+                last_updated_by = f_luby,
+                last_update_login = 0
+                where printer_type = :PRINTER_TYPE;
+              if SQL%NOTFOUND then
+                insert into FND_PRINTER_TYPES (
+                  printer_type,
+                  description,
+                  reset_string,
+                  last_update_date,
+                  last_updated_by,
+                  creation_date,
+                  created_by,
+                  last_update_login)
+                values (
+                  :PRINTER_TYPE,
+                  :DESCRIPTION,
+                  :RESET_STRING,
+                  f_ludate,
+                  f_luby,
+                  f_ludate,
+                  f_luby,
+                  0);
+              end if;
+          end if;
+        end; "
+  UPLOAD PRINTER_STYLES 
+    "declare
+        chgdb     boolean := false;  -- true if DB should change
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+        s_count  number := 0;
+        seq_count number := 0;
+        pri_seq  number := 0;
+        use_seq  number;
+        cursor c1 is select sequence from fnd_printer_styles order by sequence ;
+        begin
+  
+          -- Translate owner to file_last_updated_by
+          if (:OWNER = 'SEED') then
+            f_luby := 1;
+          else
+            f_luby := 0;
+          end if;
+   
+          -- Translate char last_update_date to date
+          f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+        
+          begin
+        
+            select count(*) 
+            into s_count
+            from fnd_printer_styles
+            where printer_style_name = :PRINTER_STYLE_NAME;
+  
+            use_seq := to_number(:SEQUENCE);
+  
+            select count(*) 
+            into seq_count
+            from fnd_printer_styles
+            where sequence = use_seq;
+  
+            begin
+              select LAST_UPDATED_BY, LAST_UPDATE_DATE
+              into db_luby, db_ludate
+              from FND_PRINTER_STYLES
+              where printer_style_name = :PRINTER_STYLE_NAME;
+  
+              -- Update record, honoring customization mode.
+              -- Record should be updated only if:
+              -- a. CUSTOM_MODE = FORCE, or
+              -- b. file owner is CUSTOM, db owner is SEED
+              -- c. owners are the same, and file_date > db_date
+	      -- d. NLS mode and both file owner and db owner are SEED
+              if ((:CUSTOM_MODE = 'FORCE') or
+                 ((f_luby = 0) and (db_luby = 1)) or
+                 ((f_luby = db_luby) and (f_ludate > db_ludate)) or
+	         ((:UPLOAD_MODE = 'NLS') and (f_luby = 1) and (db_luby = 1)))
+              then
+                chgdb := true;
+              end if;
+   
+            exception
+              when no_data_found then
+                chgdb := true;  -- change is needed if no matching db rows
+            end;
+          
+            if not chgdb then 
+              return;
+         
+            elsif (:UPLOAD_MODE = 'NLS') then
+              update fnd_printer_styles_tl set
+                source_lang=userenv('LANG'),
+                USER_PRINTER_STYLE_NAME =
+  		nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+                last_updated_by = f_luby,
+                last_update_date  = f_ludate,
+                last_update_login = 0
+              where 
+                userenv('LANG') in (language, source_lang)
+              and  PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+            elsif ( s_count > 0 ) then
+              update fnd_printer_styles_tl set
+                user_printer_style_name = 
+                    nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+                last_updated_by = f_luby,
+                last_update_date = f_ludate,
+                last_update_login = 0
+              where userenv('LANG') in (language, source_lang)
+              and PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+  
+              update fnd_printer_styles set
+                width = :WIDTH,
+                length = :LENGTH,
+                description = nvl(:DESCRIPTION, DESCRIPTION),
+                orientation = nvl(:ORIENTATION, ORIENTATION),
+                srw_driver  = nvl(:SRW_DRIVER, SRW_DRIVER),
+                header_flag = nvl(:HEADER_FLAG, HEADER_FLAG),
+                last_updated_by = f_luby,
+                last_update_date = f_ludate,
+                last_update_login = 0
+              where PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+            else
+  	    if ( seq_count > 0 ) then
+                 for c1_rec in c1 loop
+                    if ( (c1_rec.sequence - pri_seq) > 1 ) then
+                        use_seq := pri_seq + 1;
+  		      exit;
+  		  else
+   		      pri_seq := c1_rec.sequence;
+                    end if;
+                 end loop;
+  	    end if;
+  	    insert into fnd_printer_styles_tl
+                    (printer_style_name, user_printer_style_name, language,
+                     source_lang, last_update_date, last_updated_by, 
+                     created_by, creation_date, last_update_login)
+              select :PRINTER_STYLE_NAME,:USER_PRINTER_STYLE_NAME,l.language_code,
+                     USERENV('LANG'), f_ludate, f_luby, f_luby, f_ludate, 0
+                from fnd_languages l
+               where l.installed_flag in ('I','B')
+                 and not exists
+                     (select null 
+                        from fnd_printer_styles_tl t
+                       where t.printer_style_name = :PRINTER_STYLE_NAME
+                         and t.language = l.language_code); 
+              insert into fnd_printer_styles
+                    (printer_style_name, sequence, width, length, description,
+                     orientation, srw_driver, header_flag,
+                     last_update_date, last_updated_by, created_by,
+                     creation_date, last_update_login)
+              select :PRINTER_STYLE_NAME, use_seq, :WIDTH, :LENGTH, 
+                     :DESCRIPTION, :ORIENTATION, :SRW_DRIVER, :HEADER_FLAG,
+                     f_ludate, f_luby, f_luby, f_ludate, 0
+                from dual;
+            end if;
+          end;
+        end; "
+    
+  UPLOAD PRINTER_DRIVERS 
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+
+          -- Bug 6144903 & 6186654. Seperated the query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple records being fetched for Printer Drivers with NULL and NOT NULL platform_code
+
+          if (:PLATFORM_CODE IS NULL) then
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code is null ;
+          else
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code = :PLATFORM_CODE;
+          end if;
+      
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate))) 
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+         when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+
+        if not chgdb then 
+          return;
+      
+        else 
+          -- Bug 6144903 & 6186654. Seperated the update query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple row updates for Printer Drivers with NULL and NOT NULL platform_code
+         
+          if (:PLATFORM_CODE IS NULL) then
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME 
+            and platform_code is null;
+          else
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME 
+            and platform_code = :PLATFORM_CODE;
+          end if;
+          if SQL%NOTFOUND then
+            insert into FND_PRINTER_DRIVERS (
+                printer_driver_name,
+                user_printer_driver_name,
+                platform_code,
+                spool_flag,
+                stdin_flag,
+                printer_driver_method_code,
+                srw_driver,
+                header_flag,
+                description,
+                command_name,
+                arguments,
+                initialization,
+                reset,
+                attr_category,
+                attribute1,
+                attribute2,
+                attribute3,
+                attribute4,
+                attribute5,
+                attribute6,
+                attribute7,
+                attribute8,
+                attribute9,
+                attribute10,
+                attribute11,
+                attribute12,
+                attribute13,
+                attribute14,
+                attribute15,
+                last_update_date,
+                last_updated_by,
+                creation_date,
+                created_by,
+                last_update_login)
+              values (
+                :PRINTER_DRIVER_NAME,
+                :USER_PRINTER_DRIVER_NAME,
+                :PLATFORM_CODE,
+                :SPOOL_FLAG,
+                :STDIN_FLAG,
+                :PRINTER_DRIVER_METHOD_CODE,
+                :SRW_DRIVER,
+                :HEADER_FLAG,
+                :DESCRIPTION,
+                :COMMAND_NAME,
+                :ARGUMENTS,
+                :INITIALIZATION,
+                :RESET,
+                :ATTR_CATEGORY,
+                :ATTRIBUTE1,
+                :ATTRIBUTE2,
+                :ATTRIBUTE3,
+                :ATTRIBUTE4,
+                :ATTRIBUTE5,
+                :ATTRIBUTE6,
+                :ATTRIBUTE7,
+                :ATTRIBUTE8,
+                :ATTRIBUTE9,
+                :ATTRIBUTE10,
+                :ATTRIBUTE11,
+                :ATTRIBUTE12,
+                :ATTRIBUTE13,
+                :ATTRIBUTE14,
+                :ATTRIBUTE15,
+                f_ludate,
+                f_luby,
+                f_ludate,
+                f_luby,
+                0);
+          end if;
+        end if;
+      end; "
+
+UPLOAD FND_PRINTER_STYLES 
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      s_count  number := 0;
+      seq_count number := 0;
+      pri_seq  number := 0;
+      use_seq  number;
+      cursor c1 is select sequence from fnd_printer_styles order by sequence ;
+      begin
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+      
+          select count(*) 
+          into s_count
+          from fnd_printer_styles
+          where printer_style_name = :PRINTER_STYLE_NAME;
+
+          use_seq := to_number(:SEQUENCE);
+
+          select count(*) 
+          into seq_count
+          from fnd_printer_styles
+          where sequence = use_seq;
+
+          begin
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_STYLES
+            where printer_style_name = :PRINTER_STYLE_NAME;
+
+            -- Update record, honoring customization mode.
+            -- Record should be updated only if:
+            -- a. CUSTOM_MODE = FORCE, or
+            -- b. file owner is CUSTOM, db owner is SEED
+            -- c. owners are the same, and file_date > db_date
+	    -- d. NLS mode and both file owner and db owner are SEED 
+            if ((:CUSTOM_MODE = 'FORCE') or
+               ((f_luby = 0) and (db_luby = 1)) or
+               ((f_luby = db_luby) and (f_ludate > db_ludate)) or
+   	       ((:UPLOAD_MODE = 'NLS') and (f_luby = 1) and (db_luby = 1)))
+            then
+              chgdb := true;
+            end if;
+ 
+          exception
+            when no_data_found then
+              chgdb := true;  -- change is needed if no matching db rows
+          end;
+        
+          if not chgdb then 
+            return;
+       
+          elsif (:UPLOAD_MODE = 'NLS') then
+            update fnd_printer_styles_tl set
+              source_lang=userenv('LANG'),
+              USER_PRINTER_STYLE_NAME =
+		nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+              last_updated_by = f_luby,
+              last_update_date  = f_ludate,
+              last_update_login = 0
+            where 
+              userenv('LANG') in (language, source_lang)
+            and  PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+          elsif ( s_count > 0 ) then
+            update fnd_printer_styles_tl set
+              user_printer_style_name = 
+                  nvl(:USER_PRINTER_STYLE_NAME, USER_PRINTER_STYLE_NAME),
+              last_updated_by = f_luby,
+              last_update_date = f_ludate,
+              last_update_login = 0
+            where userenv('LANG') in (language, source_lang)
+            and PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+
+            update fnd_printer_styles set
+              width = :WIDTH,
+              length = :LENGTH,
+              description = nvl(:DESCRIPTION, DESCRIPTION),
+              orientation = nvl(:ORIENTATION, ORIENTATION),
+              srw_driver  = nvl(:SRW_DRIVER, SRW_DRIVER),
+              header_flag = nvl(:HEADER_FLAG, HEADER_FLAG),
+              last_updated_by = f_luby,
+              last_update_date = f_ludate,
+              last_update_login = 0
+            where PRINTER_STYLE_NAME = :PRINTER_STYLE_NAME;
+          else
+	    if ( seq_count > 0 ) then
+               for c1_rec in c1 loop
+                  if ( (c1_rec.sequence - pri_seq) > 1 ) then
+                      use_seq := pri_seq + 1;
+		      exit;
+		  else
+ 		      pri_seq := c1_rec.sequence;
+                  end if;
+               end loop;
+	    end if;
+	    insert into fnd_printer_styles_tl
+                  (printer_style_name, user_printer_style_name, language,
+                   source_lang, last_update_date, last_updated_by, 
+                   created_by, creation_date, last_update_login)
+            select :PRINTER_STYLE_NAME,:USER_PRINTER_STYLE_NAME,l.language_code,
+                   USERENV('LANG'), f_ludate, f_luby, f_luby, f_ludate, 0
+              from fnd_languages l
+             where l.installed_flag in ('I','B')
+               and not exists
+                   (select null 
+                      from fnd_printer_styles_tl t
+                     where t.printer_style_name = :PRINTER_STYLE_NAME
+                       and t.language = l.language_code); 
+            insert into fnd_printer_styles
+                  (printer_style_name, sequence, width, length, description,
+                   orientation, srw_driver, header_flag,
+                   last_update_date, last_updated_by, created_by,
+                   creation_date, last_update_login)
+            select :PRINTER_STYLE_NAME, use_seq, :WIDTH, :LENGTH, 
+                   :DESCRIPTION, :ORIENTATION, :SRW_DRIVER, :HEADER_FLAG,
+                   f_ludate, f_luby, f_luby, f_ludate, 0
+              from dual;
+          end if;
+        end;
+      end; "
+    
+UPLOAD FND_PRINTER_DRIVERS 
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+          -- Bug 6144903 & 6186654. Seperated the query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple records being fetched for Printer Drivers with NULL and NOT NULL platform_code
+
+          if (:PLATFORM_CODE IS NULL) then
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code is null;
+         else
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code = :PLATFORM_CODE;
+          end if;
+         
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate)))
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+         when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+
+        if not chgdb then 
+          return;
+      
+        else 
+          -- Bug 6144903 & 6186654. Seperated the update query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple row updates for Printer Drivers with NULL and NOT NULL platform_code
+
+          if (:PLATFORM_CODE IS NULL) then
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code is null;
+          else
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code = :PLATFORM_CODE;
+          end if;
+          if SQL%NOTFOUND then
+            insert into FND_PRINTER_DRIVERS (
+                printer_driver_name,
+                user_printer_driver_name,
+                platform_code,
+                spool_flag,
+                stdin_flag,
+                printer_driver_method_code,
+                srw_driver,
+                header_flag,
+                description,
+                command_name,
+                arguments,
+                initialization,
+                reset,
+                attr_category,
+                attribute1,
+                attribute2,
+                attribute3,
+                attribute4,
+                attribute5,
+                attribute6,
+                attribute7,
+                attribute8,
+                attribute9,
+                attribute10,
+                attribute11,
+                attribute12,
+                attribute13,
+                attribute14,
+                attribute15,
+                last_update_date,
+                last_updated_by,
+                creation_date,
+                created_by,
+                last_update_login)
+              values (
+                :PRINTER_DRIVER_NAME,
+                :USER_PRINTER_DRIVER_NAME,
+                :PLATFORM_CODE,
+                :SPOOL_FLAG,
+                :STDIN_FLAG,
+                :PRINTER_DRIVER_METHOD_CODE,
+                :SRW_DRIVER,
+                :HEADER_FLAG,
+                :DESCRIPTION,
+                :COMMAND_NAME,
+                :ARGUMENTS,
+                :INITIALIZATION,
+                :RESET,
+                :ATTR_CATEGORY,
+                :ATTRIBUTE1,
+                :ATTRIBUTE2,
+                :ATTRIBUTE3,
+                :ATTRIBUTE4,
+                :ATTRIBUTE5,
+                :ATTRIBUTE6,
+                :ATTRIBUTE7,
+                :ATTRIBUTE8,
+                :ATTRIBUTE9,
+                :ATTRIBUTE10,
+                :ATTRIBUTE11,
+                :ATTRIBUTE12,
+                :ATTRIBUTE13,
+                :ATTRIBUTE14,
+                :ATTRIBUTE15,
+                f_ludate,
+                f_luby,
+                f_ludate,
+                f_luby,
+                0);
+          end if;
+        end if;
+      end; "
+
+UPLOAD FND_PRINTER_TYPES 
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+          into db_luby, db_ludate
+          from FND_PRINTER_TYPES
+          where printer_type = :PRINTER_TYPE;
+      
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate))) 
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+          when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+ 
+        if not chgdb then 
+          return;
+       
+        else 
+            update FND_PRINTER_TYPES set
+              printer_type = :PRINTER_TYPE,
+              description = :DESCRIPTION,
+              reset_string = :RESET_STRING,
+              last_update_date = f_ludate,
+              last_updated_by = f_luby,
+              last_update_login = 0
+              where printer_type = :PRINTER_TYPE;
+            if SQL%NOTFOUND then
+              insert into FND_PRINTER_TYPES (
+                printer_type,
+                description,
+                reset_string,
+                last_update_date,
+                last_updated_by,
+                creation_date,
+                created_by,
+                last_update_login)
+              values (
+                :PRINTER_TYPE,
+                :DESCRIPTION,
+                :RESET_STRING,
+                f_ludate,
+                f_luby,
+                f_ludate,
+                f_luby,
+                0);
+            end if;
+        end if;
+      end; "
+ 
+UPLOAD FND_PRINTER
+BEGIN
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      p_count  number := 0;
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+          select count(*) 
+          into p_count
+          from fnd_printer
+          where printer_name = :PRINTER_NAME;
+      
+          select LAST_UPDATED_BY, LAST_UPDATE_DATE
+          into db_luby, db_ludate
+          from FND_PRINTER
+          where printer_name = :PRINTER_NAME;
+
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+	  -- d. NLS mode and both file owner and db owner are SEED
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate)) or
+	     ((:UPLOAD_MODE = 'NLS') and (f_luby = 1) and (db_luby = 1)))
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+          when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+        
+        if not chgdb then 
+          return;
+       
+        elsif (:UPLOAD_MODE = 'NLS') then
+            update fnd_printer_tl set
+              source_lang=userenv('LANG'),
+              DESCRIPTION =
+		nvl(:DESCRIPTION, DESCRIPTION),
+              last_updated_by = f_luby,
+              last_update_date  = f_ludate,
+              last_update_login = 0
+            where 
+              userenv('LANG') in (language, source_lang)
+            and  PRINTER_NAME = :PRINTER_NAME;
+        elsif ( p_count > 0 ) then
+          update fnd_printer_tl set
+            DESCRIPTION = 
+                  nvl(:DESCRIPTION, DESCRIPTION),
+            last_updated_by = f_luby,
+            last_update_date = f_ludate,
+            last_update_login = 0
+            where userenv('LANG') in (language, source_lang)
+            and PRINTER_NAME = :PRINTER_NAME;
+
+          update FND_PRINTER set
+            printer_name = :PRINTER_NAME, 
+            printer_type = :FP_TYPE_PRINTER_TYPE,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_name = :PRINTER_NAME;
+
+        else
+	  insert into fnd_printer_tl
+                (printer_name, language, source_lang, 
+                last_update_date, last_updated_by, 
+                created_by, creation_date, last_update_login,
+                description)
+          select :PRINTER_NAME, l.language_code, USERENV('LANG'), 
+                f_ludate, f_luby, f_luby, f_ludate, 0,
+                :DESCRIPTION
+              from fnd_languages l
+             where l.installed_flag in ('I','B')
+               and not exists
+                   (select null 
+                      from fnd_printer_tl t
+                     where t.printer_name = :PRINTER_NAME
+                       and t.language = l.language_code); 
+          insert into FND_PRINTER (
+                printer_name,
+                last_update_date,
+                last_updated_by,
+                creation_date,
+                created_by,
+                last_update_login,
+                printer_type)
+          values (
+                :PRINTER_NAME,
+                f_ludate,
+                f_luby,
+                f_ludate,
+                f_luby,
+                0,
+                :FP_TYPE_PRINTER_TYPE);
+        end if;
+      end; "
+
+  UPLOAD FP_PRINTER_DRIVERS 
+  "declare
+      chgdb     boolean := false;  -- true if DB should change
+      f_luby    number;  -- entity owner in file
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+
+        -- Translate owner to file_last_updated_by
+        if (:OWNER = 'SEED') then
+          f_luby := 1;
+        else
+          f_luby := 0;
+        end if;
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+      
+        begin
+          -- Bug 6144903 & 6186654. Seperated the query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple records being fetched for Printer Drivers with NULL and NOT NULL platform_code
+
+          if (:PLATFORM_CODE IS NULL) then
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME 
+            and platform_code is null;
+          else
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_DRIVERS
+            where printer_driver_name = :PRINTER_DRIVER_NAME 
+            and platform_code = :PLATFORM_CODE;
+          end if;
+    
+          -- Update record, honoring customization mode.
+          -- Record should be updated only if:
+          -- a. CUSTOM_MODE = FORCE, or
+          -- b. file owner is CUSTOM, db owner is SEED
+          -- c. owners are the same, and file_date > db_date
+          if ((:CUSTOM_MODE = 'FORCE') or
+             ((f_luby = 0) and (db_luby = 1)) or
+             ((f_luby = db_luby) and (f_ludate > db_ludate)))
+          then
+            chgdb := true;
+          end if;
+ 
+        exception
+         when no_data_found then
+            chgdb := true;  -- change is needed if no matching db rows
+        end;
+
+        if not chgdb then 
+          return;
+      
+        else 
+          -- Bug 6144903 & 6186654. Seperated the update query for NULL and NOT NULL PLATFORM_CODE  
+          -- to avoid multiple row updates for Printer Drivers with NULL and NOT NULL platform_code
+
+          if (:PLATFORM_CODE IS NULL) then
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code is null;
+          else
+            update FND_PRINTER_DRIVERS set
+            printer_driver_name = :PRINTER_DRIVER_NAME,
+            user_printer_driver_name = :USER_PRINTER_DRIVER_NAME,
+            platform_code = :PLATFORM_CODE,
+            spool_flag = :SPOOL_FLAG,
+            stdin_flag = :STDIN_FLAG,
+            printer_driver_method_code = :PRINTER_DRIVER_METHOD_CODE,
+            srw_driver = :SRW_DRIVEr,
+            header_flag = :HEADER_FLAG,
+            description = :DESCRIPTION,
+            command_name = :COMMAND_NAME,
+            arguments = :ARGUMENTS,
+            initialization = :INITIALIZATION,
+            reset = :RESET,
+            attr_category = :ATTR_CATEGORY,
+            attribute1 = :ATTRIBUTE1,
+            attribute2 = :ATTRIBUTE2,
+            attribute3 = :ATTRIBUTE3,
+            attribute4 = :ATTRIBUTE4,
+            attribute5 = :ATTRIBUTE5,
+            attribute6 = :ATTRIBUTE6,
+            attribute7 = :ATTRIBUTE7,
+            attribute8 = :ATTRIBUTE8,
+            attribute9 = :ATTRIBUTE9,
+            attribute10 = :ATTRIBUTE10,
+            attribute11 = :ATTRIBUTE11,
+            attribute12 = :ATTRIBUTE12,
+            attribute13 = :ATTRIBUTE13,
+            attribute14= :ATTRIBUTE14,
+            attribute15 = :ATTRIBUTE15,
+            last_update_date = f_ludate,
+            last_updated_by = f_luby,
+            last_update_login = 0
+            where printer_driver_name = :PRINTER_DRIVER_NAME
+            and platform_code = :PLATFORM_CODE;
+          end if;
+
+          if SQL%NOTFOUND then
+            insert into FND_PRINTER_DRIVERS (
+                printer_driver_name,
+                user_printer_driver_name,
+                platform_code,
+                spool_flag,
+                stdin_flag,
+                printer_driver_method_code,
+                srw_driver,
+                header_flag,
+                description,
+                command_name,
+                arguments,
+                initialization,
+                reset,
+                attr_category,
+                attribute1,
+                attribute2,
+                attribute3,
+                attribute4,
+                attribute5,
+                attribute6,
+                attribute7,
+                attribute8,
+                attribute9,
+                attribute10,
+                attribute11,
+                attribute12,
+                attribute13,
+                attribute14,
+                attribute15,
+                last_update_date,
+                last_updated_by,
+                creation_date,
+                created_by,
+                last_update_login)
+              values (
+                :PRINTER_DRIVER_NAME,
+                :USER_PRINTER_DRIVER_NAME,
+                :PLATFORM_CODE,
+                :SPOOL_FLAG,
+                :STDIN_FLAG,
+                :PRINTER_DRIVER_METHOD_CODE,
+                :SRW_DRIVER,
+                :HEADER_FLAG,
+                :DESCRIPTION,
+                :COMMAND_NAME,
+                :ARGUMENTS,
+                :INITIALIZATION,
+                :RESET,
+                :ATTR_CATEGORY,
+                :ATTRIBUTE1,
+                :ATTRIBUTE2,
+                :ATTRIBUTE3,
+                :ATTRIBUTE4,
+                :ATTRIBUTE5,
+                :ATTRIBUTE6,
+                :ATTRIBUTE7,
+                :ATTRIBUTE8,
+                :ATTRIBUTE9,
+                :ATTRIBUTE10,
+                :ATTRIBUTE11,
+                :ATTRIBUTE12,
+                :ATTRIBUTE13,
+                :ATTRIBUTE14,
+                :ATTRIBUTE15,
+                f_ludate,
+                f_luby,
+                f_ludate,
+                f_luby,
+                0);
+          end if;
+        end if;
+      end; "
+
+  UPLOAD FP_PRINTER_INFORMATION
+    "declare
+        chgdb     boolean := false;  -- true if DB should change
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+        begin
+  
+          if (:UPLOAD_MODE = 'NLS') then
+            return;
+          end if;
+  
+          -- Translate owner to file_last_updated_by
+          if (:OWNER = 'SEED') then
+            f_luby := 1;
+          else
+            f_luby := 0;
+          end if;
+   
+          -- Translate char last_update_date to date
+          f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+        
+          begin
+            select LAST_UPDATED_BY, LAST_UPDATE_DATE
+            into db_luby, db_ludate
+            from FND_PRINTER_INFORMATION
+            where printer_type = :FPI_TYPE_PRINTER_TYPE
+            and printer_style = :FPI_STYLE_PRINTER_STYLE_NAME;
+        
+            -- Update record, honoring customization mode.
+            -- Record should be updated only if:
+            -- a. CUSTOM_MODE = FORCE, or
+            -- b. file owner is CUSTOM, db owner is SEED
+            -- c. owners are the same, and file_date > db_date
+            if ((:CUSTOM_MODE = 'FORCE') or
+               ((f_luby = 0) and (db_luby = 1)) or
+               ((f_luby = db_luby) and (f_ludate > db_ludate)))
+            then
+              chgdb := true;
+            end if;
+   
+          exception
+            when no_data_found then
+              chgdb := true;  -- change is needed if no matching db rows
+          end;
+   
+          if not chgdb then 
+            return;
+         
+          else
+               update FND_PRINTER_INFORMATION set
+               printer_type = :FPI_TYPE_PRINTER_TYPE,
+               printer_style = :FPI_STYLE_PRINTER_STYLE_NAME,
+               printer_driver = :PRINTER_DRIVER,
+               last_update_date = f_ludate,
+               last_updated_by = f_luby,
+               last_update_login = 0
+               where printer_type = :FPI_TYPE_PRINTER_TYPE
+               and printer_style = :FPI_STYLE_PRINTER_STYLE_NAME;
+  
+               if SQL%NOTFOUND then
+                 insert into FND_PRINTER_INFORMATION (
+                   printer_type,
+                   printer_style,
+                   printer_driver,
+                   last_update_date,
+                   last_updated_by,
+                   creation_date,
+                   created_by,
+                   last_update_login)
+                 values (
+                   :FPI_TYPE_PRINTER_TYPE,
+                   :FPI_STYLE_PRINTER_STYLE_NAME,
+                   :PRINTER_DRIVER,
+                   f_ludate,
+                   f_luby,
+                   f_ludate,
+                   f_luby,
+                   0);
+               end if;
+          end if;
+        end; "
+  

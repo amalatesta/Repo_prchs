@@ -1,0 +1,203 @@
+# +======================================================================+
+# |               Copyright (c) 2002, Oracle Corporation                 |
+# |                   Redwood Shores, California, USA                    |
+# |                        All rights reserved.                          |
+# +======================================================================+
+#
+#   Filename
+# wfprvldt.lct
+#   Entity
+#       WF_LOGICAL_DEVICE_TYPES
+#
+# $Header: wfprvldt.lct 120.1 2005/08/02 07:13:52 hgandiko noship $ 
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+54 checkfile:~PROD:~PATH:~FILE:WF_LOGICAL_DEVICE_TYPES &ui_apps 0 Y UPLOAD_PARTIAL @FND:patch/115/import/wfprvldt.lct @~PROD:~PATH/~FILE WF_LOGICAL_DEVICE_TYPES"
+
+#
+# -- DEFINE SECTION --
+#
+
+DEFINE WF_LOGICAL_DEVICE_TYPES
+    KEY     DEVICE_TYPE_NAME    VARCHAR2(80)
+    TRANS   DESCRIPTION VARCHAR2(2000)
+    BASE    CUSTOMIZATION_LEVEL   VARCHAR2(30)
+    BASE    OBJECT_VERSION_NUMBER NUMBER
+    BASE    SECURITY_GROUP_ID VARCHAR2(32)
+    CTX     OWNER     VARCHAR2(4000)
+
+  DEFINE WF_DEVICE_TYPE_PARAMS
+      KEY   PARAMETER_NAME    VARCHAR2(30)
+      BASE  DEFAULT_PARAMETER_VALUE VARCHAR2(1996)
+      BASE  ENCRYPTED_FLAG    VARCHAR2(1)
+      BASE  CUSTOMIZATION_LEVEL VARCHAR2(30)
+      BASE  OBJECT_VERSION_NUMBER NUMBER
+      BASE  SECURITY_GROUP_ID VARCHAR2(32)
+      TRANS DISPLAY_NAME    VARCHAR2(80)
+      TRANS DESCRIPTION     VARCHAR2(1996)
+      CTX   OWNER       VARCHAR2(4000)
+  END WF_DEVICE_TYPE_PARAMS
+
+  DEFINE WF_DEVICE_PROV_ACTIONS
+      KEY ACTION_TYPE VARCHAR2(80)
+      KEY ACTION_NAME VARCHAR2(80)
+      BASE COMMAND_LIST_XML VARCHAR2(32000)
+      BASE EXECUTOR_CLASS_NAME VARCHAR2(240)
+      BASE CUSTOMIZATION_LEVEL VARCHAR2(30)
+      BASE OBJECT_VERSION_NUMBER NUMBER
+      BASE SECURITY_GROUP_ID VARCHAR2(32)
+      CTX  OWNER       VARCHAR2(4000)
+  END WF_DEVICE_PROV_ACTIONS
+
+END WF_LOGICAL_DEVICE_TYPES
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD WF_LOGICAL_DEVICE_TYPES
+  "SELECT device_type_name
+        , software_version
+        , description
+        , customization_level
+        , -1 object_version_number
+        , security_group_id
+        , DECODE (last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+   FROM wf_logical_device_types_vl
+   WHERE ((:DEVICE_TYPE_NAME is NULL) OR
+          (:DEVICE_TYPE_NAME is NOT NULL) AND (DEVICE_TYPE_NAME like :DEVICE_TYPE_NAME)) 
+   ORDER BY DEVICE_TYPE_NAME"
+
+
+DOWNLOAD WF_DEVICE_TYPE_PARAMS
+  "SELECT parameter_name
+        , default_parameter_value
+        , encrypted_flag
+        , customization_level
+        , -1 object_version_number
+        , security_group_id
+        , display_name
+        , description
+        , DECODE (last_updated_by, 1, 'ORACLE', 'CUSTOM') owner
+   FROM wf_device_type_params_vl
+   WHERE DEVICE_TYPE_NAME = :DEVICE_TYPE_NAME 
+   ORDER BY parameter_name"
+
+DOWNLOAD WF_DEVICE_PROV_ACTIONS
+  "SELECT a.action_type
+        , a.action_name
+        , wf_device_prov_actions_pkg.getCommandXML(a.provision_action_id) COMMAND_LIST_XML
+        , a.executor_class_name
+        , a.validation_schema
+        , a.validation_class_name
+        , a.customization_level
+        , -1 object_version_number
+        , security_group_id
+        , DECODE (a.last_updated_by, 1, 'ORACLE','CUSTOM') owner
+   FROM wf_device_prov_actions a, wf_logical_device_types t
+   WHERE t.DEVICE_TYPE_NAME = :DEVICE_TYPE_NAME
+     and a.device_type_id = t.device_type_id
+   ORDER BY action_type, action_name"
+
+#
+# -- UPLOAD SECTION --
+#
+
+UPLOAD WF_LOGICAL_DEVICE_TYPES
+BEGIN
+"BEGIN
+  DECLARE 
+    l_device_type_id NUMBER;
+  BEGIN
+  
+    IF (:UPLOAD_MODE='NLS') THEN
+    
+        SELECT device_type_id
+        INTO l_device_type_id
+        FROM wf_logical_device_types
+        WHERE device_type_name = :DEVICE_TYPE_NAME;
+    
+        WF_LOGICAL_DEVICE_TYPES_PKG.TRANSLATE_ROW
+        (
+              x_device_type_id => l_device_type_id
+            , x_description => :DESCRIPTION
+            , x_owner => :OWNER
+        );
+    ELSE
+        WF_LOGICAL_DEVICE_TYPES_PKG.LOAD_ROW 
+        (
+              x_device_type_name => :DEVICE_TYPE_NAME
+            , x_description => :DESCRIPTION
+            , x_customization_level => :CUSTOMIZATION_LEVEL
+            , x_owner => :OWNER
+            , x_object_version_number => :OBJECT_VERSION_NUMBER
+            , x_security_group_id => :SECURITY_GROUP_ID
+        );
+    END IF;
+  END;
+END;"
+
+UPLOAD WF_DEVICE_TYPE_PARAMS
+"BEGIN
+  DECLARE
+    l_parameter_id wf_device_type_params_b.device_type_param_id%TYPE;
+    l_device_type_id NUMBER;    
+  BEGIN
+
+
+    IF (:UPLOAD_MODE='NLS') THEN
+
+        SELECT device_type_id
+        INTO l_device_type_id
+        FROM wf_logical_device_types
+        WHERE device_type_name = :DEVICE_TYPE_NAME;
+    
+        SELECT device_type_param_id
+        INTO l_parameter_id
+        FROM wf_device_type_params_b
+        WHERE parameter_name = :PARAMETER_NAME
+          and device_type_id = l_device_type_id;
+    
+        WF_DEVICE_TYPE_PARAMS_PKG.TRANSLATE_ROW
+        (
+              x_device_type_param_id => l_parameter_id
+            , x_display_name => :DISPLAY_NAME
+            , x_description => :DESCRIPTION
+            , x_owner => :OWNER
+            , x_security_group_id => :SECURITY_GROUP_ID
+        );
+    ELSE
+        WF_DEVICE_TYPE_PARAMS_PKG.LOAD_ROW 
+        (
+            x_device_type_name => :DEVICE_TYPE_NAME
+          , x_parameter_name => :PARAMETER_NAME
+          , x_default_parameter_value => :DEFAULT_PARAMETER_VALUE
+          , x_encrypted_flag => :ENCRYPTED_FLAG
+          , x_customization_level => :CUSTOMIZATION_LEVEL
+          , x_display_name => :DISPLAY_NAME
+          , x_description => :DESCRIPTION
+          , x_owner => :OWNER
+          , x_object_version_number => :OBJECT_VERSION_NUMBER
+          , x_security_group_id => :SECURITY_GROUP_ID
+          );
+    END IF;
+  END;
+END;"
+
+UPLOAD WF_DEVICE_PROV_ACTIONS
+"BEGIN
+  DECLARE 
+  BEGIN
+  
+        WF_DEVICE_PROV_ACTIONS_PKG.Load_Row 
+        (
+              x_device_type_name => :DEVICE_TYPE_NAME
+            , x_action_type => :ACTION_TYPE
+            , x_action_name => :ACTION_NAME
+            , x_command_list_xml => :COMMAND_LIST_XML
+            , x_customization_level => :CUSTOMIZATION_LEVEL
+            , x_owner => :OWNER
+            , x_object_version_number => :OBJECT_VERSION_NUMBER
+            , x_security_group_id => :SECURITY_GROUP_ID
+        );
+  END;
+END;"

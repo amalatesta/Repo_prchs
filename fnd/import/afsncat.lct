@@ -1,0 +1,134 @@
+#
+# $Header: afsncat.lct 120.0 2005/05/07 16:17:15 appldev ship $
+#
+# afsncat.lct - Document Sequence Categories Loader Configuration
+#
+# HISTORY
+#	1999-08-09	MSkees		Created
+#	1999-08-13	MSkees		115.1 - change OWNER definition to a CTX rather than BASE
+#	1999-11-06	MSkees		115.2 - added LANG clause to UPLOAD_MODE=NLS
+#
+# Entities -
+#
+#    FND_DOC_SEQUENCE_CATEGORIES
+#
+#
+# -- DEFINE SECTION --
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afsncat.lct @~PROD:~PATH/~FILE"
+
+DEFINE FND_DOC_SEQUENCE_CATEGORIES
+  KEY   APPLICATION_SHORT_NAME	        VARCHAR2(50)
+  KEY   CODE 			        VARCHAR2(30)
+  CTX   OWNER          			VARCHAR2(4000)
+  CTX   LAST_UPDATE_DATE                VARCHAR2(10)
+  BASE  TABLE_NAME     			VARCHAR2(30)
+  TRANS NAME		     		VARCHAR2(80)
+  TRANS DESCRIPTION     		VARCHAR2(240)
+END FND_DOC_SEQUENCE_CATEGORIES
+
+#
+# -- DOWNLOAD SECTION --
+#
+
+DOWNLOAD FND_DOC_SEQUENCE_CATEGORIES
+  "select a.APPLICATION_SHORT_NAME,  
+          d.CODE,  
+          fnd_load_util.owner_name(d.LAST_UPDATED_BY) OWNER,
+          to_char(d.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE, 
+          d.TABLE_NAME,
+          d.NAME,
+          d.DESCRIPTION
+   from   FND_DOC_SEQUENCE_CATEGORIES d,
+   		  FND_APPLICATION a  
+   where  d.APPLICATION_ID = a.APPLICATION_ID
+   and    a.APPLICATION_SHORT_NAME like nvl(:APP_SHORT_NAME, '%') " 
+
+
+#
+# -- UPLOAD section -- 
+# 
+
+UPLOAD FND_DOC_SEQUENCE_CATEGORIES
+" begin  
+declare  
+	f_luby 		number := 0;	
+	f_ludate	date;
+	db_luby		number;
+	db_ludate	date;
+	app_id		number;
+begin
+
+	select	APPLICATION_ID 
+	into	app_id
+	from	FND_APPLICATION
+	where	APPLICATION_SHORT_NAME = :APPLICATION_SHORT_NAME;
+
+        -- Translate owner to file_last_updated_by
+        f_luby := fnd_load_util.owner_id(:OWNER);
+ 
+        -- Translate char last_update_date to date
+        f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+
+        select	 LAST_UPDATED_BY, LAST_UPDATE_DATE
+               into 	db_luby, db_ludate
+               from 	FND_DOC_SEQUENCE_CATEGORIES
+               where 	APPLICATION_ID = app_id 
+	and	CODE = :CODE; 
+
+		
+ 	if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+               	                     db_ludate, :CUSTOM_MODE)) then
+
+           if (:UPLOAD_MODE = 'NLS') then
+		
+ 		update	FND_DOC_SEQUENCE_CATEGORIES
+		set		NAME = :NAME,
+				DESCRIPTION = :DESCRIPTION,
+				last_update_date = f_ludate,
+				last_updated_by = f_luby,
+				last_update_login = 0
+		where	APPLICATION_ID = app_id
+		and		CODE = :CODE
+		and		userenv('LANG') = ( select	language_code
+							from	FND_LANGUAGES
+						where	installed_flag = 'B');
+           else
+                update  FND_DOC_SEQUENCE_CATEGORIES
+                set             TABLE_NAME = :TABLE_NAME, 
+				NAME = :NAME,
+                                DESCRIPTION = :DESCRIPTION,
+                                last_update_date = f_ludate,
+                                last_updated_by = f_luby,
+                                last_update_login = 0
+                where   APPLICATION_ID = app_id
+                and             CODE = :CODE;
+           end if;
+	end if;
+		
+	exception
+		when NO_DATA_FOUND then
+			insert into FND_DOC_SEQUENCE_CATEGORIES ( 
+				APPLICATION_ID,
+				CODE,
+				TABLE_NAME,
+				NAME,
+				DESCRIPTION,
+				last_update_date,
+				last_updated_by,
+				creation_date,
+				created_by,  
+				last_update_login )
+			values (	app_id,
+					:CODE,
+					:TABLE_NAME,
+					:NAME,
+					:DESCRIPTION,
+					f_ludate,
+					f_luby,
+					f_ludate,
+					f_luby,
+					0 );
+				
+     end;
+end; "

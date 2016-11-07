@@ -1,0 +1,132 @@
+#
+# $Header: fwktbxlookups.lct 120.1 2007/05/02 16:09:42 pbhamidi noship $
+#
+# fwktbxlookups.lct - OA Framework Toolbox Lookups Loader Configuration
+#
+# Entities
+#    FWK_TBX_LOOKUP_TYPES  - Lookup Types
+#    FWK_TBX_LOOKUP_CODES  - Lookup Codes 
+#
+# HISTORY:
+#   02-MAY-07       pbhamidi    Bug#5986536: Added LOAD_ROW
+#
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+51 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/fwktbxlookups.lct @~PROD:~PATH/~FILE"
+
+DEFINE FWK_TBX_LOOKUP_TYPE
+  KEY   LOOKUP_TYPE                     VARCHAR2(30)
+  TRANS DISPLAY_NAME                    VARCHAR2(80)
+  TRANS DESCRIPTION                     VARCHAR2(240)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  BASE  LAST_UPDATED_BY                 NUMBER
+  BASE  CREATION_DATE                   VARCHAR2(10)
+  BASE  CREATED_BY                      NUMBER
+  BASE  LAST_UPDATE_LOGIN               NUMBER
+
+  DEFINE FWK_TBX_LOOKUP_CODE
+    KEY   LOOKUP_CODE                     VARCHAR2(30)
+    BASE  START_DATE_ACTIVE               VARCHAR2(10)
+    BASE  END_DATE_ACTIVE                 VARCHAR2(10)
+    TRANS MEANING                         VARCHAR2(80)
+    TRANS DESCRIPTION                     VARCHAR2(240)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    BASE  LAST_UPDATED_BY                 NUMBER
+    BASE  CREATION_DATE                   VARCHAR2(10)
+    BASE  CREATED_BY                      NUMBER
+    BASE  LAST_UPDATE_LOGIN               NUMBER
+  END FWK_TBX_LOOKUP_CODE
+END FWK_TBX_LOOKUP_TYPE
+
+DOWNLOAD FWK_TBX_LOOKUP_TYPE
+  "select LTT.LOOKUP_TYPE,
+          LTT.DISPLAY_NAME,
+          LTT.DESCRIPTION,
+          fnd_load_util.owner_name(LTT.LAST_UPDATED_BY) OWNER,
+          TO_CHAR(LTT.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          LTT.LAST_UPDATED_BY,
+          TO_CHAR(LTT.CREATION_DATE, 'YYYY/MM/DD') CREATION_DATE,
+          LTT.CREATED_BY,
+          LTT.LAST_UPDATE_LOGIN
+   from FWK_TBX_LOOKUP_TYPES_TL LTT
+   where LTT.SOURCE_LANG = USERENV('LANG')"
+
+DOWNLOAD FWK_TBX_LOOKUP_CODE
+  "select LCV.LOOKUP_CODE,
+          TO_CHAR(LCV.START_DATE_ACTIVE, 'YYYY/MM/DD') START_DATE_ACTIVE,
+          TO_CHAR(LCV.END_DATE_ACTIVE, 'YYYY/MM/DD') END_DATE_ACTIVE,
+          LCV.MEANING,
+          LCV.DESCRIPTION,
+          fnd_load_util.owner_name(LCB.LAST_UPDATED_BY) OWNER,
+          TO_CHAR(LCB.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          LCB.LAST_UPDATED_BY,
+          TO_CHAR(LCB.CREATION_DATE, 'YYYY/MM/DD') CREATION_DATE,
+          LCB.CREATED_BY,
+          LCB.LAST_UPDATE_LOGIN
+   from FWK_TBX_LOOKUP_CODES_VL LCV, FWK_TBX_LOOKUP_CODES_B LCB
+   where LCV.LOOKUP_TYPE = :LOOKUP_TYPE and 
+         LCV.LOOKUP_TYPE = LCB.LOOKUP_TYPE and
+         LCV.LOOKUP_CODE = LCB.LOOKUP_CODE"
+
+UPLOAD FWK_TBX_LOOKUP_TYPE
+   BEGIN
+   "declare
+        row_id varchar2(64);
+    begin
+        if (:UPLOAD_MODE = 'NLS') then  
+           FWK_TBX_LOOKUP_TYPES_PKG.TRANSLATE_ROW(  
+             x_lookup_type         => :LOOKUP_TYPE,  
+             x_owner               => :OWNER,  
+             x_display_name        => :DISPLAY_NAME,  
+             x_description         => :DESCRIPTION,
+	     x_last_update_date    => :LAST_UPDATE_DATE,
+	     x_custom_mode         => :CUSTOM_MODE);
+        else
+          FWK_TBX_LOOKUP_TYPES_PKG.LOAD_ROW(
+             x_rowid               => row_id,
+             x_lookup_type         => :LOOKUP_TYPE,
+             x_display_name        => :DISPLAY_NAME,
+             x_description         => :DESCRIPTION,
+             x_creation_date       => TO_DATE(:CREATION_DATE, 'YYYY/MM/DD'),
+             x_created_by          => :CREATED_BY,
+             x_last_update_date    => TO_DATE(:LAST_UPDATE_DATE, 'YYYY/MM/DD'),
+             x_last_updated_by     => :LAST_UPDATED_BY,
+             x_last_update_login   => :LAST_UPDATE_LOGIN,
+             x_owner               => :OWNER,
+             x_custom_mode         => :CUSTOM_MODE);
+        end if;
+    end;"
+
+UPLOAD FWK_TBX_LOOKUP_CODE
+   "declare
+        row_id varchar2(64);
+
+    begin
+        if (:UPLOAD_MODE = 'NLS') then  
+           FWK_TBX_LOOKUP_CODES_PKG.TRANSLATE_ROW(  
+             x_lookup_type         => :LOOKUP_TYPE,  
+             x_lookup_code         => :LOOKUP_CODE,
+             x_owner               => :OWNER,  
+             x_meaning             => :MEANING,  
+             x_description         => :DESCRIPTION,  
+	     x_last_update_date    => :LAST_UPDATE_DATE,
+	     x_custom_mode         => :CUSTOM_MODE);
+        else
+          FWK_TBX_LOOKUP_CODES_PKG.LOAD_ROW(
+             x_rowid               => row_id,
+             x_lookup_type         => :LOOKUP_TYPE,
+             x_lookup_code         => :LOOKUP_CODE, 
+             x_start_date_active   => TO_DATE(:START_DATE_ACTIVE, 'YYYY/MM/DD'),
+             x_end_date_active     => TO_DATE(:END_DATE_ACTIVE, 'YYYY/MM/DD'),
+             x_meaning             => :MEANING,
+             x_description         => :DESCRIPTION,
+             x_creation_date       => TO_DATE(:CREATION_DATE, 'YYYY/MM/DD'),
+             x_created_by          => :CREATED_BY,
+             x_last_update_date    => TO_DATE(:LAST_UPDATE_DATE, 'YYYY/MM/DD'),
+             x_last_updated_by     => :LAST_UPDATED_BY, 
+             x_last_update_login   => :LAST_UPDATE_LOGIN,
+             x_owner               => :OWNER,
+             x_custom_mode         => :CUSTOM_MODE);
+        end if;
+    end;"

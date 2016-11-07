@@ -1,0 +1,182 @@
+#
+# $Header: afmdmsg.lct 120.1.12010000.1 2008/07/25 13:40:15 appldev ship $
+#
+# afmdmsg.lct -  Messages
+#
+# Entities
+#    FND_NEW_MESSAGES
+#
+#
+# Note: to change the language you are downloading, setenv NLS_LANG before 
+#       running the loader.
+#
+# If you want your messages validated for correctness, pass the VALIDATION
+# parameter.  It has one of three modes:
+# VALIDATION=PATCH (the default) No errors announced.
+#   To be used in applying patches.
+# VALIDATION=POST_TRANSLATE      Announces all errors
+#   To be used when uploading messages after translation.  This mode will 
+#   will allow messages to use the full buffer sizes, and will not require
+#   them to leave space for translation.
+# VALIDATION=STRICT              Announces all errors
+#   To be used when creating new messages or editing non-translated 
+#   messages using the loader files.  This mode will announce errors 
+#   if messages do not leave enough room for translation.  
+#
+#
+# When downloading messages, you can use the parameters 
+# APPLICATION_SHORT_NAME and MESSAGE_NAME to limit which messages you get.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afmdmsg.lct @~PROD:~PATH/~FILE"
+DEFINE FND_NEW_MESSAGES
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  KEY   MESSAGE_NAME            VARCHAR2(30)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+  CTX   MESSAGE_NUMBER          VARCHAR2(50)
+  TRANS MESSAGE_TEXT            VARCHAR2(2000)
+  CTX   DESCRIPTION             VARCHAR2(240)
+  CTX   TYPE                    VARCHAR2(30)
+  CTX   MAX_LENGTH              VARCHAR2(50)
+  CTX   CATEGORY                VARCHAR2(10)
+  CTX   SEVERITY                VARCHAR2(10)
+  CTX   FND_LOG_SEVERITY        VARCHAR2(50)
+END FND_NEW_MESSAGES
+
+DOWNLOAD FND_NEW_MESSAGES
+  " select 
+          a.application_short_name,  
+          m.message_name,  
+          fnd_load_util.owner_name(m.LAST_UPDATED_BY) OWNER,
+          to_char(m.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          nvl(to_char(m.message_number), substrb(fnd_load_util.null_value,1,6)) message_number,
+          m.message_text,  
+          nvl(m.description, substrb(fnd_load_util.null_value,1,6)) description,
+          nvl(m.type, substrb(fnd_load_util.null_value,1,6)) type,
+          nvl(to_char(m.max_length), substrb(fnd_load_util.null_value,1,6)) max_length,
+          nvl(m.category, substrb(fnd_load_util.null_value,1,6)) category,
+          nvl(m.severity, substrb(fnd_load_util.null_value,1,6)) severity,
+          nvl(to_char(m.fnd_log_severity), substrb(fnd_load_util.null_value,1,6)) fnd_log_severity
+   from   fnd_new_messages m,  
+          fnd_application a  
+   where  m.application_id         = a.application_id  
+   and    (:APPLICATION_SHORT_NAME is null or
+           (:APPLICATION_SHORT_NAME is not null 
+                and a.application_short_name like :APPLICATION_SHORT_NAME))
+   and    (:MESSAGE_NAME is null or
+           (:MESSAGE_NAME is not null and m.message_name like :MESSAGE_NAME))
+   and    m.language_code          = userenv('LANG') "
+
+UPLOAD FND_NEW_MESSAGES
+" begin  
+    declare  
+
+       -- 2747318 Backwards compatibility change
+       -- The afmdmsg.lct file can be called during an upgrade against an 11.5.0
+       -- database which does not have category and severity columns defined.
+       -- Therefore, the code checks if the 2 columns exist and executes the
+       -- update and insert with the appropriate fields.
+       -- Note: the update and insert statements have been moved into strings to
+       -- allow the 2 columns to pass thru the plsql compilation verification.
+       --
+       -- Counter and sql string variables for verifying that the category 
+       -- and severity columns are present in the FND_NEW_MESSAGES table. 
+       -- Since message_name, text and description can contain single quotes, 
+       -- the dynamic sql needs to esc the single quote. 
+
+       app_id   number := 0;
+
+    begin  
+
+      -- Bug 4030688. Introduced the fnd_new_messages_pkg package. Re-wrote
+      -- backward compatibility and performance issues addressed in
+      -- Bug 2955364 and 2747318. This will do comaptibility check only once
+      -- for one upload session i.e. for one ldt
+
+      if FND_NEW_MESSAGES_PKG.ADDN_COLS IS NULL then
+
+        fnd_new_messages_pkg.check_compatibility;
+
+      end if;
+
+        select application_id into app_id
+        from   fnd_application
+        where  application_short_name = :APPLICATION_SHORT_NAME;
+
+      begin  
+     
+       if (:UPLOAD_MODE = 'NLS') then
+          fnd_new_messages_pkg.TRANSLATE_ROW(
+            x_application_id       => app_id,
+            x_message_name         => :MESSAGE_NAME,
+            x_message_text         => :MESSAGE_TEXT,
+            x_owner                => :OWNER,
+            x_custom_mode          => :CUSTOM_MODE,
+            x_last_update_date     => :LAST_UPDATE_DATE);
+          
+       else 
+          fnd_new_messages_pkg.LOAD_ROW(
+            x_application_id       => app_id,
+            x_message_name         => :MESSAGE_NAME,
+            x_message_number       => :MESSAGE_NUMBER,
+            x_message_text         => :MESSAGE_TEXT,
+            x_description          => :DESCRIPTION,
+            x_type                 => :TYPE,
+            x_max_length           => :MAX_LENGTH,
+            x_category             => :CATEGORY,
+            x_severity             => :SEVERITY,
+            x_fnd_log_severity     => :FND_LOG_SEVERITY,
+            x_owner                => :OWNER,
+            x_custom_mode          => :CUSTOM_MODE,
+            x_last_update_date     => :LAST_UPDATE_DATE);
+
+       end if; 
+ 
+      end;  
+ 
+      if (:VALIDATION IS NOT NULL) then
+
+         fnd_new_messages_pkg.CHECK_MESSAGE_TYPE( 
+            x_message_name       => :MESSAGE_NAME,
+            x_type               => :TYPE);
+
+         fnd_new_messages_pkg.CHECK_MESSAGE_DESCRIPTION( 
+            x_message_name       => :MESSAGE_NAME,
+            x_type               => :TYPE,
+            x_description        => :DESCRIPTION);
+
+         fnd_new_messages_pkg.CHECK_MAXIMUM_LENGTH_RANGE( 
+            x_max_length         => :MAX_LENGTH,
+            x_message_name       => :MESSAGE_NAME);
+
+         fnd_new_messages_pkg.CHECK_MAX_LENGTH_TYPE( 
+            x_message_name       => :MESSAGE_NAME,
+            x_type               => :TYPE,
+            x_max_length         => :MAX_LENGTH);
+
+        fnd_new_messages_pkg.CHECK_MAX_LEN_MSG_LEN( 
+            x_message_name       => :MESSAGE_NAME,
+            x_message_text       => :MESSAGE_TEXT,
+            x_max_length         => :MAX_LENGTH,
+            x_validation         => :VALIDATION);
+
+         fnd_new_messages_pkg.CHECK_CATEGORY_SEVERITY( 
+            x_category           => :CATEGORY,
+            x_severity           => :SEVERITY,
+            x_fnd_log_severity   => :FND_LOG_SEVERITY,
+            x_message_name       => :MESSAGE_NAME);
+
+        fnd_new_messages_pkg.CHECK_TOKENS_ACCESS_KEYS( 
+            x_message_name       => :MESSAGE_NAME,
+            x_message_text       => :MESSAGE_TEXT);
+
+        fnd_new_messages_pkg.CHECK_TYPE_RULES( 
+            x_message_name       => :MESSAGE_NAME,
+            x_type               => :TYPE,
+            x_message_text       => :MESSAGE_TEXT,
+            x_validation         => :VALIDATION);
+
+      end if;
+
+   end;  
+end;   " 

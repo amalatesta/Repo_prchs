@@ -1,0 +1,624 @@
+#
+# $Header: fndfold.lct 120.0 2005/07/22 21:35:04 appldev ship $
+#
+# fndfold.lct - FOLDER Loader Configuration
+#
+# Entities -
+#
+#    FND_FOLDERS
+#       FND_FOLDER_COLUMNS 
+#       FND_DEFAULT_FOLDERS
+#
+# Parameters -
+#       (1) NAME=VALUE  (WHILE DOWNLOAD ONLY)
+#       (2) OBJECT=VALUE  (WHILE DOWNLOAD ONLY)
+#       (3) TYPE= "U" OR "I"   (WHILE UPLOAD ONLY)
+#
+# To download all folders use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt FND_FOLDERS 
+#
+# To download folders by friendly names, use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt FND_FOLDERS NAME="<name of folder>"
+#
+#   Example:
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt FND_FOLDERS NAME="Receipts Summary Basic"
+#
+#   Note that the name of the folder is case sensitive.
+#
+# To download folders by internal object names, use this command -
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt FND_FOLDERS OBJECT="<internal object name>"
+#
+#   Example:
+#   FNDLOAD username/password@database 0 Y DOWNLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt FND_FOLDERS OBJECT="ARXRWRCT"
+#
+# To upload the folders use this command - 
+#   FNDLOAD username/password@database 0 Y UPLOAD $FND_TOP/patch/115/import/fndfold.lct <name of file>.ldt 
+#
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+#   LAST_UPDATE_DATE and OWNER attributes technically should be CTX.  
+#   Although since we have no translated columns this really doesn't matter. 
+#
+#   CHILD_ENTITY is a child of ENTITY.  Show this relationship by nesting
+#   its definition inside that of its parent.  The child automatically
+#   inherits the key fields of its parent and they should not be duplicated in
+#   the child's definition even though the actual underlying data model
+#   may have columns for those key values.
+#
+#   Reselecting folder_id for every child entity:  
+#   We don't expect this to have high-volume usage, so this is ok. 
+#
+#   LANGUAGE is just a striping column. Folder data is never seeded or translated.
+#   As users operate the screen and make customizations, 
+#   the changes are saved in their current language.
+#
+#   We use fnd_number.number_to_canonical to make number columns get 
+#   uploaded/downloaded with consistent formats. 
+#   SQL knows nothing about the size of a return value of a plsql function, 
+#   and thus assumes the worst (4000) - the same reason why owner has to be 
+#   declared 4000 when it is really much smaller than that.
+#
+#
+
+DEFINE FND_FOLDERS
+
+   KEY   FOLDER_ID             NUMBER         
+   KEY   OBJECT                VARCHAR2(30)   
+   KEY   FOLDER_NAME           VARCHAR2(80)   ## Alias for NAME column in database,
+                                              ## It should be TRANS but must remain KEY.
+   KEY   LANGUAGE              VARCHAR2(4)    ## just a striping column
+   KEY   CREATED_BY            VARCHAR2(4000) ## created_by used in download section 
+   KEY   CREATOR               VARCHAR2(4000) ## created_by used in upload section
+   BASE  WINDOW_WIDTH          VARCHAR2(4000)   
+   BASE  PUBLIC_FLAG           VARCHAR2(1)
+   BASE  AUTOQUERY_FLAG        VARCHAR2(1)
+   CTX   LAST_UPDATE_DATE      VARCHAR2(11)   
+   CTX   OWNER                 varchar2(4000) ## last_updated_by
+   BASE  WHERE_CLAUSE          VARCHAR2(2000)
+   BASE  ORDER_BY              VARCHAR2(30)
+ 
+  DEFINE FND_FOLDER_COLUMNS
+
+     KEY   FOLDER_ID            NUMBER
+     KEY   ITEM_NAME            VARCHAR2(30)   
+     BASE  DISPLAY_MODE         VARCHAR2(1)
+     BASE  SEQUENCE             VARCHAR2(4000) ## This is just the order of records.
+     CTX   LAST_UPDATE_DATE     VARCHAR2(11)   
+     CTX   OWNER                varchar2(4000) ## last_updated_by
+     BASE  ITEM_WIDTH           VARCHAR2(4000) 
+     TRANS ITEM_PROMPT          VARCHAR2(80)
+     BASE  X_POSITION           VARCHAR2(4000) 
+     BASE  Y_POSITION           VARCHAR2(4000) 
+     
+  END FND_FOLDER_COLUMNS
+
+  DEFINE FND_DEFAULT_FOLDERS
+     KEY   FOLDER_ID              NUMBER  
+     KEY   OBJECT                 VARCHAR2(30)
+     KEY   USER_RESP_TYPE         varchar2(10)   ## Stores info whether user_id is user or resp.
+     KEY   USER_ID                varchar2(240) 
+     CTX   LAST_UPDATE_DATE       VARCHAR2(11)   
+     CTX   OWNER                  varchar2(4000) ## last_updated_by
+     BASE  APPLICATION_SHORT_NAME VARCHAR2(4000) ## application_id
+     BASE  BEHAVIOR_MODE          VARCHAR2(1)
+    
+  END FND_DEFAULT_FOLDERS    
+
+END FND_FOLDERS
+#
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Protect against parameter passing using 
+#       and (:parm is null or (:parm is not null and col like :parm))
+#
+#	      
+DOWNLOAD FND_FOLDERS
+ "SELECT f.folder_id
+        ,f.object
+        ,f.name FOLDER_NAME
+        ,f.language
+        ,f.created_by
+        ,u.user_name CREATOR
+        ,fnd_number.number_to_canonical(f.window_width) WINDOW_WIDTH
+        ,f.public_flag
+        ,f.autoquery_flag
+        ,to_char(f.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+        ,fnd_load_util.owner_name(f.LAST_UPDATED_BY) OWNER 
+        ,f.where_clause
+        ,f.order_by        
+  FROM  fnd_folders f, fnd_user u 
+  WHERE (:NAME is null or (:NAME is not null and f.NAME like :NAME)) and
+        (:OBJECT is null or (:OBJECT is not null and f.OBJECT like :OBJECT))
+         and f.LANGUAGE  = userenv('LANG')
+         and f.created_by = u.user_id
+  ORDER BY object, name, language"
+#
+#
+DOWNLOAD FND_FOLDER_COLUMNS
+  "SELECT  folder_id
+          ,item_name
+          ,display_mode
+          ,fnd_number.number_to_canonical(sequence) SEQUENCE
+          ,to_char(LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+          ,fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER 
+          ,fnd_number.number_to_canonical(item_width) ITEM_WIDTH
+          ,item_prompt
+          ,fnd_number.number_to_canonical(x_position) X_POSITION
+          ,fnd_number.number_to_canonical(y_position) Y_POSITION
+   FROM  fnd_folder_columns 
+   WHERE folder_id = :FOLDER_ID
+   ORDER BY item_name"
+#
+#
+#
+# The user_id field stores either the USER_ID or RESPONSIBILITY
+# Although the responsibility is stored as a negative value in fnd_default_folders.user_id,
+# the responsibility_id is actually a positive value in table fnd_responsibility.
+#
+# The user_id is a Responsibility if the value is < 0.
+# The user_id is a User if the value is >= 0.
+#
+# One exception is that user_id can be -1 which is not a responsibility but an ANONYMOUS user.
+# The user_id -1 = ANONYMOUS.
+#
+# The decode(sign(F.USER_ID) will interpret <0 returns -1
+#                                            0 returns  0
+#                                           >0 returns  1 
+#
+#
+DOWNLOAD FND_DEFAULT_FOLDERS
+ "SELECT  folder_id,
+          object,      
+          decode(f.user_id, -1,'USER',decode(sign(f.user_id), -1, 'RESP', 0, 'USER', 1, 'USER')) USER_RESP_TYPE,
+          decode(f.user_id, -1, u.user_name, decode(sign(f.user_id), -1, r.responsibility_key, 0, u.user_name, 1, u.user_name)) USER_ID,
+          to_char(F.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          fnd_load_util.owner_name(f.LAST_UPDATED_BY) OWNER,           
+          nvl(a.APPLICATION_SHORT_NAME, fnd_load_util.null_value) APPLICATION_SHORT_NAME,
+          behavior_mode
+  FROM  fnd_default_folders f, fnd_responsibility r, fnd_user u, fnd_application a
+  WHERE abs(f.user_id) = r.responsibility_id (+) and 
+        f.user_id = u.user_id (+) and
+        f.application_id = a.application_id (+) and
+        folder_id = :FOLDER_ID
+  ORDER BY object"
+  
+#
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+#
+#           - Use OWNER attribute in upload logic to set LAST_UPDATED_BY
+#             columns and prevent overwriting customer changes.
+#
+#	    - Use the fnd_load_util.upload_test() utility, with the
+#	      OWNER and LAST_UPDATE_DATE attributes, to determine
+#	      whether an existing row in the database should be
+#	      over-written by the upload, based on customization and
+#	      version status of both the old and new rows.  The rules
+#	      enforced by fnd_load_util.upload_test() are:
+#	      1. If the entity being uploaded is not present in the
+#	         database, a new entity is always inserted.
+#	      2. SEED-owned entities uploaded from a file never update
+#		 CUSTOM-owned entities in the database.
+#	      3. CUSTOM-owned entities uploaded from a file always update
+#	         SEED-owned entities in the database.
+#	      4. If the owner of the entity is the same in the file
+#	         and database, the entity is updated only if the
+#	         LAST_UPDATE_DATE in the file is later than the
+#	         LAST_UPDATE_DATE in the database.
+#	      See Appendix A for more details.
+#
+#	    - Support CUSTOM_MODE=FORCE upload parameter force data
+#	      upload.  If CUSTOM_MODE=FORCE is passed, then all rows
+#	      in the data file should be inserted/updated, regardless
+#	      of OWNER and LAST_UPDATE_DATE attributes. 
+#
+#	      
+UPLOAD FND_FOLDERS
+BEGIN
+
+  "DECLARE
+    f_luby         number; -- entity owner in file
+    f_ludate       date;   -- entity update date in file
+    db_luby        number; -- entity owner in db
+    db_ludate      date;   -- entity update date in db     
+    db_folder_id   NUMBER; -- folder_id
+    db_creator     number; -- creator/owner of folder
+    c_window_width number; -- window_width
+
+    
+  BEGIN                        
+    
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+ 
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+    
+    -- Translate char window_width to number
+    c_window_width := fnd_number.canonical_to_number(:WINDOW_WIDTH);
+    
+    
+    BEGIN
+      
+    --  
+    -- Need to translate the CREATOR user name to user_id
+    --
+        
+    select u.user_id
+    into db_creator
+    from fnd_user u
+    where :CREATOR = u.user_name;
+              
+    EXCEPTION          
+    when NO_DATA_FOUND then
+       fnd_message.set_name('FND', 'FND_INVALID_USER');
+       fnd_message.set_token('USER_NAME', :CREATOR);
+       return;
+    END;     
+    
+    --
+    -- Check to see if this folder already exists in the database.      
+    -- If it does exist, perform the upload test to see if it should be 
+    -- updated or not. If it should be updated, first delete appropriate 
+    -- child records from fnd_folder_columns and fnd_default_folders 
+    -- as they will be later inserted, not updated.
+    --
+    -- If this folder does not exist, insert it into the database.
+    --         
+     
+    BEGIN
+
+      --
+      -- Two users (created_by) could potentially have folders defined with the same name 
+      -- in the same language so make sure to also check the created_by and language 
+      -- columns to find the correct folder_id.
+      --    
+      
+      SELECT FOLDER_ID, LAST_UPDATED_BY, LAST_UPDATE_DATE 
+      into db_folder_id, db_luby, db_ludate
+      FROM FND_FOLDERS
+      WHERE NAME = :FOLDER_NAME AND 
+            OBJECT = :OBJECT AND
+            CREATED_BY = db_creator AND
+            LANGUAGE = :LANGUAGE;   
+    
+      IF (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                  db_ludate, :CUSTOM_MODE)) then
+                                                                       
+        update fnd_folders set
+          name              = :FOLDER_NAME, 
+          window_width      = c_window_width,
+          public_flag       = :PUBLIC_FLAG,
+	  autoquery_flag    = :AUTOQUERY_FLAG,	
+	  last_update_date  = f_ludate,
+	  last_updated_by   = f_luby,
+	  last_update_login = 0,
+	  where_clause      = :WHERE_CLAUSE,
+          order_by          = :ORDER_BY
+        where folder_id = db_folder_id;        
+        
+        -- Delete the child rows in fnd_folder_columns and fnd_default_folders   
+	       
+	DELETE FROM FND_FOLDER_COLUMNS
+	WHERE folder_id = db_folder_id; 	
+	     
+	DELETE FROM FND_DEFAULT_FOLDERS
+        WHERE folder_id = db_folder_id;
+    
+      ELSE
+        --This object has been customized.
+        null;
+      END IF;     
+          
+       
+    EXCEPTION
+      when NO_DATA_FOUND then      
+                
+        insert into fnd_folders (
+          folder_id,
+          object,
+          name,
+          window_width,
+          public_flag,
+          autoquery_flag,
+          creation_date,
+          created_by,
+          last_update_date,
+          last_updated_by,
+          last_update_login,
+          where_clause,
+          order_by,
+          language )
+        values (         
+          fnd_folders_s.nextval, 
+          :OBJECT,
+          :FOLDER_NAME,
+          c_window_width,
+          :PUBLIC_FLAG,
+          :AUTOQUERY_FLAG,
+          f_ludate,
+          db_creator,
+          f_ludate,
+          f_luby,
+          0,
+          :WHERE_CLAUSE,
+          :ORDER_BY,
+          :LANGUAGE );
+              
+     END;     
+   END;"
+#
+#
+UPLOAD FND_FOLDER_COLUMNS
+"DECLARE
+    f_luby        number; -- entity owner in file
+    f_ludate      date;   -- entity update date in file
+    db_folder_id  NUMBER; -- folder_id
+    db_creator    number; -- creator/owner of folder    
+    c_sequence    NUMBER; -- sequence
+    c_item_width  NUMBER; -- item_width
+    c_x_position  NUMBER; -- x_position
+    c_y_position  NUMBER; -- y_position
+      
+BEGIN
+
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+ 
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+    
+    -- Translate char columns to number
+    c_sequence   := fnd_number.canonical_to_number(:SEQUENCE);
+    c_item_width := fnd_number.canonical_to_number(:ITEM_WIDTH);
+    c_x_position := fnd_number.canonical_to_number(:X_POSITION);
+    c_y_position := fnd_number.canonical_to_number(:Y_POSITION);
+    
+    
+    BEGIN
+      
+    --  
+    -- Need to translate the CREATOR user name to user_id
+    --
+        
+    select u.user_id
+    into db_creator
+    from fnd_user u
+    where :CREATOR = u.user_name;
+              
+    EXCEPTION          
+    when NO_DATA_FOUND then
+       fnd_message.set_name('FND', 'FND_INVALID_USER');
+       fnd_message.set_token('USER_NAME', :CREATOR);
+       return;
+    END;    
+    
+    --
+    -- Obtain the folder_id that was used in previous upload section 
+    -- when record was either inserted into fnd_folders table or
+    -- updated.
+    --
+         
+    SELECT FOLDER_ID
+    into db_folder_id
+    FROM FND_FOLDERS 
+    WHERE NAME = :FOLDER_NAME AND 
+          OBJECT = :OBJECT AND
+          CREATED_BY = db_creator AND
+          LANGUAGE = :LANGUAGE;
+    
+    insert into fnd_folder_columns (
+      folder_id,
+      display_mode,
+      item_name,
+      sequence,
+      creation_date,
+      created_by,
+      last_update_date,
+      last_updated_by,
+      last_update_login,
+      item_width,
+      item_prompt,
+      x_position,
+      y_position )
+    values (
+      db_folder_id,
+      :DISPLAY_MODE,
+      :ITEM_NAME,
+      c_sequence,
+      f_ludate,
+      f_luby,
+      f_ludate,
+      f_luby,
+      0,
+      c_item_width,
+      :ITEM_PROMPT,
+      c_x_position,
+      c_y_position);
+      
+END;"           
+#
+#
+UPLOAD FND_DEFAULT_FOLDERS
+"DECLARE
+
+    f_luby            number; -- entity owner in file
+    f_ludate          date;   -- entity update date in file
+    db_creator    number; -- creator/owner of folder    
+    db_folder_id      NUMBER; -- folder_id
+    db_user_id        NUMBER; -- user_id
+    db_application_id NUMBER; -- application_id
+  
+BEGIN
+
+    -- Translate owner to file_last_updated_by
+    f_luby := fnd_load_util.owner_id(:OWNER);
+ 
+    -- Translate char last_update_date to date
+    f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate); 
+    
+    
+    BEGIN
+      
+    --  
+    -- Need to translate the CREATOR user name to user_id
+    --
+        
+    select u.user_id
+    into db_creator
+    from fnd_user u
+    where :CREATOR = u.user_name;
+              
+    EXCEPTION          
+    when NO_DATA_FOUND then
+       fnd_message.set_name('FND', 'FND_INVALID_USER');
+       fnd_message.set_token('USER_NAME', :CREATOR);
+       return;
+    END;     
+              
+
+    if :USER_RESP_TYPE = 'RESP' then
+    
+      BEGIN
+    
+      --
+      -- Need to translate the responsibility to the id
+      -- and store the responsibility_id as a negative value in column user_id
+      --
+    
+      select (r.responsibility_id * -1)
+      into db_user_id
+      from fnd_responsibility r
+      where :USER_ID = r.responsibility_key;
+          
+      EXCEPTION      
+      when NO_DATA_FOUND then       
+         fnd_message.set_name('FND', 'FND-INVALID RESPONSIBILITY');
+         fnd_message.set_token('RESP', :USER_ID);
+         return;   
+      END;    
+    
+    elsif :USER_RESP_TYPE = 'USER' then
+              
+      BEGIN
+      
+      --  
+      -- Need to translate the user name 
+      --
+        
+      select u.user_id
+      into db_user_id
+      from fnd_user u
+      where :USER_ID = u.user_name;
+              
+      EXCEPTION          
+      when NO_DATA_FOUND then
+         fnd_message.set_name('FND', 'FND_INVALID_USER');
+         fnd_message.set_token('USER_NAME', :USER_ID);
+         return;
+      END;      
+    
+    end if;
+    
+    --
+    -- Need to translate the application name to the id
+    --
+    
+    if :APPLICATION_SHORT_NAME = '*NULL*' then
+      db_application_id := null;
+    else
+    
+      BEGIN
+        
+        select a.application_id 
+        into db_application_id
+        from fnd_application a
+        where :APPLICATION_SHORT_NAME = a.application_short_name;
+          
+      EXCEPTION      
+        when NO_DATA_FOUND then
+           fnd_message.set_name('FND', 'FND-INVALID APPLICATION');
+           fnd_message.set_token('APPL', :APPLICATION_SHORT_NAME);
+           return;
+      END;  
+      
+    end if;
+
+    BEGIN
+    
+      --
+      -- Obtain the folder_id that was used in previous upload section 
+      -- when record was either inserted into fnd_folders table or
+      -- updated.
+      --    
+         
+      SELECT FOLDER_ID
+      into db_folder_id
+      FROM FND_FOLDERS 
+      WHERE NAME = :FOLDER_NAME AND 
+            OBJECT = :OBJECT AND
+            CREATED_BY = db_creator AND
+            LANGUAGE = :LANGUAGE;    
+
+      insert into fnd_default_folders (
+        object,
+        user_id,
+        folder_id,
+        creation_date,
+        created_by,
+        last_update_date,
+        last_updated_by,
+        last_update_login,
+        application_id,
+        behavior_mode )
+      values (
+        :OBJECT,
+        db_user_id,
+        db_folder_id,
+        f_ludate,
+        f_luby,
+        f_ludate,
+        f_luby,
+        0,
+        db_application_id,
+        :BEHAVIOR_MODE );
+        
+     END;
+END;"                                      
+#
+#

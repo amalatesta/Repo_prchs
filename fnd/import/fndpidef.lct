@@ -1,0 +1,126 @@
+#
+# $Header: fndpidef.lct 120.0 2005/05/07 16:18:38 appldev noship $
+#
+# Entities
+#        FND_PURPOSE_ATTRIBUTES 
+#
+
+  DEFINE  FND_PURPOSE_ATTRIBUTES
+    CTX   PURPOSE_ATTRIBUTE_ID            NUMBER
+    BASE  PRIVACY_ATTRIBUTE_CODE          VARCHAR2(30)
+    BASE  PURPOSE_CODE                    VARCHAR2(30)
+    BASE  ATTRIBUTE_DEFAULT_CODE          VARCHAR2(240)
+    CTX   OWNER                           VARCHAR2(30)
+    BASE  OBJECT_VERSION_NUMBER           NUMBER
+    CTX   LAST_UPDATE_DATE                VARCHAR2(20)
+  END FND_PURPOSE_ATTRIBUTES 
+
+DOWNLOAD FND_PURPOSE_ATTRIBUTES
+  "select 
+    B.PURPOSE_ATTRIBUTE_ID,
+    B.PRIVACY_ATTRIBUTE_CODE,
+    B.PURPOSE_CODE,
+    B.ATTRIBUTE_DEFAULT_CODE,
+    decode(B.LAST_UPDATED_BY,1,'SEED',0, 'SEED', 'CUSTOM') OWNER,
+    B.OBJECT_VERSION_NUMBER,          
+    to_char(B.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+  FROM  FND_PURPOSE_ATTRIBUTES B
+  WHERE 
+       (
+          ( :PURPOSE_ATTRIBUTE_ID  IS NULL)
+           OR
+           ( (:PURPOSE_ATTRIBUTE_ID  IS NOT NULL)
+              AND
+             (B.PURPOSE_ATTRIBUTE_ID = :PURPOSE_ATTRIBUTE_ID)
+            )
+         )
+    "
+
+
+UPLOAD FND_PURPOSE_ATTRIBUTES
+   " DECLARE  
+       x  	                 number;  
+       l_purpose_attribute_id    number;
+       l_privacy_attribute_code  varchar2(30);  
+       l_purpose_code            varchar2(30);  
+       l_attribute_default_code  varchar2(240);  
+       l_object_version_number   number;  
+       l_user_id 	         number;  
+       l_row_id                  rowid;  
+
+        f_luby    number;  -- entity owner in file
+        f_ludate  date;    -- entity update date in file
+        db_luby   number;  -- entity owner in db
+        db_ludate date;    -- entity update date in db
+     BEGIN  
+ 
+       IF (:OWNER = 'ORACLE') THEN
+          l_user_id := 1;
+       ELSE
+          l_user_id := 0;
+       END IF;
+
+       -- Translate owner to file_last_updated_by
+       f_luby := fnd_load_util.owner_id(:OWNER);
+
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+
+       IF (:UPLOAD_MODE = 'NLS') then
+                null;
+       ELSE
+        BEGIN
+          SELECT privacy_attribute_code, purpose_code, object_version_number, last_updated_by, last_update_date
+          INTO   l_privacy_attribute_code, l_purpose_code, l_object_version_number, db_luby, db_ludate
+          FROM   fnd_purpose_attributes
+          WHERE  purpose_attribute_id = :purpose_attribute_id;
+          -- added the above line to search by the key only
+          --WHERE  privacy_attribute_code = :privacy_attribute_code
+          --AND    purpose_code = :purpose_code;
+          
+          EXCEPTION WHEN no_data_found THEN
+            l_privacy_attribute_code := NULL;
+            l_purpose_code := NULL;
+        END;
+
+        IF (l_privacy_attribute_code IS NULL AND l_purpose_code IS NULL) THEN
+         -- for new revords generate the l_purpose_attribute_id
+        select fnd_purpose_attributes_s.nextval into l_purpose_attribute_id from dual;
+         --l_purpose_attribute_id := 1; --fnd_purpose_attributes_s.nextval;
+
+
+          FND_PURPOSE_ATTRIBUTES_PKG.INSERT_ROW(  
+                X_ROWID                 => l_row_id,
+                X_PURPOSE_ATTRIBUTE_ID   => l_purpose_attribute_id,
+                --X_PURPOSE_ATTRIBUTE_ID   => fnd_purpose_attributes_s.nextval,
+                X_PRIVACY_ATTRIBUTE_CODE => :PRIVACY_ATTRIBUTE_CODE,
+                X_PURPOSE_CODE           => :PURPOSE_CODE,
+                X_ATTRIBUTE_DEFAULT_CODE => :ATTRIBUTE_DEFAULT_CODE,
+                X_OBJECT_VERSION_NUMBER  => 1,
+                X_CREATION_DATE          =>  f_ludate,
+                X_CREATED_BY             => f_luby ,
+                X_LAST_UPDATE_DATE       =>  f_ludate ,
+                X_LAST_UPDATED_BY        => f_luby ,
+                X_LAST_UPDATE_LOGIN      => 0);
+
+        ELSE 
+
+        --   IF (l_last_updated_by = 1) THEN
+         if (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                        db_ludate, :CUSTOM_MODE)) then
+
+          FND_PURPOSE_ATTRIBUTES_PKG.UPDATE_ROW(  
+                X_PURPOSE_ATTRIBUTE_ID   => :PURPOSE_ATTRIBUTE_ID,
+                X_PRIVACY_ATTRIBUTE_CODE => :PRIVACY_ATTRIBUTE_CODE,
+                X_PURPOSE_CODE           => :PURPOSE_CODE,
+                X_ATTRIBUTE_DEFAULT_CODE => :ATTRIBUTE_DEFAULT_CODE,
+                X_LAST_UPDATE_DATE      =>  f_ludate ,
+                X_LAST_UPDATED_BY       => f_luby ,
+                X_LAST_UPDATE_LOGIN     => 0,
+                X_OBJECT_VERSION_NUMBER => l_object_version_number + 1);
+
+           END IF;  -- last updated by check
+        END IF;     -- purpose code is null check
+      END IF;       -- upload mode is NLS check
+
+     END; "

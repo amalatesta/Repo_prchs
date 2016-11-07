@@ -1,0 +1,1098 @@
+# $Header: afsearch.lct 120.3.12010000.10 2010/04/22 12:32:41 vsoolapa ship $
+#
+# afsearch.lct - Search Metadata loader configuration
+#
+# Entities -
+#   OBJECT
+#
+# -- DEFINE SECTION --
+#
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+#
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+51 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afsearch.lct @~PROD:~PATH/~FILE"
+
+DEFINE OBJECT
+ KEY   OBJ_NAME		VARCHAR2(430)
+ KEY   DEST_TABLE              VARCHAR2(30)
+ BASE  APPLICATION_SHORT_NAME  VARCHAR2(50)
+ CTX   OWNER                   VARCHAR2(4000)
+ BASE  API_NAME                VARCHAR2(400)
+ BASE  OBJ_TYPE                VARCHAR2(30)
+ BASE  PRODUCT                 VARCHAR2(8)
+ BASE  IMP_NAME                VARCHAR2(400)
+ BASE  COMPATABILITY           VARCHAR2(1)
+ BASE  SCOPE                   VARCHAR2(30)
+ BASE  LIFECYCLE               VARCHAR2(30)
+ BASE  SOURCE_FILE_PRODUCT     VARCHAR2(8)
+ BASE  SOURCE_FILE_PATH        VARCHAR2(100)
+ BASE  SOURCE_FILE_NAME        VARCHAR2(36)
+ BASE  SOURCE_FILE_VERSION     VARCHAR2(150)
+ BASE  DESCRIPTION             VARCHAR2(32000)
+ BASE  STANDARD                VARCHAR2(30)
+ BASE  STANDARD_VERSION        VARCHAR2(30)
+ BASE  STANDARD_SPEC           VARCHAR2(240)
+ TRANS DISPNAME                VARCHAR2(240)
+ TRANS SHORTDESC               VARCHAR2(2000)
+ CTX   TIMESTAMP               VARCHAR2(11)
+ BASE  OI_FLAG                 VARCHAR2(1)
+ BASE  MAPCODE                 VARCHAR2(255)
+ BASE  PARSER_VERSION          VARCHAR2(80)
+ BASE  SDO_DEF_CLASS           VARCHAR2(400)
+ BASE  SDO_CLASS_NAME          VARCHAR2(400)
+ BASE  SDO_IS_FILTER           VARCHAR2(1)
+ BASE  SDO_FILTER_REQUIRED     VARCHAR2(1)
+ BASE  SDO_IS_EXPRESSION       VARCHAR2(1)
+ BASE  SB_INTERFACE_CLASS      VARCHAR2(400)
+ BASE  CRAWL_CRAWLABLE         VARCHAR2(1)
+ BASE  CRAWL_VISIBILITY_LEVEL  VARCHAR2(8)
+ BASE  CRAWL_SEARCH_PLUGIN     VARCHAR2(4000)
+ BASE  CRAWL_UI_FUNCTION       VARCHAR2(240)
+ BASE  CRAWL_CHANGE_EVENT_NAME VARCHAR2(4000)
+ BASE  CRAWL_CHANGE_NTF        VARCHAR2(1)
+ BASE  CRAWL_DRIVING_TABLE     VARCHAR2(30)
+
+
+ DEFINE TYPE_MEMBERS
+   KEY   SEQUENCE              VARCHAR2(50)
+   KEY   INNERTYPE_SEQUENCE    VARCHAR2(50)
+   CTX   OBJ_REF        REFERENCES OBJECT AS OBJ_NAME, DEST_TABLE
+   BASE  MEMBER_NAME           VARCHAR2(240)
+   BASE  TYPE                  VARCHAR2(430)
+   BASE  PRECISION             VARCHAR2(50)
+   BASE  MEM_SIZE              VARCHAR2(50)
+   BASE  MEM_SCALE             VARCHAR2(50)
+   BASE  NULL_ALLOWED          VARCHAR2(1)
+   BASE  DESCRIPTION           VARCHAR2(4000)
+   BASE  ATTR_SET              VARCHAR2(240)
+   BASE  PRIMARY_KEY           VARCHAR2(1)
+   BASE  TRANSLATABLE          VARCHAR2(1)
+   BASE  COMPOSITE             VARCHAR2(1)
+   BASE  DOMAIN_NAME           VARCHAR2(240)
+   BASE  MEMBER_TYPE_NAME      VARCHAR2(240)
+   BASE  SEARCH_CRITERIA_TYPE  VARCHAR2(30)
+   BASE  ATTACHMENT            VARCHAR2(1)
+   BASE  MIME_TYPE             VARCHAR2(120)
+   BASE  DOMAIN_IMPLEMENTATION VARCHAR2(400)
+   BASE  IS_SORTABLE           VARCHAR2(1)
+   BASE  CRAWL_IS_DATE_BASED   VARCHAR2(1)
+   BASE  CRAWL_MEMBER_VIS_LVL  VARCHAR2(8)
+   BASE  CRAWL_IS_DISPLAYED    VARCHAR2(1)
+   BASE  CRAWL_UI_FPARAM_NAME  VARCHAR2(240)
+   BASE  CRAWL_INDEXED         VARCHAR2(1)
+   BASE  CRAWL_STORED          VARCHAR2(1)
+   BASE  CRAWL_IS_SECURE       VARCHAR2(1)
+   BASE  CRAWL_IS_TITLE        VARCHAR2(1)
+   BASE  CRAWL_WEIGHT          VARCHAR2(50)
+ END TYPE_MEMBERS
+
+ DEFINE OBJECT_INSTANCE_SET
+   KEY   INSTANCE_SET_NAME       VARCHAR2(30)
+   CTX   INS_OBJ_NAME            REFERENCES OBJECT AS OBJ_NAME, DEST_TABLE
+   BASE  PREDICATE               VARCHAR2(4000)
+   BASE  LAST_UPDATE_DATE        VARCHAR2(10)
+   TRANS DISPLAY_NAME            VARCHAR2(240)
+   TRANS DESCRIPTION             VARCHAR2(2000)
+   CTX   OWNER                   VARCHAR2(4000)
+ END OBJECT_INSTANCE_SET
+
+ DEFINE FUNCTION
+   KEY   FUNCTION_NAME		VARCHAR2(4000)
+   BASE  FUNCTION_APP_CODE	VARCHAR2(50)
+   BASE  TYPE			VARCHAR2(30)
+   BASE  PARAMETERS		VARCHAR2(4000)
+   BASE  WEB_HOST_NAME		VARCHAR2(4000)
+   BASE  WEB_AGENT_NAME		VARCHAR2(4000)
+   BASE  WEB_HTML_CALL		VARCHAR2(4000)
+   BASE  WEB_ENCRYPT_PARAMETERS	VARCHAR2(4000)
+   BASE  WEB_SECURED		VARCHAR2(4000)
+   BASE  WEB_ICON		VARCHAR2(4000)
+   CTX   OBJECT_NAME REFERENCES OBJECT AS OBJ_NAME, DEST_TABLE
+   BASE  REGION_APPLICATION_SHORT_NAME VARCHAR2(50)
+   BASE  REGION_CODE		VARCHAR2(4000)
+   BASE  LAST_UPDATE_DATE	VARCHAR2(10)
+   BASE  MAINTENANCE_MODE_SUPPORT VARCHAR2(8)
+   BASE  CONTEXT_DEPENDENCE	VARCHAR2(8)
+   BASE  JRAD_REF_PATH		VARCHAR2(4000)
+   TRANS USER_FUNCTION_NAME	VARCHAR2(80)
+   TRANS DESCRIPTION		VARCHAR2(240)
+   CTX   OWNER			VARCHAR2(4000)
+ END FUNCTION
+
+ DEFINE MENU
+   KEY   MENU_NAME 		VARCHAR2(4000)
+   BASE  TYPE 			VARCHAR2(30)
+   BASE  LAST_UPDATE_DATE 	VARCHAR2(10)
+   CTX   OBJECT_NAME 		REFERENCES OBJECT AS OBJ_NAME, DEST_TABLE
+   TRANS USER_MENU_NAME 	VARCHAR2(80)
+   TRANS DESCRIPTION 		VARCHAR2(240)
+   CTX   OWNER 			VARCHAR2(4000)
+
+  DEFINE ENTRY
+    TRANS PROMPT            	VARCHAR2(60)
+    TRANS DESCRIPTION       	VARCHAR2(240)
+    BASE  GRANT_FLAG         VARCHAR2(1)
+    BASE  LAST_UPDATE_DATE   VARCHAR2(10)
+    CTX   SUBMENU            VARCHAR2(30)
+    CTX   FUNCTION           VARCHAR2(480)
+    CTX   OWNER              VARCHAR2(4000)
+  END ENTRY
+ END MENU
+
+ DEFINE VERSION
+   KEY   OBJECT_NAME	    	VARCHAR2(430)
+   CTX   VER_OBJ_NAME           REFERENCES OBJECT AS OBJ_NAME, DEST_TABLE
+   BASE  VERSION		VARCHAR2(10)
+   BASE  CREATED_BY             VARCHAR2(50)
+   BASE  CREATION_DATE          VARCHAR2(11)
+   BASE  LAST_UPDATED_BY        VARCHAR2(50)
+   BASE  LAST_UPDATE_DATE       VARCHAR2(11)
+   BASE  LAST_UPDATE_LOGIN      VARCHAR2(50)
+ END VERSION
+
+END OBJECT
+
+DEFINE OBJECT_DEF
+ KEY   OBJ_NAME         VARCHAR2(430)
+ KEY   DEST_TABLE              VARCHAR2(30)
+ BASE  APPLICATION_SHORT_NAME  VARCHAR2(50)
+ CTX   OWNER                   VARCHAR2(4000)
+ BASE  API_NAME                VARCHAR2(400)
+ BASE  OBJ_TYPE                VARCHAR2(30)
+ BASE  PRODUCT                 VARCHAR2(8)
+ BASE  IMP_NAME                VARCHAR2(400)
+ BASE  COMPATABILITY           VARCHAR2(1)
+ BASE  SCOPE                   VARCHAR2(30) 
+ BASE  LIFECYCLE               VARCHAR2(30)
+ BASE  SOURCE_FILE_PRODUCT     VARCHAR2(8)
+ BASE  SOURCE_FILE_PATH        VARCHAR2(100)
+ BASE  SOURCE_FILE_NAME        VARCHAR2(36)
+ BASE  SOURCE_FILE_VERSION     VARCHAR2(150)
+ BASE  DESCRIPTION             VARCHAR2(32000)
+ BASE  STANDARD                VARCHAR2(30)
+ BASE  STANDARD_VERSION        VARCHAR2(30)
+ BASE  STANDARD_SPEC           VARCHAR2(240)
+ BASE DISPNAME                VARCHAR2(240)
+ BASE SHORTDESC               VARCHAR2(2000)
+ CTX   TIMESTAMP               VARCHAR2(11)
+ BASE  OI_FLAG                 VARCHAR2(1)
+ BASE  MAPCODE                 VARCHAR2(255)
+ BASE  PARSER_VERSION          VARCHAR2(80)
+ BASE  SDO_DEF_CLASS           VARCHAR2(400)
+ BASE  SDO_CLASS_NAME          VARCHAR2(400)
+ BASE  SDO_IS_FILTER           VARCHAR2(1)
+ BASE  SDO_FILTER_REQUIRED     VARCHAR2(1)
+ BASE  SDO_IS_EXPRESSION       VARCHAR2(1)
+ BASE  SB_INTERFACE_CLASS      VARCHAR2(400)
+ BASE  CRAWL_CRAWLABLE         VARCHAR2(1)
+ BASE  CRAWL_VISIBILITY_LEVEL  VARCHAR2(8)
+ BASE  CRAWL_SEARCH_PLUGIN     VARCHAR2(4000)
+ BASE  CRAWL_UI_FUNCTION       VARCHAR2(240)
+ BASE  CRAWL_CHANGE_EVENT_NAME VARCHAR2(4000)
+ BASE  CRAWL_CHANGE_NTF        VARCHAR2(1)
+ BASE  CRAWL_DRIVING_TABLE     VARCHAR2(30)
+
+ DEFINE TYPE_MEMBERS_DEFS
+   KEY   SEQUENCE              VARCHAR2(50)
+   KEY   INNERTYPE_SEQUENCE    VARCHAR2(50)
+   CTX   OBJ_REF        REFERENCES OBJECT_DEF AS OBJ_NAME, DEST_TABLE
+   BASE  MEMBER_NAME           VARCHAR2(240)
+   BASE  TYPE                  VARCHAR2(430)
+   BASE  PRECISION             VARCHAR2(50)
+   BASE  MEM_SIZE              VARCHAR2(50)
+   BASE  MEM_SCALE             VARCHAR2(50)
+   BASE  NULL_ALLOWED          VARCHAR2(1)
+   BASE  DESCRIPTION           VARCHAR2(4000)
+   BASE  ATTR_SET              VARCHAR2(240)
+   BASE  PRIMARY_KEY           VARCHAR2(1)
+   BASE  TRANSLATABLE          VARCHAR2(1)
+   BASE  COMPOSITE             VARCHAR2(1)
+   BASE  DOMAIN_NAME           VARCHAR2(240)
+   BASE  MEMBER_TYPE_NAME      VARCHAR2(240)
+   BASE  SEARCH_CRITERIA_TYPE  VARCHAR2(30)
+   BASE  ATTACHMENT            VARCHAR2(1)
+   BASE  MIME_TYPE             VARCHAR2(120)
+   BASE  DOMAIN_IMPLEMENTATION VARCHAR2(400)
+   BASE  IS_SORTABLE           VARCHAR2(1)
+   BASE  CRAWL_IS_DATE_BASED   VARCHAR2(1)
+   BASE  CRAWL_MEMBER_VIS_LVL  VARCHAR2(8)
+   BASE  CRAWL_IS_DISPLAYED    VARCHAR2(1)
+   BASE  CRAWL_UI_FPARAM_NAME  VARCHAR2(240)
+   BASE  CRAWL_INDEXED         VARCHAR2(1)
+   BASE  CRAWL_STORED          VARCHAR2(1)
+   BASE  CRAWL_IS_SECURE       VARCHAR2(1)
+   BASE  CRAWL_IS_TITLE        VARCHAR2(1)
+   BASE  CRAWL_WEIGHT          VARCHAR2(50)
+ END TYPE_MEMBERS_DEFS
+
+ DEFINE DEFINITIONS
+   KEY   OBJECT_NAME        VARCHAR2(430)
+   KEY      APP_SHORT_CODE    VARCHAR2(50)
+   BASE  APPLICATION_ID       NUMBER
+   BASE  OBJECT_DEF_TYPE    VARCHAR2(30)
+   BASE  OBJECT_VERSION    VARCHAR2(80)
+   BASE  OBJECT_EXTN_VERSION    VARCHAR2(80)
+   BASE  STATUS        VARCHAR2(1)
+   BASE  ENABLED_FLAG          VARCHAR2(1)
+   BASE  START_DATE_ACTIVE     VARCHAR2(10)
+   BASE  END_DATE_ACTIVE       VARCHAR2(10)
+   BASE  CREATION_DATE         VARCHAR2(10)
+   BASE  CREATED_BY            VARCHAR2(4000)
+   CTX   TIMESTAMP             VARCHAR2(10)
+   CTX   OWNER            VARCHAR2(4000)
+   BASE  LAST_UPDATE_LOGIN     VARCHAR2(4000)
+   BASE  OBJECT_DEFINITION     CLOB
+   BASE  OBJECT_REFERENCE      CLOB
+ END DEFINITIONS
+
+ DEFINE VERSION_DEF
+   KEY   OBJECT_NAME	    	VARCHAR2(430)
+   CTX   VER_OBJ_NAME           REFERENCES OBJECT_DEF AS OBJ_NAME, DEST_TABLE
+   BASE  VERSION		VARCHAR2(10)
+   BASE  CREATED_BY             VARCHAR2(50)
+   BASE  CREATION_DATE          VARCHAR2(11)
+   BASE  LAST_UPDATED_BY        VARCHAR2(50)
+   BASE  LAST_UPDATE_DATE       VARCHAR2(11)
+   BASE  LAST_UPDATE_LOGIN      VARCHAR2(50)
+ END VERSION_DEF
+
+END OBJECT_DEF
+
+DOWNLOAD OBJECT
+ "SELECT
+   a.OBJ_NAME,
+   decode(a.DATABASE_OBJECT_NAME, 'FND_OBJECTS', 'O', a.DATABASE_OBJECT_NAME)			DEST_TABLE,
+   c.APPLICATION_SHORT_NAME,
+   FND_LOAD_UTIL.OWNER_NAME(a.LAST_UPDATED_BY)  OWNER,             
+   a.IREP_NAME					API_NAME,
+   a.IREP_OBJECT_TYPE				OBJ_TYPE,
+   a.IREP_PRODUCT				PRODUCT,
+   a.IREP_NAME					IMP_NAME,
+   a.IREP_COMPATIBILITY				COMPATIBILIY,
+   a.IREP_SCOPE					SCOPE,
+   a.IREP_LIFECYCLE				LIFECYCLE,
+   a.IREP_SOURCE_FILE_PRODUCT			SOURCE_FILE_PRODUCT,
+   a.IREP_SOURCE_FILE_PATH			SOURCE_FILE_PATH,
+   a.IREP_SOURCE_FILE_NAME			SOURCE_FILE_NAME,
+   a.IREP_SOURCE_FILE_VERSION			SOURCE_FILE_VERSION,
+   a.IREP_DESCRIPTION				DESCRIPTION,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD_VERSION,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD_SPEC,
+   b.DISPLAY_NAME				NAME,
+   b.DESCRIPTION				SHORTDESC,
+   TO_CHAR(a.LAST_UPDATE_DATE, 'YYYY/MM/DD')    TIMESTAMP,
+   'N'						OI_FLAG,
+   FND_LOAD_UTIL.NULL_VALUE			MAPCODE,
+   FND_LOAD_UTIL.NULL_VALUE			PARSER_VERSION,              
+   IREP_DEF_CLASS				SDO_DEF_CLASS,
+   IREP_CLASS_NAME				SDO_CLASS_NAME,
+   IREP_IS_FILTER				SDO_IS_FILTER,
+   IREP_FILTER_REQUIRED				SDO_FILTER_REQUIRED,
+   'N'						SDO_IS_EXPRESSION,
+   FND_LOAD_UTIL.NULL_VALUE			SB_INTERFACE_CLASS,
+   CRAWL_CRAWLABLE,
+   CRAWL_VISIBILITY_LEVEL,
+   CRAWL_SEARCH_PLUGIN,
+   CRAWL_UI_FUNCTION,
+   CRAWL_CHANGE_EVENT_NAME,
+   CRAWL_CHANGE_NOTIFICATION			CRAWL_CHANGE_NTF,
+   CRAWL_DRIVING_TABLE
+ FROM   FND_OBJECTS a, FND_OBJECTS_TL b, FND_APPLICATION c
+ WHERE  a.OBJECT_ID = b.OBJECT_ID
+ AND    a.APPLICATION_ID = c.APPLICATION_ID
+ AND    b.LANGUAGE = USERENV('LANG')
+ AND    ((( :OBJ_NAME is NULL ) AND ( :APPLICATION_SHORT_NAME is NULL ) AND ( a.OBJ_NAME LIKE 'EBIZ%OBJ%' ))
+         or (( :OBJ_NAME is NULL ) AND ( :APPLICATION_SHORT_NAME is not NULL ) AND ( c.APPLICATION_SHORT_NAME LIKE :APPLICATION_SHORT_NAME ) AND ( a.OBJ_NAME LIKE 'EBIZ%OBJ%' ))
+	   or ( ( :OBJ_NAME is NOT NULL ) AND ( a.OBJ_NAME like :OBJ_NAME )  ))
+ "
+
+DOWNLOAD OBJECT_DEF
+ "SELECT
+   a.OBJ_NAME,
+   decode(a.DATABASE_OBJECT_NAME, 'FND_OBJECTS', 'O', a.DATABASE_OBJECT_NAME)			DEST_TABLE,
+   c.APPLICATION_SHORT_NAME,
+   FND_LOAD_UTIL.OWNER_NAME(a.LAST_UPDATED_BY)  OWNER,             
+   a.IREP_NAME					API_NAME,
+   a.IREP_OBJECT_TYPE				OBJ_TYPE,
+   a.IREP_PRODUCT				PRODUCT,
+   a.IREP_NAME					IMP_NAME,
+   a.IREP_COMPATIBILITY				COMPATIBILIY,
+   a.IREP_SCOPE					SCOPE,
+   a.IREP_LIFECYCLE				LIFECYCLE,
+   a.IREP_SOURCE_FILE_PRODUCT			SOURCE_FILE_PRODUCT,
+   a.IREP_SOURCE_FILE_PATH			SOURCE_FILE_PATH,
+   a.IREP_SOURCE_FILE_NAME			SOURCE_FILE_NAME,
+   a.IREP_SOURCE_FILE_VERSION			SOURCE_FILE_VERSION,
+   a.IREP_DESCRIPTION				DESCRIPTION,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD_VERSION,
+   FND_LOAD_UTIL.NULL_VALUE			STANDARD_SPEC,
+   b.DISPLAY_NAME				NAME,
+   b.DESCRIPTION				SHORTDESC,
+   TO_CHAR(a.LAST_UPDATE_DATE, 'YYYY/MM/DD')    TIMESTAMP,
+   'N'						OI_FLAG,
+   FND_LOAD_UTIL.NULL_VALUE			MAPCODE,
+   FND_LOAD_UTIL.NULL_VALUE			PARSER_VERSION,              
+   IREP_DEF_CLASS				SDO_DEF_CLASS,
+   IREP_CLASS_NAME				SDO_CLASS_NAME,
+   IREP_IS_FILTER				SDO_IS_FILTER,
+   IREP_FILTER_REQUIRED				SDO_FILTER_REQUIRED,
+   'N'						SDO_IS_EXPRESSION,
+   FND_LOAD_UTIL.NULL_VALUE			SB_INTERFACE_CLASS,
+   CRAWL_CRAWLABLE,
+   CRAWL_VISIBILITY_LEVEL,
+   CRAWL_SEARCH_PLUGIN,
+   CRAWL_UI_FUNCTION,
+   CRAWL_CHANGE_EVENT_NAME,
+   CRAWL_CHANGE_NOTIFICATION			CRAWL_CHANGE_NTF,
+   CRAWL_DRIVING_TABLE
+ FROM   FND_OBJECTS a, FND_OBJECTS_TL b, FND_APPLICATION c
+ WHERE  a.OBJECT_ID = b.OBJECT_ID
+ AND    a.APPLICATION_ID = c.APPLICATION_ID
+ AND    b.LANGUAGE = USERENV('LANG')
+ AND    ((( :OBJ_NAME is NULL ) AND ( :APPLICATION_SHORT_NAME is NULL ) AND ( a.OBJ_NAME LIKE 'EBIZ%OBJ%' ))
+         or (( :OBJ_NAME is NULL ) AND ( :APPLICATION_SHORT_NAME is not NULL ) AND ( c.APPLICATION_SHORT_NAME LIKE :APPLICATION_SHORT_NAME ) AND ( a.OBJ_NAME LIKE 'EBIZ%OBJ%' ))
+	   or ( ( :OBJ_NAME is NOT NULL ) AND ( a.OBJ_NAME like :OBJ_NAME )  ))
+ "
+
+DOWNLOAD TYPE_MEMBERS
+"SELECT
+   b.MEMBER_SEQUENCE,
+   b.INNERTYPE_SEQUENCE,
+   a.OBJ_NAME,
+   decode(a.DATABASE_OBJECT_NAME, 'FND_OBJECTS', 'O', a.DATABASE_OBJECT_NAME)	DEST_TABLE,
+   b.MEMBER_NAME,
+   b.MEMBER_TYPE		TYPE,
+   b.MEMBER_PRECISION		PRECISION,
+   '0'				MEM_SIZE,
+   b.MEMBER_SCALE		MEM_SCALE,
+   b.NULL_ALLOWED,
+   b.DESCRIPTION,
+   b.ATTRIBUTE_SET		ATTR_SET,
+   b.PRIMARY_KEY,
+   b.TRANSLATABLE,
+   b.COMPOSITE,
+   b.DOMAIN_NAME,
+   b.MEMBER_TYPE_NAME,
+   b.SEARCH_CRITERIA_TYPE,
+   b.ATTACHMENT,
+   b.MIME_TYPE,
+   b.DOMAIN_IMPLEMENTATION,
+   b.IS_SORTABLE,
+   b.IS_DATE_BASED		CRAWL_IS_DATE_BASED,
+   b.VISIBILITY_LEVEL		CRAWL_MEMBER_VIS_LVL,
+   b.IS_DISPLAYED		CRAWL_IS_DISPLAYED,
+   b.UI_FUNC_PARAMETER_NAME	CRAWL_UI_FPARAM_NAME,
+   b.CRAWL_INDEXED,
+   b.CRAWL_STORED,
+   b.IS_SECURE			CRAWL_IS_SECURE,
+   b.IS_TITLE			CRAWL_IS_TITLE,
+   b.WEIGHT			CRAWL_WEIGHT
+ FROM FND_OBJECTS a, FND_OBJECT_TYPE_MEMBERS b
+ WHERE a.OBJECT_ID = b.OBJECT_ID
+ AND   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           a.OBJ_NAME LIKE :OBJ_NAME))
+"
+
+DOWNLOAD TYPE_MEMBERS_DEFS
+"SELECT
+   b.MEMBER_SEQUENCE,
+   b.INNERTYPE_SEQUENCE,
+   a.OBJ_NAME,
+   decode(a.DATABASE_OBJECT_NAME, 'FND_OBJECTS', 'O', a.DATABASE_OBJECT_NAME)   DEST_TABLE,
+   b.MEMBER_NAME,
+   b.MEMBER_TYPE                TYPE,
+   b.MEMBER_PRECISION           PRECISION,
+   '0'                          MEM_SIZE,
+   b.MEMBER_SCALE               MEM_SCALE,
+   b.NULL_ALLOWED,
+   b.DESCRIPTION,
+   b.ATTRIBUTE_SET              ATTR_SET,
+   b.PRIMARY_KEY,
+   b.TRANSLATABLE,
+   b.COMPOSITE,
+   b.DOMAIN_NAME,
+   b.MEMBER_TYPE_NAME,
+   b.SEARCH_CRITERIA_TYPE,
+   b.ATTACHMENT,
+   b.MIME_TYPE,
+   b.DOMAIN_IMPLEMENTATION,
+   b.IS_SORTABLE,
+   b.IS_DATE_BASED              CRAWL_IS_DATE_BASED,
+   b.VISIBILITY_LEVEL           CRAWL_MEMBER_VIS_LVL,
+   b.IS_DISPLAYED               CRAWL_IS_DISPLAYED,
+   b.UI_FUNC_PARAMETER_NAME     CRAWL_UI_FPARAM_NAME,
+   b.CRAWL_INDEXED,
+   b.CRAWL_STORED,
+   b.IS_SECURE                  CRAWL_IS_SECURE,
+   b.IS_TITLE                   CRAWL_IS_TITLE,
+   b.WEIGHT                     CRAWL_WEIGHT
+ FROM FND_OBJECTS a, FND_OBJECT_TYPE_MEMBERS b
+ WHERE a.OBJECT_ID = b.OBJECT_ID
+ AND   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           a.OBJ_NAME LIKE :OBJ_NAME))
+"
+
+DOWNLOAD DEFINITIONS
+"SELECT
+   a.OBJ_NAME                    OBJECT_NAME,
+   c.APPLICATION_SHORT_NAME,
+   c.APPLICATION_ID,
+   b.OBJECT_DEFINITION_TYPE            OBJECT_DEF_TYPE,
+   b.OBJECT_VERSION                OBJECT_VERSION,
+   b.OBJECT_EXTENSION_VERSION            OBJECT_EXTN_VERSION,
+   b.STATUS,
+   b.ENABLED_FLAG,
+   TO_CHAR(b.START_DATE_ACTIVE, 'YYYY/MM/DD')    START_DATE_ACTIVE,
+   TO_CHAR(b.END_DATE_ACTIVE, 'YYYY/MM/DD')    END_DATE_ACTIVE,
+   TO_CHAR(b.CREATION_DATE, 'YYYY/MM/DD')    CREATION_DATE,
+   FND_LOAD_UTIL.OWNER_NAME(b.CREATED_BY)    CREATED_BY,
+   TO_CHAR(b.LAST_UPDATE_DATE, 'YYYY/MM/DD')    TIMESTAMP,
+   FND_LOAD_UTIL.OWNER_NAME(a.LAST_UPDATED_BY)    OWNER,
+   FND_LOAD_UTIL.OWNER_NAME(b.last_update_login) LAST_UPDATE_LOGIN,
+   b.OBJECT_DEFINITION.getClobVal(),
+   b.OBJECT_REFERENCE.getClobVal()
+ FROM   FND_OBJECTS a, FND_OBJECT_DEFINITIONS b, FND_APPLICATION c
+ WHERE  a.OBJECT_ID = b.OBJECT_ID
+ AND    b.APPLICATION_ID = c.APPLICATION_ID
+ AND   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           a.OBJ_NAME LIKE :OBJ_NAME))
+"
+
+DOWNLOAD OBJECT_INSTANCE_SET
+ " select i.instance_set_name,
+          o.obj_name,
+      o.database_object_name,
+          i.predicate,
+          to_char(i.last_update_date, 'YYYY/MM/DD') last_update_date,
+          i.display_name,
+          i.description,
+          fnd_load_util.owner_name(i.LAST_UPDATED_BY) OWNER
+  from   fnd_object_instance_sets_vl i,
+         fnd_objects_vl o
+  where  o.object_id = i.object_id
+  AND   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           o.OBJ_NAME LIKE :OBJ_NAME))
+ "
+
+ DOWNLOAD FUNCTION
+ " select f.function_name,
+	  nvl(a.application_short_name, fnd_load_util.null_value)
+function_app_code,
+          f.type,
+          nvl(f.parameters, fnd_load_util.null_value) parameters,
+          nvl(f.web_host_name, fnd_load_util.null_value) web_host_name,
+          nvl(f.web_agent_name, fnd_load_util.null_value) web_agent_name,
+          nvl(f.web_html_call, fnd_load_util.null_value) web_html_call,
+          nvl(f.web_encrypt_parameters, fnd_load_util.null_value)
+web_encrypt_parameters,
+          nvl(f.web_secured, fnd_load_util.null_value) web_secured,
+          nvl(f.web_icon, fnd_load_util.null_value) web_icon,
+	  ob.obj_name,
+	  ob.database_object_name dest_table,
+          nvl(ap.application_short_name, fnd_load_util.null_value) 
+		region_application_short_name,
+          nvl(f.region_code, fnd_load_util.null_value) region_code,
+          to_char(f.last_update_date, 'YYYY/MM/DD') last_update_date,
+          f.maintenance_mode_support,
+          f.context_dependence,
+          nvl(f.jrad_ref_path, fnd_load_util.null_value) jrad_ref_path,
+          f.user_function_name,
+          f.description,
+          fnd_load_util.owner_name(f.LAST_UPDATED_BY) OWNER
+   from   fnd_form_functions_vl f,
+          fnd_application a,
+          fnd_objects_vl ob,
+          fnd_application ap
+   where  f.application_id     = a.application_id (+)
+   and    (f.type not in ('INTERFACE', 'SB_INDIRECT_OP'))  
+   and    f.region_application_id   = ap.application_id (+)
+   and    f.object_id               = ob.object_id (+)
+   and    (:OBJ_NAME IS NULL OR
+		(:OBJ_NAME IS NOT NULL AND
+			ob.OBJ_NAME LIKE :OBJ_NAME))
+  "
+
+  DOWNLOAD MENU
+  " select m.menu_name,
+          m.type,
+          to_char(m.last_update_date, 'YYYY/MM/DD') last_update_date,
+          ob.obj_name,
+          ob.database_object_name dest_table,
+          m.user_menu_name,
+          m.description,
+          fnd_load_util.owner_name(m.LAST_UPDATED_BY) OWNER
+          from  fnd_menus_vl m, fnd_objects_vl ob, fnd_menu_entries fme, fnd_form_functions f
+	  where  m.menu_id = fme.menu_id
+	  and    fme.function_id = f.function_id
+     	  and	 f.function_name = ob.obj_name
+	  and    (:OBJ_NAME IS NULL OR
+                 (:OBJ_NAME IS NOT NULL AND
+                        ob.OBJ_NAME LIKE :OBJ_NAME))
+ "
+
+ DOWNLOAD ENTRY
+ " select substrb(nvl(e.prompt, fnd_load_util.null_value),1,60) prompt,
+          e.description,
+          e.grant_flag,
+          to_char(e.last_update_date, 'YYYY/MM/DD') last_update_date,
+          nvl(m.menu_name, fnd_load_util.null_value) menu_name,
+          nvl(u.function_name, fnd_load_util.null_value) function_name,
+          fnd_load_util.owner_name(e.LAST_UPDATED_BY) OWNER
+   from   fnd_menu_entries_vl e,
+          fnd_menus_vl m,
+          fnd_form_functions_vl u,
+	  fnd_objects_vl ob
+   	  where  e.function_id = u.function_id
+    	  and   e.menu_id    = m.menu_id
+          and   ob.obj_name = u.function_name
+	  and   m.menu_name = :MENU_NAME
+	  and    (:OBJ_NAME IS NULL OR
+                 (:OBJ_NAME IS NOT NULL AND
+                        ob.OBJ_NAME LIKE :OBJ_NAME))
+   order by e.entry_sequence
+ "
+
+DOWNLOAD VERSION
+ " select obj_name OBJECT_NAME,
+          obj_name,
+          database_object_name,
+          irep_source_file_version VERSION,
+          created_by,
+          creation_date,
+          last_updated_by,
+          last_update_date,
+          last_update_login
+  from   fnd_objects
+  WHERE   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           OBJ_NAME LIKE :OBJ_NAME))
+ "
+
+DOWNLOAD VERSION_DEF
+ " select obj_name OBJECT_NAME,
+          obj_name,
+          database_object_name,
+          irep_source_file_version VERSION,
+          created_by,
+          creation_date,
+          last_updated_by,
+          last_update_date,
+          last_update_login
+  from   fnd_objects
+  WHERE   (:OBJ_NAME IS NULL OR
+       (:OBJ_NAME IS NOT NULL AND
+           OBJ_NAME LIKE :OBJ_NAME))
+ "
+
+UPLOAD OBJECT
+ BEGIN
+  "declare
+    f_luby    number;  -- entity owner in file
+    f_ludate  date;    -- entity update date in file
+    db_luby   number;  -- entity owner in db
+    db_ludate date;    -- entity update date in db
+    upload boolean := false;
+
+    begin -- UPLOAD OBJECT
+
+    f_luby := fnd_load_util.owner_id(:OWNER);
+
+    f_ludate := nvl(to_date(:TIMESTAMP, 'YYYY/MM/DD'), sysdate);
+
+    begin
+    select fot.last_updated_by, fot.last_update_date
+    into db_luby, db_ludate
+    from fnd_objects_tl fot, fnd_objects fo
+    where obj_name = :OBJ_NAME
+    and userenv('LANG') = LANGUAGE
+    and fo.object_id = fot.object_id;
+
+    exception
+       when no_data_found then
+          upload := true;
+    end;
+
+    if ((upload = true) OR (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                db_ludate, :CUSTOM_MODE))) then
+    FND_IREP_LOADER_PRIVATE.UPLOAD_IREP_OBJECT(
+                       P_UPLOAD_MODE => :UPLOAD_MODE,
+                       P_OBJECT_NAME => :OBJ_NAME,
+                       P_DEST_TABLE => :DEST_TABLE,
+                       P_OWNER => :OWNER,
+                       P_API_NAME => :API_NAME,
+                       P_OBJ_TYPE => :OBJ_TYPE,
+                       P_PRODUCT => :PRODUCT,
+                       P_IMP_NAME => :IMP_NAME,
+                       P_COMPATABILITY => :COMPATABILITY,
+                       P_SCOPE => :SCOPE,
+                       P_LIFECYCLE => :LIFECYCLE,
+                       P_SOURCE_FILE_PRODUCT => :SOURCE_FILE_PRODUCT,
+                       P_SOURCE_FILE_PATH => :SOURCE_FILE_PATH,
+                       P_SOURCE_FILE_NAME => :SOURCE_FILE_NAME,
+                       P_SOURCE_FILE_VERSION => :SOURCE_FILE_VERSION,
+                       P_DESCRIPTION => :DESCRIPTION,
+                       P_STANDARD => :STANDARD,
+                       P_STANDARD_VERSION => :STANDARD_VERSION,
+                       P_STANDARD_SPEC => :STANDARD_SPEC,
+                       P_DISPNAME => :DISPNAME,
+                       P_SHORTDISC => :SHORTDESC,
+                       P_TIMESTAMP => :TIMESTAMP,
+                       P_OI_FLAG => :OI_FLAG,
+                       P_MAPCODE => :MAPCODE,
+                       P_PARSER_VERSION => :PARSER_VERSION,
+                       P_SDO_DEF_CLASS => :SDO_DEF_CLASS,
+                       P_SDO_CLASS_NAME => :SDO_CLASS_NAME,
+                       P_SDO_IS_FILTER => :SDO_IS_FILTER,
+                       P_SDO_FILTER_REQUIRED => :SDO_FILTER_REQUIRED,
+                       P_SDO_IS_EXPRESSION => :SDO_IS_EXPRESSION,
+                       P_SB_INTERFACE_CLASS => :SB_INTERFACE_CLASS,
+                       P_CRAWL_CRAWLABLE => :CRAWL_CRAWLABLE,
+                       P_CRAWL_VISIBILITY_LEVEL => :CRAWL_VISIBILITY_LEVEL,
+                       P_CRAWL_SEARCH_PLUGIN => :CRAWL_SEARCH_PLUGIN,
+                       P_CRAWL_UI_FUNCTION => :CRAWL_UI_FUNCTION,
+                       P_CRAWL_CHANGE_EVENT_NAME => :CRAWL_CHANGE_EVENT_NAME,
+                       P_CRAWL_CHANGE_NTF => :CRAWL_CHANGE_NTF,
+                       P_CRAWL_DRIVING_TABLE => :CRAWL_DRIVING_TABLE );
+
+    -- Bug 9582935. Update FND_OBJECTS even when :UPLOAD_MODE is null.
+    if (:UPLOAD_MODE is NULL or :UPLOAD_MODE <> 'NLS') then
+       UPDATE FND_OBJECTS
+       SET DATABASE_OBJECT_NAME = 'FND_OBJECTS',
+       PK1_COLUMN_NAME = 'CRAWL_CRAWLABLE',
+       PK1_COLUMN_TYPE = 'VARCHAR2'
+       --IREP_SOURCE_FILE_VERSION = '1'
+       WHERE OBJ_NAME = :OBJ_NAME;
+    end if;
+
+    end if; -- OBJECT
+
+    end; "
+
+  UPLOAD TYPE_MEMBERS
+  " begin -- UPLOAD TYPE_MEMBERS
+
+    if (:UPLOAD_MODE = 'NLS') then
+       NULL;
+    else
+       begin
+         delete from fnd_object_type_members
+         where object_id in
+         (select object_id from fnd_objects where obj_name = :OBJ_NAME)
+         and member_name = :MEMBER_NAME;
+       exception
+          when OTHERS then
+             NULL;
+       end; 
+
+       FND_IREP_LOADER_PRIVATE.UPLOAD_TYPE_MEMBERS(
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJ_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_SEQUENCE => :SEQUENCE,
+                      P_INNERTYPE_SEQUENCE => :INNERTYPE_SEQUENCE,
+                      P_MEMBER_NAME => :MEMBER_NAME,
+                      P_TYPE => :TYPE,
+                      P_PRECISION => :PRECISION,
+                      P_SIZE => :SIZE,
+                      P_SCALE => :SCALE,
+                      P_NULL_ALLOWED => :NULL_ALLOWED,
+                      P_DESCRIPTION => :DESCRIPTION,
+                      P_ATTR_SET => :ATTR_SET,
+                      P_PRIMARY_KEY => :PRIMARY_KEY,
+                      P_TRANSLATABLE => :TRANSLATABLE,
+                      P_COMPOSITE => :COMPOSITE,
+                      P_DOMAIN_NAME => :DOMAIN_NAME,
+                      P_MEMBER_TYPE_NAME => :MEMBER_TYPE_NAME,
+                      P_SEARCH_CRITERIA_TYPE => :SEARCH_CRITERIA_TYPE,
+                      P_ATTACHMENT => :ATTACHMENT,
+                      P_MIME_TYPE => :MIME_TYPE,
+                      P_DOMAIN_IMPLEMENTATION => :DOMAIN_IMPLEMENTATION,
+                      P_IS_SORTABLE => :IS_SORTABLE,
+                      P_CRAWL_IS_DATE_BASED => :CRAWL_IS_DATE_BASED,
+                      P_CRAWL_MEMBER_VIS_LVL => :CRAWL_MEMBER_VIS_LVL,
+                      P_CRAWL_IS_DISPLAYED => :CRAWL_IS_DISPLAYED,
+                      P_CRAWL_UI_FPARAM_NAME => :CRAWL_UI_FPARAM_NAME,
+                      P_CRAWL_INDEXED => :CRAWL_INDEXED,
+                      P_CRAWL_STORED => :CRAWL_STORED,
+                      P_CRAWL_IS_SECURE => :CRAWL_IS_SECURE,
+                      P_CRAWL_IS_TITLE => :CRAWL_IS_TITLE,
+                      P_CRAWL_WEIGHT => :CRAWL_WEIGHT);
+    end if;
+    end; "
+
+  UPLOAD OBJECT_INSTANCE_SET
+  " begin -- UPLOAD OBJECT_INSTANCE_SET
+    
+    if (:UPLOAD_MODE = 'NLS') then
+       FND_OBJECT_INSTANCE_SETS_PKG.TRANSLATE_ROW(
+             X_INSTANCE_SET_NAME => :INSTANCE_SET_NAME,
+             X_OWNER => :OWNER,
+             X_DISPLAY_NAME => :DISPLAY_NAME,
+             X_DESCRIPTION  => :DESCRIPTION,
+             X_CUSTOM_MODE  => :CUSTOM_MODE,
+             X_LAST_UPDATE_DATE => :LAST_UPDATE_DATE); 
+    else
+       FND_OBJECT_INSTANCE_SETS_PKG.LOAD_ROW(
+             X_INSTANCE_SET_NAME => :INSTANCE_SET_NAME,
+             X_OWNER => :OWNER,
+             X_OBJECT_NAME => :OBJ_NAME,
+             X_PREDICATE => FND_DATA_SECURITY.UPGRADE_PREDICATE(:PREDICATE),
+             X_DISPLAY_NAME => :DISPLAY_NAME,
+             X_DESCRIPTION  => :DESCRIPTION, 
+             X_CUSTOM_MODE  => :CUSTOM_MODE,
+             X_LAST_UPDATE_DATE => :LAST_UPDATE_DATE);
+    end if;
+    end; "
+
+   UPLOAD FUNCTION
+   " begin -- UPLOAD FUNCTION
+       declare 
+         func_id   number := 0;
+       begin
+         if (:UPLOAD_MODE = 'NLS') then
+
+            select function_id into func_id
+            from   fnd_form_functions_vl
+            where  function_name = :FUNCTION_NAME;
+
+            FND_FORM_FUNCTIONS_PKG.TRANSLATE_ROW(
+                X_FUNCTION_ID         => func_id,
+                X_USER_FUNCTION_NAME  => :USER_FUNCTION_NAME,
+                X_DESCRIPTION         => :DESCRIPTION,
+                X_OWNER               => :OWNER,
+                X_CUSTOM_MODE         => :CUSTOM_MODE,
+                X_LAST_UPDATE_DATE    => :LAST_UPDATE_DATE);
+         else
+            FND_FORM_FUNCTIONS_PKG.LOAD_ROW(
+                X_FUNCTION_NAME       => :FUNCTION_NAME,
+                X_APPLICATION_SHORT_NAME => :FORM_APPLICATION_SHORT_NAME,
+                X_FORM_NAME           => :FORM_FORM_NAME,
+                X_PARAMETERS          => :PARAMETERS,
+                X_TYPE                => :TYPE,
+                X_WEB_HOST_NAME       => :WEB_HOST_NAME,
+                X_WEB_AGENT_NAME      => :WEB_AGENT_NAME,
+                X_WEB_HTML_CALL       => :WEB_HTML_CALL,
+                X_WEB_ENCRYPT_PARAMETERS => :WEB_ENCRYPT_PARAMETERS,
+                X_WEB_SECURED         => :WEB_SECURED,
+                X_WEB_ICON            => :WEB_ICON,
+                X_OBJECT_NAME         => :OBJ_NAME,
+                X_REGION_APPLICATION_NAME => :REGION_APPLICATION_NAME,
+                X_REGION_CODE         => :REGION_CODE,
+                X_USER_FUNCTION_NAME  => :USER_FUNCTION_NAME,
+                X_DESCRIPTION         => :DESCRIPTION,
+                X_OWNER               => :OWNER,
+                X_CUSTOM_MODE         => :CUSTOM_MODE,
+                X_LAST_UPDATE_DATE    => :LAST_UPDATE_DATE,
+                X_MAINTENANCE_MODE_SUPPORT => :MAINTENANCE_MODE_SUPPORT,
+                X_CONTEXT_DEPENDENCE       => :CONTEXT_DEPENDENCE,
+                X_JRAD_REF_PATH       => :JRAD_REF_PATH);
+         end if;
+       end;
+     end; "
+
+
+  UPLOAD MENU
+  BEGIN
+  " begin -- UPLOAD MENU
+      declare
+        mnu_id   number := 0;
+      begin
+ 
+        if (:UPLOAD_MODE = 'NLS') then
+           if (:MENU_NAME is not NULL) then
+              select menu_id into mnu_id
+              from   fnd_menus
+              where  menu_name = :MENU_NAME;
+           else
+              mnu_id := NULL;
+           end if;
+
+           FND_MENUS_PKG.TRANSLATE_ROW(
+               X_MENU_ID             => mnu_id,
+               X_USER_MENU_NAME      => :USER_MENU_NAME,
+               X_DESCRIPTION         => :DESCRIPTION,
+               X_OWNER               => :OWNER,
+               X_CUSTOM_MODE         => :CUSTOM_MODE,
+               X_LAST_UPDATE_DATE    => :LAST_UPDATE_DATE);
+        else
+           FND_MENUS_PKG.LOAD_ROW(
+               X_MENU_NAME           => :MENU_NAME,
+               X_MENU_TYPE           => :TYPE,
+               X_USER_MENU_NAME      => :USER_MENU_NAME,
+               X_DESCRIPTION         => :DESCRIPTION,
+               X_OWNER               => :OWNER,
+               X_CUSTOM_MODE         => :CUSTOM_MODE,
+               X_LAST_UPDATE_DATE    => :LAST_UPDATE_DATE);
+        end if;
+      end;
+    end; "
+
+END
+"  declare
+     request_status varchar2(30); 
+   begin
+     /* Submit a request if one hasn't already been submitted to compile*/
+     /* the menu entries that were uploaded in this menu */
+     request_status := FND_MENU_ENTRIES_PKG.SUBMIT_COMPILE;
+   end;
+"
+
+UPLOAD ENTRY
+  " begin
+      declare
+        func_id   number := 0;
+        mnu_id   number := 0;
+        sub_mnu_id   number := 0;
+        l_sub_menu_name varchar2(4000);
+        l_function_name varchar2(4000);
+
+      begin
+
+        if (:UPLOAD_MODE = 'NLS') then
+
+            select decode(:SUBMENU_MENU_NAME,
+                fnd_load_util.null_value, null,
+                null, :SUBMENU_MENU_NAME,
+                :SUBMENU_MENU_NAME) into l_sub_menu_name from dual;
+
+            select decode(:FUNCTION_FUNCTION_NAME,
+                fnd_load_util.null_value, null,
+                null, :FUNCTION_FUNCTION_NAME,
+                :FUNCTION_FUNCTION_NAME) into l_function_name from dual;
+
+          if(l_function_name is not NULL) then
+            select function_id into func_id
+            from   fnd_form_functions
+            where  function_name = l_function_name;
+          else
+            func_id := NULL;
+          end if;
+
+          if(l_sub_menu_name is not NULL) then
+            select menu_id into sub_mnu_id
+            from   fnd_menus
+            where  menu_name = l_sub_menu_name;
+          else
+            sub_mnu_id := NULL;
+          end if;
+
+         if(:MENU_NAME is not NULL) then
+            select menu_id into mnu_id
+            from   fnd_menus
+            where  menu_name = :MENU_NAME;
+          else
+            mnu_id := NULL;
+          end if;
+
+          fnd_menu_entries_pkg.TRANSLATE_ROW(  
+            x_menu_id             => mnu_id,
+            x_sub_menu_id         => sub_mnu_id,
+            x_function_id         => func_id,
+            x_prompt              => :PROMPT,
+            x_description         => :DESCRIPTION,
+            x_owner               => :OWNER,
+            x_custom_mode         => :CUSTOM_MODE,
+            x_last_update_date    => :LAST_UPDATE_DATE);
+        else  
+          fnd_menu_entries_pkg.LOAD_ROW(
+            x_mode             => :UPLOAD_MODE,
+            x_ent_sequence     => to_char(fnd_menus_pkg.NEXT_ENTRY_SEQUENCE),
+            x_menu_name        => :MENU_NAME,
+            x_sub_menu_name    => :SUBMENU_MENU_NAME,
+            x_function_name    => :FUNCTION,
+            x_grant_flag       => :GRANT_FLAG,
+            x_prompt           => :PROMPT,
+            x_description      => :DESCRIPTION,
+            x_owner            => :OWNER,
+            x_custom_mode      => :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+
+        end if;
+      end;
+    end;
+"
+
+
+  UPLOAD VERSION
+  " begin -- UPLOAD VERSION
+      --UPDATE FND_OBJECTS
+      --SET IREP_SOURCE_FILE_VERSION = '1'
+      --WHERE OBJ_NAME = :OBJ_NAME;
+      NULL;
+    end; "
+
+UPLOAD OBJECT_DEF
+ BEGIN
+  " declare
+    f_luby    number;  -- entity owner in file
+    f_ludate  date;    -- entity update date in file
+    db_luby   number;  -- entity owner in db
+    db_ludate date;    -- entity update date in db
+    upload boolean := false;
+
+    begin -- UPLOAD OBJECT_DEF
+
+    f_luby := fnd_load_util.owner_id(:OWNER);
+
+    f_ludate := nvl(to_date(:TIMESTAMP, 'YYYY/MM/DD'), sysdate);
+
+    begin
+    select last_updated_by, last_update_date
+    into db_luby, db_ludate
+    from fnd_objects
+    where obj_name = :OBJ_NAME;
+
+    exception
+       when no_data_found then
+          upload := true;
+    end;
+
+    if ((upload = true) OR (fnd_load_util.upload_test(f_luby, f_ludate, db_luby,
+                                db_ludate, :CUSTOM_MODE))) then
+    FND_IREP_LOADER_PRIVATE.UPLOAD_IREP_OBJECT(
+                       P_UPLOAD_MODE => :UPLOAD_MODE,
+                       P_OBJECT_NAME => :OBJ_NAME,
+                       P_DEST_TABLE => :DEST_TABLE,
+                       P_OWNER => :OWNER,
+                       P_API_NAME => :API_NAME,
+                       P_OBJ_TYPE => :OBJ_TYPE,
+                       P_PRODUCT => :PRODUCT,
+                       P_IMP_NAME => :IMP_NAME,
+                       P_COMPATABILITY => :COMPATABILITY,
+                       P_SCOPE => :SCOPE,
+                       P_LIFECYCLE => :LIFECYCLE,
+                       P_SOURCE_FILE_PRODUCT => :SOURCE_FILE_PRODUCT,
+                       P_SOURCE_FILE_PATH => :SOURCE_FILE_PATH,
+                       P_SOURCE_FILE_NAME => :SOURCE_FILE_NAME,
+                       P_SOURCE_FILE_VERSION => :SOURCE_FILE_VERSION,
+                       P_DESCRIPTION => :DESCRIPTION,
+                       P_STANDARD => :STANDARD,
+                       P_STANDARD_VERSION => :STANDARD_VERSION,
+                       P_STANDARD_SPEC => :STANDARD_SPEC,
+                       P_DISPNAME => :DISPNAME,
+                       P_SHORTDISC => :SHORTDESC,
+                       P_TIMESTAMP => :TIMESTAMP,
+                       P_OI_FLAG => :OI_FLAG,
+                       P_MAPCODE => :MAPCODE,
+                       P_PARSER_VERSION => :PARSER_VERSION,
+                       P_SDO_DEF_CLASS => :SDO_DEF_CLASS,
+                       P_SDO_CLASS_NAME => :SDO_CLASS_NAME,
+                       P_SDO_IS_FILTER => :SDO_IS_FILTER,
+                       P_SDO_FILTER_REQUIRED => :SDO_FILTER_REQUIRED,
+                       P_SDO_IS_EXPRESSION => :SDO_IS_EXPRESSION,
+                       P_SB_INTERFACE_CLASS => :SB_INTERFACE_CLASS,
+                       P_CRAWL_CRAWLABLE => :CRAWL_CRAWLABLE,
+                       P_CRAWL_VISIBILITY_LEVEL => :CRAWL_VISIBILITY_LEVEL,
+                       P_CRAWL_SEARCH_PLUGIN => :CRAWL_SEARCH_PLUGIN,
+                       P_CRAWL_UI_FUNCTION => :CRAWL_UI_FUNCTION,
+                       P_CRAWL_CHANGE_EVENT_NAME => :CRAWL_CHANGE_EVENT_NAME,
+                       P_CRAWL_CHANGE_NTF => :CRAWL_CHANGE_NTF,
+                       P_CRAWL_DRIVING_TABLE => :CRAWL_DRIVING_TABLE );
+
+    UPDATE FND_OBJECTS
+    SET DATABASE_OBJECT_NAME = 'FND_OBJECTS',
+    PK1_COLUMN_NAME = 'CRAWL_CRAWLABLE',
+    PK1_COLUMN_TYPE = 'VARCHAR2'
+    --IREP_SOURCE_FILE_VERSION = '1'
+    WHERE OBJ_NAME = :OBJ_NAME;
+
+    end if;
+
+    end; "
+
+  UPLOAD TYPE_MEMBERS_DEFS
+  " begin -- UPLOAD TYPE_MEMBERS
+
+    if (:UPLOAD_MODE = 'NLS') then
+       NULL;
+    else
+       begin
+         delete from fnd_object_type_members
+         where object_id in
+         (select object_id from fnd_objects where obj_name = :OBJ_NAME)
+         and member_name = :MEMBER_NAME;
+       exception
+          when OTHERS then
+             NULL;
+       end;
+
+       FND_IREP_LOADER_PRIVATE.UPLOAD_TYPE_MEMBERS(
+                      P_UPLOAD_MODE => :UPLOAD_MODE,
+                      P_OBJECT_NAME => :OBJ_NAME,
+                      P_DEST_TABLE => :DEST_TABLE,
+                      P_SEQUENCE => :SEQUENCE,
+                      P_INNERTYPE_SEQUENCE => :INNERTYPE_SEQUENCE,
+                      P_MEMBER_NAME => :MEMBER_NAME,
+                      P_TYPE => :TYPE,
+                      P_PRECISION => :PRECISION,
+                      P_SIZE => :SIZE,
+                      P_SCALE => :SCALE,
+                      P_NULL_ALLOWED => :NULL_ALLOWED,
+                      P_DESCRIPTION => :DESCRIPTION,
+                      P_ATTR_SET => :ATTR_SET,
+                      P_PRIMARY_KEY => :PRIMARY_KEY,
+                      P_TRANSLATABLE => :TRANSLATABLE,
+                      P_COMPOSITE => :COMPOSITE,
+                      P_DOMAIN_NAME => :DOMAIN_NAME,
+                      P_MEMBER_TYPE_NAME => :MEMBER_TYPE_NAME,
+                      P_SEARCH_CRITERIA_TYPE => :SEARCH_CRITERIA_TYPE,
+                      P_ATTACHMENT => :ATTACHMENT,
+                      P_MIME_TYPE => :MIME_TYPE,
+                      P_DOMAIN_IMPLEMENTATION => :DOMAIN_IMPLEMENTATION,
+                      P_IS_SORTABLE => :IS_SORTABLE,
+                      P_CRAWL_IS_DATE_BASED => :CRAWL_IS_DATE_BASED,
+                      P_CRAWL_MEMBER_VIS_LVL => :CRAWL_MEMBER_VIS_LVL,
+                      P_CRAWL_IS_DISPLAYED => :CRAWL_IS_DISPLAYED,
+                      P_CRAWL_UI_FPARAM_NAME => :CRAWL_UI_FPARAM_NAME,
+                      P_CRAWL_INDEXED => :CRAWL_INDEXED,
+                      P_CRAWL_STORED => :CRAWL_STORED,
+                      P_CRAWL_IS_SECURE => :CRAWL_IS_SECURE,
+                      P_CRAWL_IS_TITLE => :CRAWL_IS_TITLE,
+                      P_CRAWL_WEIGHT => :CRAWL_WEIGHT);
+    end if;
+    end; "
+
+  UPLOAD DEFINITIONS
+  " begin -- UPLOAD DEFINITIONS
+    FND_OBJECT_DEFINITIONS_PKG.LOAD_ROW (
+                     X_OBJ_NAME => :OBJ_NAME,
+                     X_APPLICATION_ID => :APPLICATION_ID,
+                     X_OBJECT_DEFINITION_TYPE => :OBJECT_DEF_TYPE,
+                     X_OBJECT_EXTENSION_VERSION => :OBJECT_EXTN_VERSION,
+                     X_STATUS => :STATUS,
+                     X_ENABLED_FLAG => :ENABLED_FLAG,
+                     X_START_DATE_ACTIVE => TO_DATE(:START_DATE_ACTIVE, 'YYYY/MM/DD'),
+                     X_END_DATE_ACTIVE => TO_DATE(:END_DATE_ACTIVE, 'YYYY/MM/DD'),
+                     X_CREATION_DATE => TO_DATE(:CREATION_DATE, 'YYYY/MM/DD'),
+                     X_CREATED_BY => FND_LOAD_UTIL.OWNER_ID(:CREATED_BY),
+                     X_LAST_UPDATE_DATE => TO_DATE(:TIMESTAMP, 'YYYY/MM/DD'),
+                     X_LAST_UPDATED_BY => FND_LOAD_UTIL.OWNER_ID(:OWNER),
+                     X_LAST_UPDATE_LOGIN =>FND_LOAD_UTIL.OWNER_ID(:LAST_UPDATE_LOGIN),
+                     X_OBJECT_DEFINITION => XMLTYPE(:OBJECT_DEFINITION),
+                     X_OBJECT_REFERENCE => XMLTYPE(:OBJECT_REFERENCE),
+                     X_CUSTOM_MODE => :CUSTOM_MODE);
+    end; "
+
+  UPLOAD VERSION_DEF
+  " begin -- UPLOAD VERSION_DEF
+      --UPDATE FND_OBJECTS
+      --SET IREP_SOURCE_FILE_VERSION = '1'
+      --WHERE OBJ_NAME = :OBJ_NAME;
+      NULL;
+    end; "
+
