@@ -10,7 +10,7 @@
 --  Description: XX GL Reporte Mayor con cuenta PUC detalle NIT
 -- 
 --  Modification History:
---     03-NOV-2016 - AMalatesta - Created
+--     15-NOV-2016 - AMalatesta - Created
 -- 
 -- parameters : p_date_from  : Fecha desde
 --              p_date_to    : Fecha hasta
@@ -34,7 +34,7 @@
 --------------------------------------------------------------------------------
 -- date        author                            description 
 -- ----------- --------------------------------- -------------------------------
--- 03-NOV-2016 AMalatesta [Despegar]             Created -  
+-- 15-NOV-2016 AMalatesta [Despegar]             Created -  
 -- *****************************************************************************
 set serveroutput on size 1000000 
 whenever sqlerror exit failure 
