@@ -1,0 +1,134 @@
+#
+# $Header: xdotrans.lct 120.0 2005/05/11 06:01:17 appldev noship $
+#
+# xdotrans.lct - Configuration file for loading XML Publisher template
+#                translations
+#
+# HISTROY
+#   02/01/2005 mnagakur  Initial Creation
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#    XDO_TRANS_UNITS -- Parent
+#     |
+#     +--XDO_TRANS_UNIT_PROPS -- Child
+#
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=dat checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @XDO:patch/115/import/xdotrans.lct @~PROD:~PATH/~FILE"
+
+DEFINE XDO_TRANS_UNITS
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  KEY   TEMPLATE_CODE	        VARCHAR2(80)
+  KEY   UNIT_ID                 VARCHAR2(255)
+  TRANS VALUE                   VARCHAR2(4000)
+  CTX   NOTE                    VARCHAR2(4000)
+  CTX   OWNER          	        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(11)
+
+  DEFINE XDO_TRANS_UNIT_PROPS
+    KEY   PROP_TYPE             VARCHAR2(50)
+    BASE  PROP_VALUE            VARCHAR2(4000)            
+    CTX   OWNER		        VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE      VARCHAR2(11)
+  END XDO_TRANS_UNIT_PROPS
+END XDO_TRANS_UNITS
+
+
+#
+# -- DOWNLOAD SECTION --
+#
+#
+
+DOWNLOAD XDO_TRANS_UNITS
+  "select unit.APPLICATION_SHORT_NAME,  
+          unit.TEMPLATE_CODE,  
+          unit.UNIT_ID,
+          value.VALUE,
+          unit.NOTE,
+          fnd_load_util.owner_name(value.LAST_UPDATED_BY) OWNER,
+          to_char(value.LAST_UPDATE_DATE,'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   xdo_trans_units unit,
+          xdo_trans_unit_values value,
+          xdo_templates_b tmp
+   where  (:APPLICATION_SHORT_NAME is null or ((:APPLICATION_SHORT_NAME is not null) and (unit.application_short_name like :APPLICATION_SHORT_NAME)))
+     and  (:TEMPLATE_CODE is null or ((:TEMPLATE_CODE is not null) and (unit.template_code like :TEMPLATE_CODE)))
+     and  (:DATA_SOURCE_CODE is null or ((:DATA_SOURCE_CODE is not null) and (tmp.data_source_code like :DATA_SOURCE_CODE)))
+     and  (:DS_APP_SHORT_NAME is null or ((:DS_APP_SHORT_NAME is not null) and (tmp.ds_app_short_name like :DS_APP_SHORT_NAME)))
+     and  tmp.application_short_name = unit.application_short_name
+     and  tmp.template_code = unit.template_code
+     and  value.application_short_name = unit.application_short_name
+     and  value.template_code = unit.template_code
+     and  value.unit_id = unit.unit_id
+     and  value.language = (select lower(iso_language)
+                                   from fnd_languages
+                                  where language_code = userenv('LANG'))
+     and  value.territory = (select iso_territory
+                               from fnd_languages
+                              where language_code = userenv('LANG'))
+   order by unit.last_update_date desc"        
+
+DOWNLOAD XDO_TRANS_UNIT_PROPS
+  "select PROP_TYPE,  
+          PROP_VALUE,  
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE,'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   xdo_trans_unit_props  
+   where  application_short_name = :APPLICATION_SHORT_NAME
+     and  template_code = :TEMPLATE_CODE
+     and  unit_id = :UNIT_ID "
+
+#
+# -- UPLOAD section -- 
+#
+#
+
+UPLOAD XDO_TRANS_UNITS
+BEGIN 
+  "BEGIN
+      if (:UPLOAD_MODE = 'NLS') then  
+        XDO_TRANS_UNITS_PKG.TRANSLATE_ROW (  
+          X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,  
+          X_TEMPLATE_CODE          => :TEMPLATE_CODE,  
+          X_UNIT_ID                => :UNIT_ID,
+          X_VALUE                  => :VALUE,
+          X_CUSTOM_MODE            => :CUSTOM_MODE,
+	  X_LAST_UPDATE_DATE       => to_date(:LAST_UPDATE_DATE,'YYYY/MM/DD'),  
+          X_LAST_UPDATED_BY        => fnd_load_util.owner_id(:OWNER),
+          X_LAST_UPDATE_LOGIN      => 0);  
+      else  
+        XDO_TRANS_UNITS_PKG.LOAD_ROW (  
+          X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,  
+          X_TEMPLATE_CODE          => :TEMPLATE_CODE,  
+          X_UNIT_ID                => :UNIT_ID,
+          X_VALUE                  => :VALUE,
+          X_NOTE                   => :NOTE,
+          X_CUSTOM_MODE            => :CUSTOM_MODE,
+	  X_LAST_UPDATE_DATE       => to_date(:LAST_UPDATE_DATE,'YYYY/MM/DD'),
+          X_OWNER                  => :OWNER);   
+      end if; 
+   END; "
+
+
+UPLOAD XDO_TRANS_UNIT_PROPS
+  " begin  
+      begin  
+        -- No translated columns, do nothing in NLS mode.
+        if (:UPLOAD_MODE = 'NLS') then
+          return;
+        end if;
+     
+        XDO_TRANS_UNITS_PKG.LOAD_TRANS_UNIT_PROP (
+           X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,
+           X_TEMPLATE_CODE          => :TEMPLATE_CODE,
+           X_UNIT_ID                => :UNIT_ID,
+           X_PROP_TYPE              => :PROP_TYPE,
+           X_PROP_VALUE             => :PROP_VALUE,
+           X_CUSTOM_MODE            => :CUSTOM_MODE,
+           X_LAST_UPDATE_DATE       => to_date(:LAST_UPDATE_DATE,'YYYY/MM/DD'),
+           X_LAST_UPDATED_BY        => fnd_load_util.owner_id(:OWNER),
+           X_LAST_UPDATE_LOGIN      => 0);
+       end;
+    end; "

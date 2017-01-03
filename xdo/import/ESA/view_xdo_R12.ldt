@@ -1,0 +1,23 @@
+# $Header: view_xdo_R12.ldt 120.1 level:-99999 2009/04/03 23:34:49 pkm ship  $
+# dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afdict.lct @~PROD:~PATH/~FILE
+LANGUAGE="ESA"
+LDRCONFIG = "afdict.lct 120.0"
+#Source Database seed120
+#RELEASE_NAME 12.0.0
+# -- Begin Entity Definitions -- 
+DEFINE FND_VIEW
+KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+KEY   BUILDING_BLOCK_NAME             VARCHAR2(80)
+KEY   VIEW_NAME                       VARCHAR2(30)
+BASE  TEXT                            VARCHAR2(64000)
+BASE  DESCRIPTION                     VARCHAR2(240)
+CTX   OWNER                           VARCHAR2(4000)
+BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+DEFINE FND_VIEW_COLUMN
+KEY   VIEW_COLUMN_NAME                VARCHAR2(30)
+BASE  VIEW_COLUMN_SEQUENCE            VARCHAR2(50)
+CTX   OWNER                           VARCHAR2(4000)
+BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+END FND_VIEW_COLUMN
+END FND_VIEW
+# -- End Entity Definitions -- 

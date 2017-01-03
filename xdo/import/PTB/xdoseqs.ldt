@@ -1,0 +1,23 @@
+# $Header: xdoseqs.ldt 120.3 level:-99999 2009/04/03 22:45:56 pkm ship  $
+# dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afdict.lct @~PROD:~PATH/~FILE
+LANGUAGE="PTB"
+LDRCONFIG = "afdict.lct 120.0"
+#Source Database seed120
+#RELEASE_NAME 12.0.0
+# -- Begin Entity Definitions -- 
+DEFINE FND_SEQUENCE
+KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+KEY   BUILDING_BLOCK_NAME             VARCHAR2(80)
+KEY   SEQUENCE_NAME                   VARCHAR2(30)
+BASE  START_VALUE                     VARCHAR2(50)
+BASE  DESCRIPTION                     VARCHAR2(240)
+BASE  INCREMENT_BY                    VARCHAR2(50)
+BASE  MIN_VALUE                       VARCHAR2(50)
+BASE  MAX_VALUE                       VARCHAR2(50)
+BASE  CACHE_SIZE                      VARCHAR2(50)
+BASE  CYCLE_FLAG                      VARCHAR2(1)
+BASE  ORDER_FLAG                      VARCHAR2(1)
+CTX   OWNER                           VARCHAR2(4000)
+BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+END FND_SEQUENCE
+# -- End Entity Definitions -- 

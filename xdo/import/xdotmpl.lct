@@ -1,0 +1,552 @@
+#
+# $Header: xdotmpl.lct 120.5.12010000.3 2008/10/17 20:55:42 bgkim ship $
+#
+# xdotmpl.lct - Template Manager Loader Configuration
+#
+# HISTROY
+#   00/00/2003 mnagakur  Initial Creation
+#   01/20/2004 mnagakur  Modified for 4.3 compatiblity
+#   03/18/2004 mnagakur  Obsolete template-only manipulation 
+#   03/19/2004 mnagakur  Change owner download from hard coding to 
+#                        fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER.
+#                        OWNER columns must be 4000 in length.
+#   03/30/2004 mnagakur  Change to accommodate XDO_TEMPLATES_PKG.LOAD_ROW
+#                        change for DEPENDENCY_FLAG support.
+#   06/02/2008 hidekoji  Added Default Output Type to support ER Bug#5612820
+#
+# Entities 
+#
+#   Requirements
+#   This lct should satisfy the following types:
+#   1. Data source with all the associated templates
+#   2. Template without data source
+#         In this case, template_fields is not downloaded.
+#         Mapping of element and fields must be done in UI afterward 
+#         in this case.
+#   THIS TYPE HAS BEEN OBSOLETED AS A TEMPLATE MUST BELONG TO A DATA SOURCE
+#   FROM 4.3.  WE COULD ENHANCE THIS TO REFER DATA SOURCE TO WHICH THE
+#   TEMPLATE BELONGS TO IF THERE IS SUCH A REQUIREMENT.
+#   3. Tempalte with its datasource without other associated template
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#  Type 1: 
+#    XDO_TEMPLATES  -- Parent: Template without data source
+#   
+#   THIS TYPE HAS BEEN OBSOLETED AS A TEMPLATE MUST BELONG TO A DATA SOURCE
+#   FROM 4.3.  WE COULD ENHANCE THIS TO REFER DATA SOURCE TO WHICH THE
+#   TEMPLATE BELONGS TO IF THERE IS SUCH A REQUIREMENT.
+#
+#  Type 2:
+#    XDO_DS_DEFINITIONS -- Parent: data source and 
+#     |                            all the associated information
+#     |
+#     +--X_TEMPLATES -- Child
+#         |
+#         +--X_TEMPLATE_FIELDS -- Child
+#
+#
+#  Type 3:
+#     Give :TMPL_APP_SHORT_NAME and :TEMPLATE_CODE to Type 2 in addition 
+#           to :APPLICATION_SHORT_NAME and :DATA_SOURCE_CODE.
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=dat checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @XDO:patch/115/import/xdotmpl.lct @~PROD:~PATH/~FILE"
+
+#DEFINE XDO_TEMPLATES
+#  KEY   APPLICATION_SHORT_NAME 	VARCHAR2(50)
+#  KEY   TEMPLATE_CODE		    VARCHAR2(80)
+#  CTX   OWNER          	        VARCHAR2(4000)
+#  BASE  APP_DS_SHORT_NAME       VARCHAR2(50)
+#  BASE  DATA_SOURCE_CODE 		VARCHAR2(80)
+#  BASE  TEMPLATE_TYPE_CODE      VARCHAR2(30)
+#  BASE  DEFAULT_LANGUAGE        VARCHAR2(6)
+#  BASE  DEFAULT_TERRITORY       VARCHAR2(6)
+#  BASE  DEFAULT_OUTPUT_TYPE     VARCHAR2(10)
+#  BASE  TEMPLATE_STATUS         VARCHAR2(6)
+#  BASE  USE_ALIAS_TABLE         VARCHAR2(6)
+#  BASE  START_DATE              VARCHAR2(11)
+#  BASE  END_DATE                VARCHAR2(11)
+#  BASE  OBJECT_VERSION_NUMBER   NUMBER
+#  BASE  LAST_UPDATE_DATE        VARCHAR2(11)
+#  BASE  ATTRIBUTE_CATEGORY      VARCHAR2(90)
+#  BASE  ATTRIBUTE1              VARCHAR2(450)
+#  BASE  ATTRIBUTE2              VARCHAR2(450)
+#  BASE  ATTRIBUTE3              VARCHAR2(450)
+#  BASE  ATTRIBUTE4              VARCHAR2(450)
+#  BASE  ATTRIBUTE5              VARCHAR2(450)
+#  BASE  ATTRIBUTE6              VARCHAR2(450)
+#  BASE  ATTRIBUTE7              VARCHAR2(450)
+#  BASE  ATTRIBUTE8              VARCHAR2(450)
+#  BASE  ATTRIBUTE9              VARCHAR2(450)
+#  BASE  ATTRIBUTE10             VARCHAR2(450)
+#  BASE  ATTRIBUTE11             VARCHAR2(450)
+#  BASE  ATTRIBUTE12             VARCHAR2(450)
+#  BASE  ATTRIBUTE13             VARCHAR2(450)
+#  BASE  ATTRIBUTE14             VARCHAR2(450)
+#  BASE  ATTRIBUTE15             VARCHAR2(450)
+#  TRANS TEMPLATE_NAME           VARCHAR2(120)
+#  TRANS DESCRIPTION             VARCHAR2(2000)
+#
+#END XDO_TEMPLATES
+
+DEFINE XDO_DS_DEFINITIONS
+  KEY   APPLICATION_SHORT_NAME 	  VARCHAR2(50)
+  KEY   DATA_SOURCE_CODE	      VARCHAR2(80)
+  CTX   OWNER          	          VARCHAR2(4000)
+  BASE  DATA_SOURCE_STATUS	      VARCHAR2(1)
+  BASE  START_DATE                VARCHAR2(11)
+  BASE  END_DATE                  VARCHAR2(11)
+  BASE  OBJECT_VERSION_NUMBER     NUMBER
+  BASE  LAST_UPDATE_DATE          VARCHAR2(11)
+  BASE  ATTRIBUTE_CATEGORY        VARCHAR2(90)
+  BASE  ATTRIBUTE1                VARCHAR2(450)
+  BASE  ATTRIBUTE2                VARCHAR2(450)
+  BASE  ATTRIBUTE3                VARCHAR2(450)
+  BASE  ATTRIBUTE4                VARCHAR2(450)
+  BASE  ATTRIBUTE5                VARCHAR2(450)
+  BASE  ATTRIBUTE6                VARCHAR2(450)
+  BASE  ATTRIBUTE7                VARCHAR2(450)
+  BASE  ATTRIBUTE8                VARCHAR2(450)
+  BASE  ATTRIBUTE9                VARCHAR2(450)
+  BASE  ATTRIBUTE10               VARCHAR2(450)
+  BASE  ATTRIBUTE11               VARCHAR2(450)
+  BASE  ATTRIBUTE12               VARCHAR2(450)
+  BASE  ATTRIBUTE13               VARCHAR2(450)
+  BASE  ATTRIBUTE14               VARCHAR2(450)
+  BASE  ATTRIBUTE15               VARCHAR2(450)
+  TRANS DATA_SOURCE_NAME          VARCHAR2(120)
+  TRANS DESCRIPTION               VARCHAR2(2000)
+
+  DEFINE X_TEMPLATES
+    KEY   TMPL_APP_SHORT_NAME     VARCHAR2(50)
+    KEY   TEMPLATE_CODE		      VARCHAR2(80)
+    CTX   OWNER          	      VARCHAR2(4000)
+    BASE  TEMPLATE_TYPE_CODE      VARCHAR2(30)
+    BASE  DEFAULT_LANGUAGE        VARCHAR2(6)
+    BASE  DEFAULT_TERRITORY       VARCHAR2(6)
+    BASE  DEFAULT_OUTPUT_TYPE     VARCHAR2(10)
+    BASE  MLS_LANGUAGE            VARCHAR2(6)
+    BASE  MLS_TERRITORY           VARCHAR2(6)
+    BASE  TEMPLATE_STATUS         VARCHAR2(6)
+    BASE  USE_ALIAS_TABLE         VARCHAR2(6)
+    BASE  DEPENDENCY_FLAG         VARCHAR2(1)
+    BASE  START_DATE              VARCHAR2(11)
+    BASE  END_DATE                VARCHAR2(11)
+    BASE  OBJECT_VERSION_NUMBER   NUMBER
+    BASE  LAST_UPDATE_DATE        VARCHAR2(11)
+    BASE  ATTRIBUTE_CATEGORY      VARCHAR2(100)
+    BASE  ATTRIBUTE1              VARCHAR2(450)
+    BASE  ATTRIBUTE2              VARCHAR2(450)
+    BASE  ATTRIBUTE3              VARCHAR2(450)
+    BASE  ATTRIBUTE4              VARCHAR2(450)
+    BASE  ATTRIBUTE5              VARCHAR2(450)
+    BASE  ATTRIBUTE6              VARCHAR2(450)
+    BASE  ATTRIBUTE7              VARCHAR2(450)
+    BASE  ATTRIBUTE8              VARCHAR2(450)
+    BASE  ATTRIBUTE9              VARCHAR2(450)
+    BASE  ATTRIBUTE10             VARCHAR2(450)
+    BASE  ATTRIBUTE11             VARCHAR2(450)
+    BASE  ATTRIBUTE12             VARCHAR2(450)
+    BASE  ATTRIBUTE13             VARCHAR2(450)
+    BASE  ATTRIBUTE14             VARCHAR2(450)
+    BASE  ATTRIBUTE15             VARCHAR2(450)
+    TRANS TEMPLATE_NAME           VARCHAR2(120)
+    TRANS DESCRIPTION             VARCHAR2(2000)
+
+    DEFINE X_TEMPLATE_FIELDS
+      KEY   FIELD_NAME	      VARCHAR2(255)
+      CTX   OWNER		      VARCHAR2(4000)
+      BASE  ALIAS_NAME        VARCHAR2(255)
+      BASE  LAST_UPDATE_DATE  VARCHAR2(11)
+    END X_TEMPLATE_FIELDS
+
+  END X_TEMPLATES
+
+END XDO_DS_DEFINITIONS
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#     Using to_char(sysdate, 'YYYY/MM/DD') instead as many people are 
+#     doing this.
+#
+#   Protect against null parameter passing using 
+#       and (:parm is null or (:parm is not null and col like :parm))
+#
+#
+#DOWNLOAD XDO_TEMPLATES
+#  " select 
+#          v.APPLICATION_SHORT_NAME,  
+#          v.TEMPLATE_CODE,  
+#          fnd_load_util.owner_name(v.LAST_UPDATED_BY) OWNER,
+#          v.DS_APP_SHORT_NAME,  
+#          v.DATA_SOURCE_CODE,
+#          v.TEMPLATE_TYPE_CODE,
+#          v.DEFAULT_LANGUAGE,
+#          v.DEFAULT_TERRITORY,
+#          v.DEFAULT_OUTPUT_TYPE,
+#          v.TEMPLATE_STATUS,
+#          v.USE_ALIAS_TABLE,
+#          to_char(v.START_DATE,'YYYY/MM/DD'),
+#          to_char(v.END_DATE,'YYYY/MM/DD'),
+#          v.OBJECT_VERSION_NUMBER,
+#          to_char(v.LAST_UPDATE_DATE,'YYYY/MM/DD'),
+#          v.ATTRIBUTE_CATEGORY,
+#          v.ATTRIBUTE1,
+#          v.ATTRIBUTE2,
+#          v.ATTRIBUTE3,
+#          v.ATTRIBUTE4,
+#          v.ATTRIBUTE5,
+#          v.ATTRIBUTE6,
+#          v.ATTRIBUTE7,
+#          v.ATTRIBUTE8,
+#          v.ATTRIBUTE9,
+#          v.ATTRIBUTE10,
+#          v.ATTRIBUTE11,
+#          v.ATTRIBUTE12,
+#          v.ATTRIBUTE13,
+#          v.ATTRIBUTE14,
+#          v.ATTRIBUTE15,
+#          v.TEMPLATE_NAME,
+#          v.DESCRIPTION
+#   from   XDO_TEMPLATES_VL v
+#   where (:TEMPLATE_CODE is null or 
+#              (:TEMPLATE_CODE is not null and 
+#                v.TEMPLATE_CODE like :TEMPLATE_CODE)
+#         )
+#   and   (:APPLICATION_SHORT_NAME is null or 
+#              (:APPLICATION_SHORT_NAME is not null and 
+#                v.APPLICATION_SHORT_NAME like 
+#                               :APPLICATION_SHORT_NAME)
+#         )
+#   "
+
+DOWNLOAD XDO_DS_DEFINITIONS
+  "select 
+          ds.APPLICATION_SHORT_NAME,
+          ds.DATA_SOURCE_CODE,
+          fnd_load_util.owner_name(ds.LAST_UPDATED_BY) OWNER,
+          ds.DATA_SOURCE_STATUS,
+          to_char(ds.START_DATE,'YYYY/MM/DD') START_DATE,
+          to_char(ds.END_DATE,'YYYY/MM/DD') END_DATE,
+          ds.OBJECT_VERSION_NUMBER,
+          to_char(ds.LAST_UPDATE_DATE,'YYYY/MM/DD') LAST_UPDATE_DATE,
+          ds.ATTRIBUTE_CATEGORY,
+          ds.ATTRIBUTE1,
+          ds.ATTRIBUTE2,
+          ds.ATTRIBUTE3,
+          ds.ATTRIBUTE4,
+          ds.ATTRIBUTE5,
+          ds.ATTRIBUTE6,
+          ds.ATTRIBUTE7,
+          ds.ATTRIBUTE8,
+          ds.ATTRIBUTE9,
+          ds.ATTRIBUTE10,
+          ds.ATTRIBUTE11,
+          ds.ATTRIBUTE12,
+          ds.ATTRIBUTE13,
+          ds.ATTRIBUTE14,
+          ds.ATTRIBUTE15,
+          ds.DATA_SOURCE_NAME,
+          ds.DESCRIPTION
+   from   XDO_DS_DEFINITIONS_VL ds
+   where  (:DATA_SOURCE_CODE is null or
+              (:DATA_SOURCE_CODE is not null and
+                ds.DATA_SOURCE_CODE like :DATA_SOURCE_CODE)
+         )
+   and   (:APPLICATION_SHORT_NAME is null or
+              (:APPLICATION_SHORT_NAME is not null and
+                ds.APPLICATION_SHORT_NAME like
+                               :APPLICATION_SHORT_NAME)
+         )
+   and   (:ACTIVE_ONLY is null or
+          :ACTIVE_ONLY <> 'Y' or
+          (:ACTIVE_ONLY = 'Y' and
+            ds.start_date <= sysdate and
+            (ds.end_date is null or ds.end_date >= sysdate))) 
+  "
+
+DOWNLOAD X_TEMPLATES
+  " select 
+          v.APPLICATION_SHORT_NAME TMPL_APP_SHORT_NAME,
+          v.TEMPLATE_CODE,  
+          fnd_load_util.owner_name(v.LAST_UPDATED_BY) OWNER,
+          v.TEMPLATE_TYPE_CODE,
+          v.DEFAULT_LANGUAGE,
+          v.DEFAULT_TERRITORY,
+          v.DEFAULT_OUTPUT_TYPE,
+          v.MLS_LANGUAGE,
+          v.MLS_TERRITORY,
+          v.TEMPLATE_STATUS,
+          v.USE_ALIAS_TABLE,
+          v.DEPENDENCY_FLAG,
+          to_char(v.START_DATE,'YYYY/MM/DD'),
+          to_char(v.END_DATE,'YYYY/MM/DD'),
+          v.OBJECT_VERSION_NUMBER,
+          to_char(v.LAST_UPDATE_DATE,'YYYY/MM/DD'),
+          v.ATTRIBUTE_CATEGORY,
+          v.ATTRIBUTE1,
+          v.ATTRIBUTE2,
+          v.ATTRIBUTE3,
+          v.ATTRIBUTE4,
+          v.ATTRIBUTE5,
+          v.ATTRIBUTE6,
+          v.ATTRIBUTE7,
+          v.ATTRIBUTE8,
+          v.ATTRIBUTE9,
+          v.ATTRIBUTE10,
+          v.ATTRIBUTE11,
+          v.ATTRIBUTE12,
+          v.ATTRIBUTE13,
+          v.ATTRIBUTE14,
+          v.ATTRIBUTE15,
+          v.TEMPLATE_NAME,
+          v.DESCRIPTION
+   from   XDO_TEMPLATES_VL v
+   where v.DS_APP_SHORT_NAME=:APPLICATION_SHORT_NAME
+     and v.DATA_SOURCE_CODE=:DATA_SOURCE_CODE
+     and (:TMPL_APP_SHORT_NAME is null or 
+              (:TMPL_APP_SHORT_NAME is not null and 
+                v.APPLICATION_SHORT_NAME like 
+                               :TMPL_APP_SHORT_NAME)
+         )
+     and (:TEMPLATE_CODE is null or 
+              (:TEMPLATE_CODE is not null and 
+                v.TEMPLATE_CODE like :TEMPLATE_CODE)
+         )
+     and (:ACTIVE_ONLY is null or
+          :ACTIVE_ONLY <> 'Y' or
+          (:ACTIVE_ONLY = 'Y' and
+            v.start_date <= sysdate and
+            (v.end_date is null or v.end_date >= sysdate))) 
+   "
+
+DOWNLOAD X_TEMPLATE_FIELDS
+      "select
+            fl.FIELD_NAME,
+            fnd_load_util.owner_name(fl.LAST_UPDATED_BY) OWNER,
+            fl.ALIAS_NAME,
+          to_char(fl.LAST_UPDATE_DATE,'YYYY/MM/DD') LAST_UPDATE_DATE
+      from  XDO_TEMPLATE_FIELDS fl
+      where APPLICATION_SHORT_NAME=:TMPL_APP_SHORT_NAME
+      and   TEMPLATE_CODE=:TEMPLATE_CODE
+     "
+
+
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+#UPLOAD XDO_TEMPLATES
+#    " begin  
+#      if (:UPLOAD_MODE = 'NLS') then  
+#        XDO_TEMPLATES_PKG.TRANSLATE_ROW (  
+#            X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,
+#            X_TEMPLATE_CODE          => :TEMPLATE_CODE,
+#            X_TEMPLATE_NAME          => :TEMPLATE_NAME,
+#            X_DESCRIPTION            => :DESCRIPTION,
+#            X_OWNER                  => :OWNER,
+#            X_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,
+#            X_CUSTOM_MODE            => :CUSTOM_MODE
+#            );
+#      else  
+#        XDO_TEMPLATES_PKG.LOAD_ROW (  
+#           X_APPLICATION_SHORT_NAME  => :APPLICATION_SHORT_NAME,
+#           X_TEMPLATE_CODE           => :TEMPLATE_CODE,
+#           X_DS_APP_SHORT_NAME       => :DS_APP_SHORT_NAME,
+#           X_DATA_SOURCE_CODE        => :DATA_SOURCE_CODE,
+#           X_TEMPLATE_TYPE_CODE      => :TEMPLATE_TYPE_CODE,
+#           X_DEFAULT_LANGUAGE        => :DEFAULT_LANGUAGE,
+#           X_DEFAULT_TERRITORY       => :DEFAULT_TERRITORY,
+#           X_DEFAULT_OUTPUT_TYPE     => :DEFAULT_OUTPUT_TYPE,
+#           X_TEMPLATE_STATUS         => :TEMPLATE_STATUS,
+#           X_USE_ALIAS_TABLE         => :USE_ALIAS_TABLE,
+#           X_START_DATE              => :START_DATE,
+#           X_END_DATE                => :END_DATE,
+#           X_TEMPLATE_NAME           => :TEMPLATE_NAME,
+#           X_DESCRIPTION             => :DESCRIPTION,
+#           X_OWNER                   => :OWNER,
+#           X_LAST_UPDATE_DATE        => :LAST_UPDATE_DATE,
+#           X_CUSTOM_MODE             => :CUSTOM_MODE,
+#           X_OBJECT_VERSION_NUMBER   => :OBJECT_VERSION_NUMBER,
+#           X_ATTRIBUTE_CATEGORY      => :ATTRIBUTE_CATEGORY,
+#           X_ATTRIBUTE1              => :ATTRIBUTE1,
+#           X_ATTRIBUTE2              => :ATTRIBUTE2,
+#           X_ATTRIBUTE3              => :ATTRIBUTE3,
+#           X_ATTRIBUTE4              => :ATTRIBUTE4,
+#           X_ATTRIBUTE5              => :ATTRIBUTE5,
+#           X_ATTRIBUTE6              => :ATTRIBUTE6,
+#           X_ATTRIBUTE7              => :ATTRIBUTE7,
+#           X_ATTRIBUTE8              => :ATTRIBUTE8,
+#           X_ATTRIBUTE9              => :ATTRIBUTE9,
+#           X_ATTRIBUTE10             => :ATTRIBUTE10,
+#           X_ATTRIBUTE11             => :ATTRIBUTE11,
+#           X_ATTRIBUTE12             => :ATTRIBUTE12,
+#           X_ATTRIBUTE13             => :ATTRIBUTE13,
+#           X_ATTRIBUTE14              => :ATTRIBUTE14,
+#           X_ATTRIBUTE15              => :ATTRIBUTE15
+#           );
+#      end if;  
+#    end; "
+
+#  Type 2:
+#    XDO_DS_DEFINITIONS -- Parent: data source and 
+#     |                            all the associated information
+#     |
+#     +--X_TEMPLATES -- Child
+#         |
+#         +--X_TEMPLATE_FIELDS -- Child
+#
+
+UPLOAD XDO_DS_DEFINITIONS
+BEGIN
+  " begin
+      if (:UPLOAD_MODE = 'NLS') then  
+        XDO_DS_DEFINITIONS_PKG.TRANSLATE_ROW (  
+              X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,
+              X_DATA_SOURCE_CODE       => :DATA_SOURCE_CODE,
+              X_DATA_SOURCE_NAME       => :DATA_SOURCE_NAME,
+              X_DESCRIPTION            => :DESCRIPTION,
+              X_OWNER                  => :OWNER,
+              X_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,
+              X_CUSTOM_MODE            => :CUSTOM_MODE
+        );
+      else  
+        XDO_DS_DEFINITIONS_PKG.LOAD_ROW (  
+              X_APPLICATION_SHORT_NAME => :APPLICATION_SHORT_NAME,
+              X_DATA_SOURCE_CODE       => :DATA_SOURCE_CODE,
+              X_DATA_SOURCE_STATUS     => :DATA_SOURCE_STATUS,
+              X_START_DATE             => :START_DATE,
+              X_END_DATE               => :END_DATE,
+              X_OBJECT_VERSION_NUMBER  => :OBJECT_VERSION_NUMBER,
+              X_DATA_SOURCE_NAME       => :DATA_SOURCE_NAME,
+              X_DESCRIPTION            => :DESCRIPTION,
+              X_OWNER                  => :OWNER,
+              X_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,
+              X_CUSTOM_MODE            => :CUSTOM_MODE,
+              X_ATTRIBUTE_CATEGORY     => :ATTRIBUTE_CATEGORY,
+              X_ATTRIBUTE1             => :ATTRIBUTE1,
+              X_ATTRIBUTE2             => :ATTRIBUTE2,
+              X_ATTRIBUTE3             => :ATTRIBUTE3,
+              X_ATTRIBUTE4             => :ATTRIBUTE4,
+              X_ATTRIBUTE5             => :ATTRIBUTE5,
+              X_ATTRIBUTE6             => :ATTRIBUTE6,
+              X_ATTRIBUTE7             => :ATTRIBUTE7,
+              X_ATTRIBUTE8             => :ATTRIBUTE8,
+              X_ATTRIBUTE9             => :ATTRIBUTE9,
+              X_ATTRIBUTE10            => :ATTRIBUTE10,
+              X_ATTRIBUTE11            => :ATTRIBUTE11,
+              X_ATTRIBUTE12            => :ATTRIBUTE12,
+              X_ATTRIBUTE13            => :ATTRIBUTE13,
+              X_ATTRIBUTE14            => :ATTRIBUTE14,
+              X_ATTRIBUTE15            => :ATTRIBUTE15 
+        );
+      end if;
+  end; "
+
+
+UPLOAD X_TEMPLATES
+BEGIN
+    " begin  
+      if (:UPLOAD_MODE = 'NLS') then  
+        XDO_TEMPLATES_PKG.TRANSLATE_ROW (  
+            X_APPLICATION_SHORT_NAME => :TMPL_APP_SHORT_NAME,
+            X_TEMPLATE_CODE          => :TEMPLATE_CODE,
+            X_TEMPLATE_NAME          => :TEMPLATE_NAME,
+            X_DESCRIPTION            => :DESCRIPTION,
+            X_OWNER                  => :OWNER,
+            X_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,
+            X_CUSTOM_MODE            => :CUSTOM_MODE
+            );
+      else  
+        XDO_TEMPLATES_PKG.LOAD_ROW (  
+           X_APPLICATION_SHORT_NAME  => :TMPL_APP_SHORT_NAME,
+           X_TEMPLATE_CODE           => :TEMPLATE_CODE,
+           X_DS_APP_SHORT_NAME       => :APPLICATION_SHORT_NAME,
+           X_DATA_SOURCE_CODE        => :DATA_SOURCE_CODE,
+           X_TEMPLATE_TYPE_CODE      => :TEMPLATE_TYPE_CODE,
+           X_DEFAULT_LANGUAGE        => :DEFAULT_LANGUAGE,
+           X_DEFAULT_TERRITORY       => :DEFAULT_TERRITORY,
+           X_DEFAULT_OUTPUT_TYPE     => :DEFAULT_OUTPUT_TYPE,
+           X_MLS_LANGUAGE            => :MLS_LANGUAGE,
+           X_MLS_TERRITORY           => :MLS_TERRITORY,
+           X_TEMPLATE_STATUS         => :TEMPLATE_STATUS,
+           X_USE_ALIAS_TABLE         => :USE_ALIAS_TABLE,
+           X_START_DATE              => :START_DATE,
+           X_END_DATE                => :END_DATE,
+           X_TEMPLATE_NAME           => :TEMPLATE_NAME,
+           X_DESCRIPTION             => :DESCRIPTION,
+           X_OWNER                   => :OWNER,
+           X_LAST_UPDATE_DATE        => :LAST_UPDATE_DATE,
+           X_CUSTOM_MODE             => :CUSTOM_MODE,
+           X_DEPENDENCY_FLAG         => :DEPENDENCY_FLAG,
+           X_OBJECT_VERSION_NUMBER   => :OBJECT_VERSION_NUMBER,
+           X_ATTRIBUTE_CATEGORY      => :ATTRIBUTE_CATEGORY,
+           X_ATTRIBUTE1              => :ATTRIBUTE1,
+           X_ATTRIBUTE2              => :ATTRIBUTE2,
+           X_ATTRIBUTE3              => :ATTRIBUTE3,
+           X_ATTRIBUTE4              => :ATTRIBUTE4,
+           X_ATTRIBUTE5              => :ATTRIBUTE5,
+           X_ATTRIBUTE6              => :ATTRIBUTE6,
+           X_ATTRIBUTE7              => :ATTRIBUTE7,
+           X_ATTRIBUTE8              => :ATTRIBUTE8,
+           X_ATTRIBUTE9              => :ATTRIBUTE9,
+           X_ATTRIBUTE10             => :ATTRIBUTE10,
+           X_ATTRIBUTE11             => :ATTRIBUTE11,
+           X_ATTRIBUTE12             => :ATTRIBUTE12,
+           X_ATTRIBUTE13             => :ATTRIBUTE13,
+           X_ATTRIBUTE14             => :ATTRIBUTE14,
+           X_ATTRIBUTE15             => :ATTRIBUTE15
+           );
+      end if;  
+    end; "
+
+UPLOAD X_TEMPLATE_FIELDS
+  " begin
+      if (:UPLOAD_MODE = 'NLS') then  
+       return;
+      else  
+        XDO_TEMPLATE_FIELDS_PKG.LOAD_ROW (  
+          X_APPLICATION_SHORT_NAME => :TMPL_APP_SHORT_NAME,
+          X_TEMPLATE_CODE          => :TEMPLATE_CODE,
+          X_FIELD_NAME             => :FIELD_NAME,
+          X_ALIAS_NAME             => :ALIAS_NAME,
+          X_OWNER                  => :OWNER,
+          X_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,
+          X_CUSTOM_MODE            => :CUSTOM_MODE
+        );
+      end if;
+  end;"

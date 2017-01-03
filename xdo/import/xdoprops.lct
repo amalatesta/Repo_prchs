@@ -1,0 +1,78 @@
+#
+# $Header: xdoprops.lct 120.3 2006/07/14 21:09:19 jyeung noship $
+#
+# xdoprops.lct - Configuration file for loading XML Publisher config properties
+#                
+#
+# HISTROY
+#   07/01/2005 jyeung  Initial Creation
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#    XDO_CONFIG_PROPERTIES
+#
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=dat checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @XDO:patch/115/import/xdoprops.lct @~PROD:~PATH/~FILE"
+
+DEFINE XDO_CONFIG_PROPERTIES
+  KEY   PROPERTY_CODE           VARCHAR2(100)
+  TRANS PROPERTY_NAME           VARCHAR2(120)
+  BASE  CATEGORY                VARCHAR2(50)
+  BASE  XDO_CFG_NAME            VARCHAR2(100)       
+  BASE  LOOKUP_TYPE             VARCHAR2(50)
+  BASE  SORT_ORDER              NUMBER
+  CTX   OWNER          	        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE        VARCHAR2(11)
+
+END XDO_CONFIG_PROPERTIES
+
+
+#
+# -- DOWNLOAD SECTION --
+#
+#
+
+DOWNLOAD XDO_CONFIG_PROPERTIES
+  "select property_code,
+          property_name,
+          category,
+          xdo_cfg_name,
+          lookup_type,
+          sort_order,
+          fnd_load_util.owner_name(LAST_UPDATED_BY) OWNER,
+          to_char(LAST_UPDATE_DATE,'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   xdo_config_properties_vl
+   where (:PROPERTY_CODE is null or ((:PROPERTY_CODE is not null) and (property_code like :PROPERTY_CODE)))"
+
+
+
+#
+# -- UPLOAD section -- 
+#
+#
+
+UPLOAD XDO_CONFIG_PROPERTIES
+  "BEGIN
+      if (:UPLOAD_MODE = 'NLS') then  
+        XDO_CONFIG_PROPERTIES_PKG.TRANSLATE_ROW (  
+          P_PROPERTY_CODE          => :PROPERTY_CODE,  
+          P_PROPERTY_NAME          => :PROPERTY_NAME,  
+	  P_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,  
+          P_CUSTOM_MODE            => :CUSTOM_MODE,
+          P_OWNER                  => :OWNER);  
+      else
+        XDO_CONFIG_PROPERTIES_PKG.LOAD_ROW (  
+          P_PROPERTY_CODE          => :PROPERTY_CODE,  
+          P_PROPERTY_NAME          => :PROPERTY_NAME,
+          P_CATEGORY               => :CATEGORY,
+          P_XDO_CFG_NAME           => :XDO_CFG_NAME,
+          P_LOOKUP_TYPE            => :LOOKUP_TYPE,
+          P_SORT_ORDER             => :SORT_ORDER,  
+	  P_LAST_UPDATE_DATE       => :LAST_UPDATE_DATE,  
+          P_CUSTOM_MODE            => :CUSTOM_MODE,
+          P_OWNER                  => :OWNER);
+      end if; 
+   END; "
