@@ -170,14 +170,14 @@ create or replace package body xx_ar_raxinv_pk as
     and rct.cust_trx_type_id     = nvl(p_cust_trx_type_id ,rct.cust_trx_type_id)
     and rct.bill_to_customer_id  = nvl(p_customer_id ,rct.bill_to_customer_id)
     and rct.complete_flag        = 'Y'
-    and nvl(rct.attribute9 ,'N') = 'N'
+    --and nvl(rct.attribute9 ,'N') = 'N' --PAM PD Procesado
     and p_draft_mode             = 'N'
     and rct.batch_source_id      = rbs.batch_source_id
-    and rbs.attribute3           = 'Y'
+    --and rbs.attribute3           = 'Y' --Fact. Elec: Origen de Comprobante Electronico
     and rct.customer_trx_id      = xarir.customer_trx_id (+)
     and nvl(xarir.status ,'@')  in ('@' ,'PROCESSING_ERROR_ORACLE' ,'ERROR_OAS')
     and rct.cust_trx_type_id     = rctt.cust_trx_type_id
-    and rctt.attribute12         = 'Y'
+    --and rctt.attribute12         = 'Y' --Fact. Elec: Comprobante Electronico
     and rct.org_id               = hou.organization_id
     and hou.location_id          = hl_org.location_id
     and rct.bill_to_customer_id  = hca.cust_account_id
@@ -289,10 +289,10 @@ create or replace package body xx_ar_raxinv_pk as
     and rct.complete_flag       = 'Y'
     and p_draft_mode            = 'Y'
     and rct.batch_source_id     = rbs.batch_source_id
-    and rbs.attribute3          = 'Y'
+    --and rbs.attribute3          = 'Y' --Fact. Elec: Origen de Comprobante Electronico
     and rct.customer_trx_id     = xarir.customer_trx_id (+)
     and rct.cust_trx_type_id    = rctt.cust_trx_type_id
-    and rctt.attribute12        = 'Y'
+    --and rctt.attribute12        = 'Y' --Fact. Elec: Comprobante Electronico
     and rct.org_id              = hou.organization_id
     and hou.location_id         = hl_org.location_id
     and rct.bill_to_customer_id = hca.cust_account_id
