@@ -441,7 +441,7 @@ create or replace package body xx_ar_raxinv_pk as
     v_calling_sequence varchar2(2000);
     v_indent_length    number(15);
   begin
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.INDENT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.indent';
     v_indent_length    := 3;
     if p_type           = '+' then
       g_indent         := replace(rpad(' ' ,nvl(length(g_indent) ,0 ) + v_indent_length ) ,' ' ,' ' );
@@ -483,7 +483,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.DISPLAY_MESSAGE_SPLIT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.display_message_split';
     /*-- ---------------------------------------------------------------------------*/
     /*-- Obtengo la longitud del mensaje.*/
     /*-- ---------------------------------------------------------------------------*/
@@ -554,7 +554,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.DEBUG';
+    v_calling_sequence := 'xx_ar_raxinv_pk.debug';
     /*-- ---------------------------------------------------------------------------*/
     /*-- Realizo el debug.*/
     /*-- ---------------------------------------------------------------------------*/
@@ -613,7 +613,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDSB_PK.PRINT_TEXT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.print_text';
     debug(g_indent || v_calling_sequence ,'1' );
     /*-- ---------------------------------------------------------------------------*/
     /*-- Despliego Parametros.*/
@@ -1114,7 +1114,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SEND_PK.GENERATE_FILES';
+    v_calling_sequence := 'xx_ar_raxinv_pk.generate_files';
     v_request_id       := fnd_global.conc_request_id;
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo el debug.*/
@@ -1836,7 +1836,7 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
         exception
         when others then
-          v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). Texto: ' || v_send_line || '. ' || sqlerrm;
+          v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(xx_ar_raxinv_pk). Texto: ' || v_send_line || '. ' || sqlerrm;
         end;
         if (v_mesg_error is null and v_trxs_tbl(i).status != 'ERROR') then
           debug(g_indent || v_calling_sequence || ' Copiando lob' ,'1' );
@@ -2196,7 +2196,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.UPLOAD_FILES';
+    v_calling_sequence := 'xx_ar_raxinv_pk.upload_files';
     v_conc_request_id  := fnd_global.conc_request_id;
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo el debug.*/
@@ -2275,10 +2275,10 @@ create or replace package body xx_ar_raxinv_pk as
           into v_send_file_data;
         exception
         when others then
-          v_mesg_error := 'Error actualizando ' || 'la columna del contenido del ' || 'archivo  ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || sqlerrm;
+          v_mesg_error := 'Error actualizando ' || 'la columna del contenido del ' || 'archivo  ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || sqlerrm;
           exit;
         end;
-        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna del contenido del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX)' ,'1' );
+        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna del contenido del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk)' ,'1' );
         /*-- --------------------------------------------------------------------*/
         /*-- Recorro el contenido del archivo.*/
         /*-- --------------------------------------------------------------------*/
@@ -2296,7 +2296,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text1) ,cfd.text1);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text1 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text1 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2305,7 +2305,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text2) ,cfd.text2);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text2 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text2 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2314,7 +2314,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text3) ,cfd.text3);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text3 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text3 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2339,10 +2339,10 @@ create or replace package body xx_ar_raxinv_pk as
           where xafut.rowid    = ct.row_id;
         exception
         when others then
-          v_mesg_error := 'Error actualizando ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || sqlerrm;
+          v_mesg_error := 'Error actualizando ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || sqlerrm;
           exit;
         end;
-        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX)' ,'1' );
+        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk)' ,'1' );
       end loop;
       indent('-');
     end if;
@@ -2450,7 +2450,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.REPORT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.report';
     v_conc_request_id  := fnd_global.conc_request_id;
     v_length_line      := 227;
     v_line_single      := replace(rpad(' ' ,40) ,' ' ,'-');
@@ -3533,7 +3533,7 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
         exception
           when others then
-            v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). Texto: ' || v_send_line || '. ' || sqlerrm;
+            v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(xx_ar_raxinv_pk). Texto: ' || v_send_line || '. ' || sqlerrm;
         end;
         if (v_mesg_error is null and v_trxs_tbl(i).status != 'ERROR') then
           debug(g_indent || v_calling_sequence || ' Copiando lob' ,'1' );
