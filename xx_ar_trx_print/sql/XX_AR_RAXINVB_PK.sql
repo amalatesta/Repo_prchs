@@ -425,6 +425,24 @@ create or replace package body xx_ar_raxinv_pk as
 /*=========================================================================+
 |                                                                          |
 | Private Procedure                                                        |
+|    print_output                                                          |
+|                                                                          |
+| Description                                                              |
+|    Procedimiento privado para imprimir                                   |
+|                                                                          |
+| Parameters                                                               |
+|    p_print_output in varchar2                                            |
+|                                                                          |
++=========================================================================*/
+  procedure print_output
+    (p_print_output in varchar2)
+  is
+  begin
+    fnd_file.put_line(fnd_file.output,p_print_output);
+  end print_output;
+/*=========================================================================+
+|                                                                          |
+| Private Procedure                                                        |
 |    indent                                                                |
 |                                                                          |
 | Description                                                              |
@@ -3548,9 +3566,11 @@ create or replace package body xx_ar_raxinv_pk as
     if (v_mesg_error is null) then
       debug(g_indent || v_calling_sequence || ' Generando archivos' ,'1' );
       begin
-        if not print_text(p_print_output => null ,p_mesg_error => v_mesg_error ) then
-          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
-        end if;
+--        /*Comento porque null es para sacarlo a un archivo*/
+--        if not print_text(p_print_output => null ,p_mesg_error => v_mesg_error ) then
+--          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
+--        end if;
+        /*Si se le pasa Y lo saca a la salida del concurrente*/
         if not print_text(p_print_output => 'Y' ,p_mesg_error => v_mesg_error ) then
           v_mesg_error := 'Error generando archivos: '||v_mesg_error;
         end if;
@@ -3559,245 +3579,245 @@ create or replace package body xx_ar_raxinv_pk as
         v_mesg_error := v_calling_sequence || '. Error llamando a la funcion ' || 'PRINT_TEXT. ' || sqlerrm;
       end;
     end if; /*-- Genera los archivos*/
-    /*-- Inserta registros en tabla de intercambio*/
-    if (v_mesg_error is null) then
-      for i in 1..v_trxs_tbl.count
-      loop
-        if v_trxs_tbl(i).status = 'ERROR' then
-          v_error_qty          := v_error_qty + 1;
-        else
-          v_success_qty := v_success_qty + 1;
-        end if;
-        begin
-          /*-- Se obtiene extracto del comprobante relacionado cuando corresponde*/
-          v_hotel_stmt_trx_number := xx_ar_utilities_pk.get_hotel_stmt_trx_number(v_trxs_tbl(i).customer_trx_id);
-          /*-- Se obtiene el periodo del extracto*/
-          xx_ar_utilities_pk.get_hotel_stmt_info(p_hotel_stmt_trx_number => v_hotel_stmt_trx_number ,x_period_name => v_month_billed);
-          select
-            case
-              when nvl(v_trxs_tbl(i).collection_type ,'XX') = 'PD'
-              then null
-              else decode(rctl.interface_line_context ,'ORDER ENTRY' ,oos.name ,'XX_MANUAL' )
-            end
-          ,ooh.orig_sys_document_ref
-          ,xahsh.stmt_source
-          into v_order_source
-          ,v_orig_sys_document_ref
-          ,v_stmt_source
-          from oe_order_sources oos
-          ,oe_order_headers ooh
-          ,oe_order_lines ool
-          ,ra_customer_trx rct
-          ,ra_customer_trx_lines rctl
-          ,xx_ap_hotel_statements_hdr xahsh
-          where 1                                                                                     = 1
-          and v_trxs_tbl(i).customer_trx_id                                                           = rct.customer_trx_id
-          and rct.customer_trx_id                                                                     = rctl.customer_trx_id
-          and rctl.line_type                                                                          = 'LINE'
-          and rctl.interface_line_attribute6                                                          = ool.line_id(+)
-          and ool.header_id                                                                           = ooh.header_id(+)
-          and xx_ar_utilities_pk.get_hotel_stmt_trx_number(rct.customer_trx_id)                       = xahsh.hotel_stmt_trx_number(+)
-          and decode(rctl.interface_line_context ,'ORDER ENTRY' ,rctl.interface_line_attribute1 ,-1 ) = decode(rctl.interface_line_context ,'ORDER ENTRY' ,ooh.order_number ,-1 )
-          and ooh.order_source_id                                                                     = oos.order_source_id(+)
-          and rownum                                                                                  = 1;
-        exception
-        when others then
-          v_order_source          := null;
-          v_orig_sys_document_ref := null;
-          v_stmt_source           := null;
-        end;
-        /*----------------------------*/
-        /*-- Calcula datos adicionales*/
-        /*----------------------------*/
-        begin
-          insert
-          into xx_ar_reg_invoice_request
-            (
-              customer_trx_id
-            ,trx_number_ori
-            ,reference
-            ,receive_date
-            ,trx_number_new
-            ,link
-            ,cae
-            ,fecha_cae
-            ,file_name
-            ,status
-            ,error_code
-            ,error_messages
-            ,created_by
-            ,creation_date
-            ,last_updated_by
-            ,last_update_date
-            ,last_update_login
-            ,purchase_order
-            ,request_number
-            ,order_source
-            ,orig_sys_document_ref
-            ,collection_type
-            ,document_type
-            ,email
-            ,source_system_number
-            ,legal_entity
-            ,legal_entity_code
-            ,request_id
-            ,stmt_source
-            ,hotel_stmt_trx_number
-            ,attribute_category
-            ,attribute1
-            ,attribute2
-            ,attribute3
-            ,attribute4
-            ,attribute5
-            ,attribute6
-            ,attribute7
-            ,attribute8
-            ,attribute9
-            ,attribute10
-            ,net_amount
-            ,net_amount_pcc
-            ,tax_amount
-            ,tax_amount_pcc
-            ,total_amount
-            ,total_amount_pcc
-            ,trx_date
-            ,collection_country
-            ,month_billed
-            ,invoice_currency_code
-            ,printing_currency_code
-            )
-            values
-            (
-              v_trxs_tbl(i).customer_trx_id /*-- CUSTOMER_TRX_ID*/
-            ,v_trxs_tbl(i).trx_number /*-- TRX_NUMBER_ORI*/
-            ,v_trxs_tbl(i).customer_name /*-- REFERENCE*/
-            ,null /*-- RECEIVE_DATE*/
-            ,null /*-- TRX_NUMBER_NEW*/
-            ,null /*-- LINK*/
-            ,null /*-- CAE*/
-            ,null /*-- FECHA_CAE*/
-            ,v_trxs_tbl(i).output_file /*-- FILE_NAME*/
-            ,decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW') /*-- STATUS*/
-            ,v_trxs_tbl(i).error_code /*-- ERROR_CODE*/
-            ,v_trxs_tbl(i).error_messages /*-- ERROR_MESSAGES*/
-            ,fnd_global.user_id /*-- CREATED_BY*/
-            ,sysdate /*-- CREATION_DATE*/
-            ,fnd_global.user_id /*-- LAST_UPDATED_BY*/
-            ,sysdate /*-- LAST_UPDATE_DATE*/
-            ,fnd_global.login_id /*-- LAST_UPDATE_LOGIN*/
-            ,v_trxs_tbl(i).purchase_order /*-- PURCHASE_ORDER*/
-            ,v_trxs_tbl(i).request_number /*-- REQUEST_NUMBER*/
-            ,v_order_source /*-- ORDER_SOURCE*/
-            ,v_orig_sys_document_ref /*-- ORIG_SYS_DOCUMENT_REF*/
-            ,v_trxs_tbl(i).collection_type /*-- COLLECTION_TYPE*/
-            ,v_trxs_tbl(i).document_type /*-- DOCUMENT_TYPE*/
-            ,v_trxs_tbl(i).customer_email /*-- EMAIL*/
-            ,v_trxs_tbl(i).source_system_number /*-- SOURCE_SYSTEM_NUMBER*/
-            ,v_trxs_tbl(i).legal_entity_name /*-- LEGAL_ENTITY*/
-            ,v_trxs_tbl(i).legal_entity_id /*-- LEGAL_ENTITY_CODE*/
-            ,fnd_global.conc_request_id /*-- REQUEST_ID*/
-            ,v_stmt_source /*-- STMT_SOURCE*/
-            ,v_hotel_stmt_trx_number /*-- HOTEL_STMT_TRX_NUMBER*/
-            ,p_territory_code /*-- ATTRIBUTE_CATEGORY*/
-            ,v_trxs_tbl(i).electr_doc_type /*-- ATTRIBUTE1*/
-            ,v_trxs_tbl(i).legal_entity_identifier /*-- ATTRIBUTE2*/
-            ,null /*-- ATTRIBUTE3*/
-            ,null /*-- ATTRIBUTE4*/
-            ,null /*-- ATTRIBUTE5*/
-            ,null /*-- ATTRIBUTE6*/
-            ,null /*-- ATTRIBUTE7*/
-            ,null /*-- ATTRIBUTE8*/
-            ,null /*-- ATTRIBUTE9*/
-            ,null /*-- ATTRIBUTE10*/
-            ,v_trxs_tbl(i).net_amount /*-- NET_AMOUNT*/
-            ,v_trxs_tbl(i).net_amount_pcc /*-- NET_AMOUNT_PCC*/
-            ,v_trxs_tbl(i).tax_amount /*-- TAX_AMOUNT*/
-            ,v_trxs_tbl(i).tax_amount_pcc /*-- TAX_AMOUNT_PCC*/
-            ,v_trxs_tbl(i).total_amount /*-- TOTAL_AMOUNT*/
-            ,v_trxs_tbl(i).total_amount_pcc /*-- TOTAL_AMOUNT_PCC*/
-            ,v_trxs_tbl(i).trx_date /*-- TRX_DATE*/
-            ,v_trxs_tbl(i).collection_country /*-- COLLECTION_COUNTRY*/
-            ,v_month_billed /*-- MONTH_BILLED*/
-            ,v_trxs_tbl(i).invoice_currency_code /*-- INVOICE_CURRENCY_CODE*/
-            ,v_trxs_tbl(i).printing_currency_code/*-- PRINTING_CURRENCY_CODE*/
-            );
-        exception
-        when dup_val_on_index then
-          update xx_ar_reg_invoice_request
-          set trx_number_ori                  = v_trxs_tbl(i).trx_number
-          ,reference                          = v_trxs_tbl(i).customer_name
-          ,receive_date                       = null
-          ,trx_number_new                     = null
-          ,link                               = null
-          ,cae                                = null
-          ,fecha_cae                          = null
-          ,file_name                          = v_trxs_tbl(i).output_file
-          ,status                             = decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW')
-          ,error_code                         = v_trxs_tbl(i).error_code
-          ,error_messages                     = v_trxs_tbl(i).error_messages
-          ,last_updated_by                    = fnd_global.user_id
-          ,last_update_date                   = sysdate
-          ,last_update_login                  = fnd_global.login_id
-          ,purchase_order                     = v_trxs_tbl(i).purchase_order
-          ,request_number                     = v_trxs_tbl(i).request_number
-          ,order_source                       = v_order_source
-          ,orig_sys_document_ref              = v_orig_sys_document_ref
-          ,collection_type                    = v_trxs_tbl(i).collection_type
-          ,document_type                      = v_trxs_tbl(i).document_type
-          ,email                              = v_trxs_tbl(i).customer_email
-          ,source_system_number               = v_trxs_tbl(i).source_system_number
-          ,legal_entity                       = v_trxs_tbl(i).legal_entity_name
-          ,legal_entity_code                  = v_trxs_tbl(i).legal_entity_id
-          ,request_id                         = fnd_global.conc_request_id
-          ,stmt_source                        = v_stmt_source
-          ,hotel_stmt_trx_number              = v_hotel_stmt_trx_number
-          ,attribute_category                 = p_territory_code
-          ,attribute1                         = v_trxs_tbl(i).electr_doc_type
-          ,attribute2                         = v_trxs_tbl(i).legal_entity_identifier
-          ,attribute3                         = null
-          ,attribute4                         = null
-          ,attribute5                         = null
-          ,attribute6                         = null
-          ,attribute7                         = null
-          ,attribute8                         = null
-          ,attribute9                         = null
-          ,attribute10                        = null
-          ,net_amount                         = v_trxs_tbl(i).net_amount
-          ,net_amount_pcc                     =v_trxs_tbl(i).net_amount_pcc
-          ,tax_amount                         = v_trxs_tbl(i).tax_amount
-          ,tax_amount_pcc                     = v_trxs_tbl(i).tax_amount_pcc
-          ,total_amount                       = v_trxs_tbl(i).total_amount
-          ,total_amount_pcc                   = v_trxs_tbl(i).total_amount_pcc
-          ,trx_date                           = v_trxs_tbl(i).trx_date
-          ,collection_country                 = v_trxs_tbl(i).collection_country
-          ,month_billed                       = v_month_billed
-          ,invoice_currency_code              = v_trxs_tbl(i).invoice_currency_code
-          ,printing_currency_code             = v_trxs_tbl(i).printing_currency_code
-          where v_trxs_tbl(i).customer_trx_id = customer_trx_id;
-        end;
-      end loop;
-    end if;
-    /*-- ---------------------------------------------------------------------------*/
-    /*-- Verifico si se produjo un error.*/
-    /*-- ---------------------------------------------------------------------------*/
-    if v_mesg_error is not null and v_mesg_error != 'NO_DATA_FOUND' then
-      debug(g_indent || v_calling_sequence || '. ' || v_mesg_error ,'1' );
-      fnd_file.put(fnd_file.log ,g_indent || v_calling_sequence || '. ' || v_mesg_error );
-      fnd_file.new_line(fnd_file.log ,1);
-      debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
-      rollback;
-      retcode := '2';
-      errbuf  := substr(v_mesg_error ,1 ,2000);
-    else
-      if upper(nvl(p_draft_mode ,'N')) = 'N' then
-        debug(g_indent || v_calling_sequence || '. Realizando commit' ,'1' );
-        commit;
-      else
-        debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
-        rollback;
-      end if;
-      retcode := '0';
-    end if;
+--    /*-- Inserta registros en tabla de intercambio*/
+--    if (v_mesg_error is null) then
+--      for i in 1..v_trxs_tbl.count
+--      loop
+--        if v_trxs_tbl(i).status = 'ERROR' then
+--          v_error_qty          := v_error_qty + 1;
+--        else
+--          v_success_qty := v_success_qty + 1;
+--        end if;
+--        begin
+--          /*-- Se obtiene extracto del comprobante relacionado cuando corresponde*/
+--          v_hotel_stmt_trx_number := xx_ar_utilities_pk.get_hotel_stmt_trx_number(v_trxs_tbl(i).customer_trx_id);
+--          /*-- Se obtiene el periodo del extracto*/
+--          xx_ar_utilities_pk.get_hotel_stmt_info(p_hotel_stmt_trx_number => v_hotel_stmt_trx_number ,x_period_name => v_month_billed);
+--          select
+--            case
+--              when nvl(v_trxs_tbl(i).collection_type ,'XX') = 'PD'
+--              then null
+--              else decode(rctl.interface_line_context ,'ORDER ENTRY' ,oos.name ,'XX_MANUAL' )
+--            end
+--          ,ooh.orig_sys_document_ref
+--          ,xahsh.stmt_source
+--          into v_order_source
+--          ,v_orig_sys_document_ref
+--          ,v_stmt_source
+--          from oe_order_sources oos
+--          ,oe_order_headers ooh
+--          ,oe_order_lines ool
+--          ,ra_customer_trx rct
+--          ,ra_customer_trx_lines rctl
+--          ,xx_ap_hotel_statements_hdr xahsh
+--          where 1                                                                                     = 1
+--          and v_trxs_tbl(i).customer_trx_id                                                           = rct.customer_trx_id
+--          and rct.customer_trx_id                                                                     = rctl.customer_trx_id
+--          and rctl.line_type                                                                          = 'LINE'
+--          and rctl.interface_line_attribute6                                                          = ool.line_id(+)
+--          and ool.header_id                                                                           = ooh.header_id(+)
+--          and xx_ar_utilities_pk.get_hotel_stmt_trx_number(rct.customer_trx_id)                       = xahsh.hotel_stmt_trx_number(+)
+--          and decode(rctl.interface_line_context ,'ORDER ENTRY' ,rctl.interface_line_attribute1 ,-1 ) = decode(rctl.interface_line_context ,'ORDER ENTRY' ,ooh.order_number ,-1 )
+--          and ooh.order_source_id                                                                     = oos.order_source_id(+)
+--          and rownum                                                                                  = 1;
+--        exception
+--        when others then
+--          v_order_source          := null;
+--          v_orig_sys_document_ref := null;
+--          v_stmt_source           := null;
+--        end;
+--        /*----------------------------*/
+--        /*-- Calcula datos adicionales*/
+--        /*----------------------------*/
+--        begin
+--          insert
+--          into xx_ar_reg_invoice_request
+--            (
+--              customer_trx_id
+--            ,trx_number_ori
+--            ,reference
+--            ,receive_date
+--            ,trx_number_new
+--            ,link
+--            ,cae
+--            ,fecha_cae
+--            ,file_name
+--            ,status
+--            ,error_code
+--            ,error_messages
+--            ,created_by
+--            ,creation_date
+--            ,last_updated_by
+--            ,last_update_date
+--            ,last_update_login
+--            ,purchase_order
+--            ,request_number
+--            ,order_source
+--            ,orig_sys_document_ref
+--            ,collection_type
+--            ,document_type
+--            ,email
+--            ,source_system_number
+--            ,legal_entity
+--            ,legal_entity_code
+--            ,request_id
+--            ,stmt_source
+--            ,hotel_stmt_trx_number
+--            ,attribute_category
+--            ,attribute1
+--            ,attribute2
+--            ,attribute3
+--            ,attribute4
+--            ,attribute5
+--            ,attribute6
+--            ,attribute7
+--            ,attribute8
+--            ,attribute9
+--            ,attribute10
+--            ,net_amount
+--            ,net_amount_pcc
+--            ,tax_amount
+--            ,tax_amount_pcc
+--            ,total_amount
+--            ,total_amount_pcc
+--            ,trx_date
+--            ,collection_country
+--            ,month_billed
+--            ,invoice_currency_code
+--            ,printing_currency_code
+--            )
+--            values
+--            (
+--              v_trxs_tbl(i).customer_trx_id /*-- CUSTOMER_TRX_ID*/
+--            ,v_trxs_tbl(i).trx_number /*-- TRX_NUMBER_ORI*/
+--            ,v_trxs_tbl(i).customer_name /*-- REFERENCE*/
+--            ,null /*-- RECEIVE_DATE*/
+--            ,null /*-- TRX_NUMBER_NEW*/
+--            ,null /*-- LINK*/
+--            ,null /*-- CAE*/
+--            ,null /*-- FECHA_CAE*/
+--            ,v_trxs_tbl(i).output_file /*-- FILE_NAME*/
+--            ,decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW') /*-- STATUS*/
+--            ,v_trxs_tbl(i).error_code /*-- ERROR_CODE*/
+--            ,v_trxs_tbl(i).error_messages /*-- ERROR_MESSAGES*/
+--            ,fnd_global.user_id /*-- CREATED_BY*/
+--            ,sysdate /*-- CREATION_DATE*/
+--            ,fnd_global.user_id /*-- LAST_UPDATED_BY*/
+--            ,sysdate /*-- LAST_UPDATE_DATE*/
+--            ,fnd_global.login_id /*-- LAST_UPDATE_LOGIN*/
+--            ,v_trxs_tbl(i).purchase_order /*-- PURCHASE_ORDER*/
+--            ,v_trxs_tbl(i).request_number /*-- REQUEST_NUMBER*/
+--            ,v_order_source /*-- ORDER_SOURCE*/
+--            ,v_orig_sys_document_ref /*-- ORIG_SYS_DOCUMENT_REF*/
+--            ,v_trxs_tbl(i).collection_type /*-- COLLECTION_TYPE*/
+--            ,v_trxs_tbl(i).document_type /*-- DOCUMENT_TYPE*/
+--            ,v_trxs_tbl(i).customer_email /*-- EMAIL*/
+--            ,v_trxs_tbl(i).source_system_number /*-- SOURCE_SYSTEM_NUMBER*/
+--            ,v_trxs_tbl(i).legal_entity_name /*-- LEGAL_ENTITY*/
+--            ,v_trxs_tbl(i).legal_entity_id /*-- LEGAL_ENTITY_CODE*/
+--            ,fnd_global.conc_request_id /*-- REQUEST_ID*/
+--            ,v_stmt_source /*-- STMT_SOURCE*/
+--            ,v_hotel_stmt_trx_number /*-- HOTEL_STMT_TRX_NUMBER*/
+--            ,p_territory_code /*-- ATTRIBUTE_CATEGORY*/
+--            ,v_trxs_tbl(i).electr_doc_type /*-- ATTRIBUTE1*/
+--            ,v_trxs_tbl(i).legal_entity_identifier /*-- ATTRIBUTE2*/
+--            ,null /*-- ATTRIBUTE3*/
+--            ,null /*-- ATTRIBUTE4*/
+--            ,null /*-- ATTRIBUTE5*/
+--            ,null /*-- ATTRIBUTE6*/
+--            ,null /*-- ATTRIBUTE7*/
+--            ,null /*-- ATTRIBUTE8*/
+--            ,null /*-- ATTRIBUTE9*/
+--            ,null /*-- ATTRIBUTE10*/
+--            ,v_trxs_tbl(i).net_amount /*-- NET_AMOUNT*/
+--            ,v_trxs_tbl(i).net_amount_pcc /*-- NET_AMOUNT_PCC*/
+--            ,v_trxs_tbl(i).tax_amount /*-- TAX_AMOUNT*/
+--            ,v_trxs_tbl(i).tax_amount_pcc /*-- TAX_AMOUNT_PCC*/
+--            ,v_trxs_tbl(i).total_amount /*-- TOTAL_AMOUNT*/
+--            ,v_trxs_tbl(i).total_amount_pcc /*-- TOTAL_AMOUNT_PCC*/
+--            ,v_trxs_tbl(i).trx_date /*-- TRX_DATE*/
+--            ,v_trxs_tbl(i).collection_country /*-- COLLECTION_COUNTRY*/
+--            ,v_month_billed /*-- MONTH_BILLED*/
+--            ,v_trxs_tbl(i).invoice_currency_code /*-- INVOICE_CURRENCY_CODE*/
+--            ,v_trxs_tbl(i).printing_currency_code/*-- PRINTING_CURRENCY_CODE*/
+--            );
+--        exception
+--        when dup_val_on_index then
+--          update xx_ar_reg_invoice_request
+--          set trx_number_ori                  = v_trxs_tbl(i).trx_number
+--          ,reference                          = v_trxs_tbl(i).customer_name
+--          ,receive_date                       = null
+--          ,trx_number_new                     = null
+--          ,link                               = null
+--          ,cae                                = null
+--          ,fecha_cae                          = null
+--          ,file_name                          = v_trxs_tbl(i).output_file
+--          ,status                             = decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW')
+--          ,error_code                         = v_trxs_tbl(i).error_code
+--          ,error_messages                     = v_trxs_tbl(i).error_messages
+--          ,last_updated_by                    = fnd_global.user_id
+--          ,last_update_date                   = sysdate
+--          ,last_update_login                  = fnd_global.login_id
+--          ,purchase_order                     = v_trxs_tbl(i).purchase_order
+--          ,request_number                     = v_trxs_tbl(i).request_number
+--          ,order_source                       = v_order_source
+--          ,orig_sys_document_ref              = v_orig_sys_document_ref
+--          ,collection_type                    = v_trxs_tbl(i).collection_type
+--          ,document_type                      = v_trxs_tbl(i).document_type
+--          ,email                              = v_trxs_tbl(i).customer_email
+--          ,source_system_number               = v_trxs_tbl(i).source_system_number
+--          ,legal_entity                       = v_trxs_tbl(i).legal_entity_name
+--          ,legal_entity_code                  = v_trxs_tbl(i).legal_entity_id
+--          ,request_id                         = fnd_global.conc_request_id
+--          ,stmt_source                        = v_stmt_source
+--          ,hotel_stmt_trx_number              = v_hotel_stmt_trx_number
+--          ,attribute_category                 = p_territory_code
+--          ,attribute1                         = v_trxs_tbl(i).electr_doc_type
+--          ,attribute2                         = v_trxs_tbl(i).legal_entity_identifier
+--          ,attribute3                         = null
+--          ,attribute4                         = null
+--          ,attribute5                         = null
+--          ,attribute6                         = null
+--          ,attribute7                         = null
+--          ,attribute8                         = null
+--          ,attribute9                         = null
+--          ,attribute10                        = null
+--          ,net_amount                         = v_trxs_tbl(i).net_amount
+--          ,net_amount_pcc                     =v_trxs_tbl(i).net_amount_pcc
+--          ,tax_amount                         = v_trxs_tbl(i).tax_amount
+--          ,tax_amount_pcc                     = v_trxs_tbl(i).tax_amount_pcc
+--          ,total_amount                       = v_trxs_tbl(i).total_amount
+--          ,total_amount_pcc                   = v_trxs_tbl(i).total_amount_pcc
+--          ,trx_date                           = v_trxs_tbl(i).trx_date
+--          ,collection_country                 = v_trxs_tbl(i).collection_country
+--          ,month_billed                       = v_month_billed
+--          ,invoice_currency_code              = v_trxs_tbl(i).invoice_currency_code
+--          ,printing_currency_code             = v_trxs_tbl(i).printing_currency_code
+--          where v_trxs_tbl(i).customer_trx_id = customer_trx_id;
+--        end;
+--      end loop;
+--    end if;
+--    /*-- ---------------------------------------------------------------------------*/
+--    /*-- Verifico si se produjo un error.*/
+--    /*-- ---------------------------------------------------------------------------*/
+--    if v_mesg_error is not null and v_mesg_error != 'NO_DATA_FOUND' then
+--      debug(g_indent || v_calling_sequence || '. ' || v_mesg_error ,'1' );
+--      fnd_file.put(fnd_file.log ,g_indent || v_calling_sequence || '. ' || v_mesg_error );
+--      fnd_file.new_line(fnd_file.log ,1);
+--      debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
+--      rollback;
+--      retcode := '2';
+--      errbuf  := substr(v_mesg_error ,1 ,2000);
+--    else
+--      if upper(nvl(p_draft_mode ,'N')) = 'N' then
+--        debug(g_indent || v_calling_sequence || '. Realizando commit' ,'1' );
+--        commit;
+--      else
+--        debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
+--        rollback;
+--      end if;
+--      retcode := '0';
+--    end if;
     fnd_file.put(fnd_file.log ,'---------------------------------------------------------------------');
     fnd_file.new_line(fnd_file.log ,1);
     fnd_file.put(fnd_file.log ,' Registros procesados exitosamente: '||v_success_qty);
