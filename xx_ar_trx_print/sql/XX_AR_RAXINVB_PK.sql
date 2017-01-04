@@ -3566,9 +3566,11 @@ create or replace package body xx_ar_raxinv_pk as
     if (v_mesg_error is null) then
       debug(g_indent || v_calling_sequence || ' Generando archivos' ,'1' );
       begin
-        if not print_text(p_print_output => null ,p_mesg_error => v_mesg_error ) then
-          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
-        end if;
+--        /*Comento porque null es para sacarlo a un archivo*/
+--        if not print_text(p_print_output => null ,p_mesg_error => v_mesg_error ) then
+--          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
+--        end if;
+        /*Si se le pasa Y lo saca a la salida del concurrente*/
         if not print_text(p_print_output => 'Y' ,p_mesg_error => v_mesg_error ) then
           v_mesg_error := 'Error generando archivos: '||v_mesg_error;
         end if;
