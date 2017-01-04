@@ -441,7 +441,7 @@ create or replace package body xx_ar_raxinv_pk as
     v_calling_sequence varchar2(2000);
     v_indent_length    number(15);
   begin
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.INDENT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.indent';
     v_indent_length    := 3;
     if p_type           = '+' then
       g_indent         := replace(rpad(' ' ,nvl(length(g_indent) ,0 ) + v_indent_length ) ,' ' ,' ' );
@@ -483,7 +483,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.DISPLAY_MESSAGE_SPLIT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.display_message_split';
     /*-- ---------------------------------------------------------------------------*/
     /*-- Obtengo la longitud del mensaje.*/
     /*-- ---------------------------------------------------------------------------*/
@@ -554,7 +554,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.DEBUG';
+    v_calling_sequence := 'xx_ar_raxinv_pk.debug';
     /*-- ---------------------------------------------------------------------------*/
     /*-- Realizo el debug.*/
     /*-- ---------------------------------------------------------------------------*/
@@ -613,7 +613,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDSB_PK.PRINT_TEXT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.print_text';
     debug(g_indent || v_calling_sequence ,'1' );
     /*-- ---------------------------------------------------------------------------*/
     /*-- Despliego Parametros.*/
@@ -1114,7 +1114,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SEND_PK.GENERATE_FILES';
+    v_calling_sequence := 'xx_ar_raxinv_pk.generate_files';
     v_request_id       := fnd_global.conc_request_id;
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo el debug.*/
@@ -1836,7 +1836,7 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
         exception
         when others then
-          v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). Texto: ' || v_send_line || '. ' || sqlerrm;
+          v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(xx_ar_raxinv_pk). Texto: ' || v_send_line || '. ' || sqlerrm;
         end;
         if (v_mesg_error is null and v_trxs_tbl(i).status != 'ERROR') then
           debug(g_indent || v_calling_sequence || ' Copiando lob' ,'1' );
@@ -2196,7 +2196,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.UPLOAD_FILES';
+    v_calling_sequence := 'xx_ar_raxinv_pk.upload_files';
     v_conc_request_id  := fnd_global.conc_request_id;
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo el debug.*/
@@ -2275,10 +2275,10 @@ create or replace package body xx_ar_raxinv_pk as
           into v_send_file_data;
         exception
         when others then
-          v_mesg_error := 'Error actualizando ' || 'la columna del contenido del ' || 'archivo  ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || sqlerrm;
+          v_mesg_error := 'Error actualizando ' || 'la columna del contenido del ' || 'archivo  ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || sqlerrm;
           exit;
         end;
-        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna del contenido del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX)' ,'1' );
+        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna del contenido del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk)' ,'1' );
         /*-- --------------------------------------------------------------------*/
         /*-- Recorro el contenido del archivo.*/
         /*-- --------------------------------------------------------------------*/
@@ -2296,7 +2296,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text1) ,cfd.text1);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text1 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text1 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2305,7 +2305,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text2) ,cfd.text2);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text2 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text2 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2314,7 +2314,7 @@ create or replace package body xx_ar_raxinv_pk as
               dbms_lob.writeappend(v_send_file_data ,length(cfd.text3) ,cfd.text3);
             exception
             when others then
-              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || 'Texto: ' || cfd.text3 || '. ' || sqlerrm;
+              v_mesg_error := 'Error cargando el ' || 'contenido del archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || 'Texto: ' || cfd.text3 || '. ' || sqlerrm;
               exit;
             end;
           end if;
@@ -2339,10 +2339,10 @@ create or replace package body xx_ar_raxinv_pk as
           where xafut.rowid    = ct.row_id;
         exception
         when others then
-          v_mesg_error := 'Error actualizando ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX). ' || sqlerrm;
+          v_mesg_error := 'Error actualizando ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk). ' || sqlerrm;
           exit;
         end;
-        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(XX_AR_FE_CL_TRX)' ,'1' );
+        debug(g_indent || v_calling_sequence || '. Se actualizaron: ' || nvl(sql%rowcount ,0) || ' registros con ' || 'la columna de longitud del ' || 'archivo ' || 'en la tabla de ' || 'Envios de Transacciones ' || '(xx_ar_raxinv_pk)' ,'1' );
       end loop;
       indent('-');
     end if;
@@ -2450,7 +2450,7 @@ create or replace package body xx_ar_raxinv_pk as
     /*-- ---------------------------------------------------------------------------*/
     /*-- Inicializo variables Grales de Ejecucion.*/
     /*-- ---------------------------------------------------------------------------*/
-    v_calling_sequence := 'XX_AR_FE_CL_SENDS_PK.REPORT';
+    v_calling_sequence := 'xx_ar_raxinv_pk.report';
     v_conc_request_id  := fnd_global.conc_request_id;
     v_length_line      := 227;
     v_line_single      := replace(rpad(' ' ,40) ,' ' ,'-');
@@ -2701,6 +2701,1121 @@ create or replace package body xx_ar_raxinv_pk as
     errbuf  := substr(v_mesg_error ,1 ,250);
     rollback;
   end report;
+/*=========================================================================+
+|                                                                          |
+| Public Procedure                                                         |
+|    main_cl_rn                                                            |
+|                                                                          |
+| Description                                                              |
+|    Procedimiento que genera los archivos de nota de cobro para Chile     |
+|                                                                          |
+| Parameters                                                               |
+|    errbuf            OUT VARCHAR2 Uso interno del concurrente.           |
+|    retcode           OUT VARCHAR2 Uso interno del concurrente.           |
+|    p_draft_mode      IN  VARCHAR2 Modo draft (Y/N).                      |
+|    p_debug_flag      IN  VARCHAR2 Flag de debug.                         |
+|    p_cust_trx_type   IN  NUMBER   Tipo de Transaccion.                   |
+|    p_batch_source    IN  VARCHAR2 Origen.                                |
+|    p_trx_number_from IN  VARCHAR2 Numero de Transaccion desde.           |
+|    p_trx_number_to   IN  VARCHAR2 Numero de Transaccion hasta.           |
+|    p_date_from       IN  DATE     Fecha desde.                           |
+|    p_date_to         IN  DATE     Fecha hasta.                           |
+|    p_customer_id     IN  NUMBER   Cliente.                               |
+|    p_territory_code  IN  VARCHAR2 Pais.                                  |
+|                                                                          |
++=========================================================================*/
+  procedure main_cl_rn
+    (errbuf            out varchar2
+    ,retcode           out number
+    ,p_draft_mode      in varchar2
+    ,p_debug_flag      in varchar2
+    ,p_batch_source    in varchar2
+    ,p_cust_trx_type   in number
+    ,p_trx_number_from in varchar2
+    ,p_trx_number_to   in varchar2
+    ,p_date_from       in varchar2
+    ,p_date_to         in varchar2
+    ,p_customer_id     in number
+    ,p_territory_code  in varchar2 )
+  is
+    /*-- ---------------------------------------------------------------------------*/
+    /*-- Definicion de Variables*/
+    /*-- ---------------------------------------------------------------------------*/
+    v_calling_sequence      varchar2(2000);
+    v_request_id            number(15);
+    v_mesg_error            varchar2(32767);
+    v_mesg_api_error        varchar2(32767);
+    v_return_status         varchar2(1);
+    v_msg_count             number;
+    v_msg_data              varchar2(2000);
+    v_msg_index_out         number;
+    v_order_source          oe_order_sources.name%type;
+    v_orig_sys_document_ref oe_order_headers.orig_sys_document_ref%type;
+    v_stmt_source           xx_ap_hotel_statements_hdr.stmt_source%type;
+    v_hotel_stmt_trx_number xx_ap_hotel_statements_hdr.hotel_stmt_trx_number%type;
+    v_month_billed          xx_ap_hotel_statements_hdr.period_name%type;
+    v_amount_in_words       varchar2(4000);
+    v_send_file             clob;
+    v_send_line             varchar2(4000);
+    v_nro_lin_det           number;
+    v_success_qty           number  := 0;
+    v_error_qty             number  := 0;
+    v_is_prod_env           boolean := false;
+    v_is_test_env           boolean := false;
+  begin
+    /*-- ---------------------------------------------------------------------------*/
+    /*-- Inicializo variables Grales de Ejecucion.*/
+    /*-- ---------------------------------------------------------------------------*/
+    v_calling_sequence := 'xx_ar_raxinv_pk.main_cl_rn';
+    v_request_id       := fnd_global.conc_request_id;
+    /*-- ---------------------------------------------------------------------------*/
+    /*-- Inicializo el debug.*/
+    /*-- ---------------------------------------------------------------------------*/
+    g_debug_flag     := upper(nvl(p_debug_flag,'N'));
+    g_debug_mode     := 'CONC_LOG';
+    g_message_length := 4000;
+    debug(g_indent || v_calling_sequence ,'1' );
+    /*-- ---------------------------------------------------------------------------*/
+    /*-- Despliego Parametros.*/
+    /*-- ---------------------------------------------------------------------------*/
+    debug(g_indent || v_calling_sequence || '. Modo draft: ' || p_draft_mode ,'1' );
+    debug(g_indent || v_calling_sequence || '. Origen: ' || p_batch_source ,'1' );
+    debug(g_indent || v_calling_sequence || '. Tipo de Transaccion: ' || p_cust_trx_type ,'1' );
+    debug(g_indent || v_calling_sequence || '. Numero Transaccion desde: ' || p_trx_number_from ,'1' );
+    debug(g_indent || v_calling_sequence || '. Numero Transaccion hasta: ' || p_trx_number_from ,'1' );
+    debug(g_indent || v_calling_sequence || '. Fecha desde: ' || p_date_from ,'1' );
+    debug(g_indent || v_calling_sequence || '. Fecha hasta: ' || p_date_to ,'1' );
+    debug(g_indent || v_calling_sequence || '. Cliente: ' || p_customer_id ,'1' );
+    debug(g_indent || v_calling_sequence || '. Pais: ' || p_territory_code ,'1' );
+    debug(g_indent || v_calling_sequence || '. Flag de debug: ' || p_debug_flag ,'1' );
+    debug(g_indent || v_calling_sequence || '. Obtiene facturas a procesar' ,'1' );
+    /*-- Verifica si se ejecuta en entorno de produccion*/
+    if (fnd_profile.value('TWO_TASK') = 'EBSP') then
+      v_is_prod_env := true;
+    else
+      v_is_test_env := true;
+    end if;
+    /*-- Para modo draft se debe informar Transaccion Desde y Hasta*/
+    if (nvl(p_draft_mode,'N') = 'Y' and (p_trx_number_from is null or p_trx_number_to is null)) then
+      v_mesg_error := 'Para Modo Draft informar Transaccions Desde y Hasta';
+      debug(v_calling_sequence || '. ' || v_mesg_error ,'1' );
+      fnd_file.put(fnd_file.log ,g_indent || v_calling_sequence || '. ' || v_mesg_error );
+      fnd_file.new_line(fnd_file.log ,1);
+      retcode := '1';
+      errbuf  := substr(v_mesg_error ,1 ,2000);
+      return;
+    end if;
+    open c_trxs(p_customer_id      => p_customer_id
+               ,p_cust_trx_type_id => p_cust_trx_type
+               ,p_trx_number_from  => p_trx_number_from
+               ,p_trx_number_to    => p_trx_number_to
+               ,p_date_from        => fnd_date.canonical_to_date(p_date_from)
+               ,p_date_to          => fnd_date.canonical_to_date(p_date_to)
+               ,p_draft_mode       => nvl(p_draft_mode,'N'));
+    loop
+      fetch c_trxs bulk collect into v_trxs_aux_tbl limit 5000;
+      exit
+    when v_trxs_aux_tbl.count = 0;
+      /*-- Completa estructura v_trxs_tbl*/
+      for i in 1..v_trxs_aux_tbl.count
+      loop
+        v_trxs_aux_tbl(i).status         := 'NEW';
+        v_trxs_aux_tbl(i).error_code     := null;
+        v_trxs_aux_tbl(i).error_messages := null;
+        v_trxs_tbl(v_trxs_tbl.count+1)   := v_trxs_aux_tbl(i);
+      end loop;
+    end loop;
+    close c_trxs;
+    debug(g_indent||v_calling_sequence||'. Obtuvo '||v_trxs_tbl.count||' facturas a procesar','1');
+    if (v_trxs_tbl.count = 0) then
+      v_mesg_error      := 'NO_DATA_FOUND';
+    end if;
+    /*-- Completa detalles a imprimir*/
+    if (v_mesg_error is null) then
+      for i in 1..v_trxs_tbl.count
+      loop
+        dbms_lob.createtemporary(v_send_file,false);
+        debug(g_indent||v_calling_sequence||'. Customer_Trx_ID: '||v_trxs_tbl(i).customer_trx_id||' Generic Customer ? '||v_trxs_tbl(i).generic_customer,'1');
+        /*-- Verifico que los Extra-Attributes se encuentran creados para la factura*/
+        if (not xx_ar_reg_send_invoices_pk.extra_attributes_exists(p_customer_trx_id => v_trxs_tbl(i).customer_trx_id)) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'No existen los registros de extra-attributes para las lineas de pedidos de ventas';
+          debug(g_indent || v_calling_sequence || ' No existen los registros de extra-attributes de las lineas de pedidos de ventas para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        end if;
+        /*-- Verifico que la moneda de impresion informada sea correcta*/
+        if (not xx_ar_reg_send_invoices_pk.printing_currency_is_valid (p_printing_currency_code =>v_trxs_tbl(i).printing_currency_code ,p_functional_currency_code =>g_func_currency_code ,p_document_currency_code =>v_trxs_tbl(i).invoice_currency_code)) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '020_INVALID_CONFIGURATION';
+          v_trxs_tbl(i).error_messages := 'La moneda de impresion de factura('||v_trxs_tbl(i).printing_currency_code||')'|| ' solo puede ser igual a la moneda de la transaccion('||v_trxs_tbl(i).invoice_currency_code||')'|| ' o la moneda funcional del pais ('||g_func_currency_code||')';
+          debug(g_indent || v_calling_sequence || ' La moneda de impresion de factura es diferente a la moneda de la transaccion y a la moneda funcional para customer_trx_id:'||' ' ||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        end if;
+        /*-- Verifica si es un cliente generico o no para obtener los datos*/
+        if (v_trxs_tbl(i).generic_customer = 'N') then
+          begin
+            select replace(hp.party_name,'('||v_trxs_tbl(i).org_country||')','')
+                  ,hp.attribute3
+                  ,hp.jgzz_fiscal_code||hca.global_attribute12
+                  ,hp.jgzz_fiscal_code
+                  ,hca.global_attribute12
+                  ,ac.email_address
+                  ,substr(hl_cusb.address1||decode(hl_cusb.address2 ,null ,null ,','||hl_cusb.address2)||decode(hl_cusb.address3 ,null ,null ,','||hl_cusb.address3)||decode(hl_cusb.address4 ,null ,null ,','||hl_cusb.address4) ,1 ,150) customer_base_address
+                  ,hcasb.attribute1
+                  ,hl_cusb.province
+                  ,hl_cusb.city
+                  ,hl_cusb.country
+            into   v_trxs_tbl(i).customer_name
+                  ,v_trxs_tbl(i).customer_doc_type
+                  ,v_trxs_tbl(i).customer_doc_number_full
+                  ,v_trxs_tbl(i).customer_doc_number
+                  ,v_trxs_tbl(i).customer_doc_digit
+                  ,v_trxs_tbl(i).customer_email
+                  ,v_trxs_tbl(i).customer_base_address
+                  ,v_trxs_tbl(i).giro_receptor_code
+                  ,v_trxs_tbl(i).province_receptor_name
+                  ,v_trxs_tbl(i).city_receptor_name
+                  ,v_trxs_tbl(i).pais_receptor_code
+            from   hz_party_sites     hpsb
+                  ,hz_cust_acct_sites hcasb
+                  ,hz_cust_site_uses  hcsub
+                  ,hz_locations       hl_cusb
+                  ,hz_parties         hp
+                  ,ar_contacts_v      ac
+                  ,hz_cust_accounts   hca
+            where  1=1
+            and v_trxs_tbl(i).party_id            = hp.party_id
+            and v_trxs_tbl(i).cust_account_id     = hca.cust_account_id
+            and hca.cust_account_id               = ac.customer_id(+)
+            and v_trxs_tbl(i).bill_to_site_use_id = hcsub.site_use_id
+            and hcsub.cust_acct_site_id           = hcasb.cust_acct_site_id
+            and hcasb.party_site_id               = hpsb.party_site_id
+            and hpsb.location_id                  = hl_cusb.location_id
+            and rownum                           <= 1;
+          exception
+            when others then
+              v_trxs_tbl(i).status         := 'ERROR';
+              v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+              v_trxs_tbl(i).error_messages := 'Error inesperado obteniendo datos de cliente :'||sqlerrm;
+              v_trxs_tbl(i).customer_name  := 'ERROR OBTENIENDO DATOS CLIENTE';
+              debug(g_indent||v_calling_sequence||' Error inesperado obteniendo datos de cliente particular '||v_trxs_tbl(i).cust_account_id||' '||sqlerrm ,'1');
+              continue;
+          end;
+        end if;
+        /*-- Obtengo la descripcion para el giro comercial del cliente*/
+        if (v_trxs_tbl(i).pais_receptor_name is null) then
+          begin
+            select flv.description
+            into   v_trxs_tbl(i).giro_receptor_meaning
+            from   fnd_lookup_values_vl flv
+            where  1=1
+            and    flv.lookup_type = 'XX_GIROS_COMERCIALES'
+            and    flv.lookup_code = v_trxs_tbl(i).giro_receptor_code;
+          exception
+            when others then
+              null;
+          end;
+        end if;
+        /*-- Obtengo la descripcion para las geografias*/
+        /*-- Pais*/
+        if (v_trxs_tbl(i).pais_receptor_name is null) then
+          begin
+            select hg.geography_name
+            into   v_trxs_tbl(i).pais_receptor_name
+            from   hz_geographies hg
+            where  1=1
+            and    country_code   = v_trxs_tbl(i).pais_receptor_code
+            and    geography_type = 'COUNTRY'
+            and    rownum         = 1;
+          exception
+            when others then
+              null;
+          end;
+        end if;
+        /*-- Province*/
+        if (v_trxs_tbl(i).province_receptor_name is null) then
+          begin
+            select hg.geography_name
+            into   v_trxs_tbl(i).province_receptor_name
+            from   hz_geographies hg
+            where  1=1
+            and    country_code      = v_trxs_tbl(i).pais_receptor_code
+            and    hg.geography_code = v_trxs_tbl(i).province_receptor_code
+            and    hg.geography_type = 'PROVINCE'
+            and    hg.geography_use  = 'MASTER_REF'
+            and    rownum            = 1;
+          exception
+            when others then
+              null;
+          end;
+        end if;
+        /*-- City (Comuna)*/
+        if (v_trxs_tbl(i).city_receptor_name is null) then
+          begin
+            select hg.geography_name
+            into   v_trxs_tbl(i).city_receptor_name
+            from   hz_geographies hg
+            where  1=1
+            and    country_code               = v_trxs_tbl(i).pais_receptor_code
+            and    hg.geography_element2_code = v_trxs_tbl(i).province_receptor_code
+            and    hg.geography_code          = v_trxs_tbl(i).city_receptor_code
+            and    hg.geography_type          = 'CITY'
+            and    hg.geography_use           = 'MASTER_REF'
+            and    rownum                     = 1;
+          exception
+            when others then
+              null;
+          end;
+        end if;
+        /*-- Armo la direccion final del cliente*/
+        begin
+          select substr(v_trxs_tbl(i).customer_base_address
+                 ||decode(v_trxs_tbl(i).province_receptor_name ,null ,null ,','
+                 ||v_trxs_tbl(i).province_receptor_name)
+                 ||decode(v_trxs_tbl(i).city_receptor_name ,null ,null ,','
+                 ||v_trxs_tbl(i).city_receptor_name)
+                 ||decode(v_trxs_tbl(i).pais_receptor_name ,null ,null ,','
+                 ||v_trxs_tbl(i).pais_receptor_name) ,1 ,150) customer_address
+          into   v_trxs_tbl(i).customer_address
+          from   dual;
+        exception
+          when others then
+            null;
+        end;
+        /*-- Llamo a la funcion que calcula los totales del Comprobante*/
+        begin
+          v_mesg_api_error := null;
+          xx_ar_reg_send_invoices_pk.get_invoice_values_vat_details(p_customer_trx_id        => v_trxs_tbl(i).customer_trx_id
+                                                                   ,p_country                => 'CL'
+                                                                   ,p_vat_tax                => g_vat_tax
+                                                                   ,x_net_amount             => v_trxs_tbl(i).net_amount
+                                                                   ,x_net_amount_pcc         => v_trxs_tbl(i).net_amount_pcc
+                                                                   ,x_tax_amount             => v_trxs_tbl(i).tax_amount
+                                                                   ,x_tax_amount_pcc         => v_trxs_tbl(i).tax_amount_pcc
+                                                                   ,x_total_amount           => v_trxs_tbl(i).total_amount
+                                                                   ,x_total_amount_pcc       => v_trxs_tbl(i).total_amount_pcc
+                                                                   ,x_net_amount_exento      => v_trxs_tbl(i).net_amount_exento
+                                                                   ,x_net_amount_exento_pcc  => v_trxs_tbl(i).net_amount_exento_pcc
+                                                                   ,x_net_amount_gravado     => v_trxs_tbl(i).net_amount_gravado
+                                                                   ,x_net_amount_gravado_pcc => v_trxs_tbl(i).net_amount_gravado_pcc
+                                                                   ,x_tax_amount_iva         => v_trxs_tbl(i).tax_amount_iva
+                                                                   ,x_tax_amount_iva_pcc     => v_trxs_tbl(i).tax_amount_iva_pcc
+                                                                   ,x_collection_country     => v_trxs_tbl(i).collection_country
+                                                                   ,x_invoice_currency_code  => v_trxs_tbl(i).invoice_currency_code
+                                                                   ,x_printing_currency_code => v_trxs_tbl(i).printing_currency_code
+                                                                   ,x_return_status          => v_return_status
+                                                                   ,x_msg_count              => v_msg_count
+                                                                   ,x_msg_data               => v_msg_data);
+          if (v_return_status != fnd_api.g_ret_sts_success) then
+            for cnt in 1..v_msg_count
+            loop
+              fnd_msg_pub.get(p_msg_index     => cnt
+                             ,p_encoded       => fnd_api.g_false
+                             ,p_data          => v_msg_data
+                             ,p_msg_index_out => v_msg_index_out);
+              v_mesg_api_error := v_mesg_api_error || v_msg_data;
+            end loop;
+            v_mesg_api_error := 'Get_Invoice_Values_Tax_Details: '||v_mesg_api_error;
+          end if;
+        exception
+          when others then
+            v_mesg_api_error := 'Get_Invoice_Values_Tax_Details: '||sqlerrm;
+        end;
+        /*-- Valido que se hayan podido obtener los importes en la API*/
+        if (v_mesg_api_error           is not null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+          v_trxs_tbl(i).error_messages := 'Error inesperado obteniendo Valores del Comprobante '|| v_mesg_api_error;
+          debug(g_indent||v_calling_sequence||' Error inesperado obteniendo valores para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        end if;
+        /*-- Obtengo la Tasa de Iva de la Factura, No puede haber mas de un porcentaje.*/
+        begin
+          select zx_rate.percentage_rate
+          into   v_trxs_tbl(i).vat_percentage
+          from   ra_customer_trx_lines_all rctlt
+                ,zx_lines zx_line
+                ,zx_rates_vl zx_rate
+          where  1=1
+          and    rctlt.line_type(+)                   = 'TAX'
+          and    zx_rate.tax_rate_id(+)               = zx_line.tax_rate_id
+          and    zx_line.tax_line_id(+)               = rctlt.tax_line_id
+          and    zx_line.entity_code                  = 'TRANSACTIONS'
+          and    zx_rate.tax                          = g_vat_tax
+          and    zx_line.application_id               = 222
+          and    rctlt.customer_trx_id                = v_trxs_tbl(i).customer_trx_id
+          and    (    (    v_trxs_tbl(i).electr_doc_type not in ('110' ,'112')
+                      and nvl (zx_rate.percentage_rate ,0)    != 0)
+                   or /*-- Fac Nacional, solo me interesan las lineas != 0*/
+                     (v_trxs_tbl(i).electr_doc_type in ('110' ,'112'))) /*-- Fac Exportacion*/
+          group by zx_rate.percentage_rate;
+          /*-- Para la Factura de Exportacion la tasa siempre debe ser 0*/
+          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112') and v_trxs_tbl(i).vat_percentage != 0) then
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+            v_trxs_tbl(i).error_messages := 'La Tasa de Iva para el comprobante de exportacion debe ser siempre 0.';
+            debug(g_indent||v_calling_sequence||'  La Tasa de Iva para el comprobante de exportacion debe ser siempre 0 para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+            continue;
+          end if;
+        exception
+          when others then
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+            v_trxs_tbl(i).error_messages := 'No se pudo obtener la Tasa de Iva para el comprobante. Debe existir una tasa unica de iva.'||sqlerrm;
+            debug(g_indent || v_calling_sequence || '  No se pudo obtener una Tasa de Iva unica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id||' '||sqlerrm ,'1' );
+            continue;
+        end;
+        /*-- Llamo a la funcion que calcula el monto en letras*/
+        v_amount_in_words := xx_ar_reg_send_invoices_pk.get_amount_in_words(p_amount                => v_trxs_tbl(i).total_amount_pcc
+                                                                           ,p_country_currency_code => g_func_currency_code
+                                                                           ,p_amount_currency_code  => v_trxs_tbl(i).printing_currency_code
+                                                                           ,p_country_code          => 'CL');
+        /*-- Si es una NC, llamo a la funcion que obtiene la referencia a la FC original*/
+        if (v_trxs_tbl(i).document_type      = 'CM') then
+          v_trxs_tbl(i).ref_customer_trx_id := xx_ar_utilities_pk.get_related_invoice_id (p_customer_trx_id => v_trxs_tbl(i).customer_trx_id);
+          /*-- Obtengo los datos del comprobante relacionado*/
+          get_datos_trx(p_customer_trx_id          => v_trxs_tbl(i).ref_customer_trx_id
+                       ,x_trx_number               => v_trxs_tbl(i).ref_trx_number
+                       ,x_trx_date                 => v_trxs_tbl(i).ref_trx_date
+                       ,x_electr_doc_type          => v_trxs_tbl(i).ref_electr_doc_type
+                       ,x_procesado_fc_electronica => v_trxs_tbl(i).ref_procesado_fc_electronica);
+        end if;
+        /*-- Valida datos obligatorios*/
+        if (v_trxs_tbl(i).customer_name is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'No se informo nombre del cliente';
+          v_trxs_tbl(i).customer_name  := 'NO INFORMADO';
+          debug(g_indent || v_calling_sequence || ' No se informo nombre del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).customer_doc_number is null) then
+          v_trxs_tbl(i).status              := 'ERROR';
+          v_trxs_tbl(i).error_code          := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages      := 'No se informo Nro Documento del cliente';
+          v_trxs_tbl(i).customer_doc_number := '0';
+          debug(g_indent || v_calling_sequence || ' No se informo Nro Documento del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).pais_receptor_name is null) then
+          v_trxs_tbl(i).status             := 'ERROR';
+          v_trxs_tbl(i).error_code         := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages     := 'No se informo Pais del cliente';
+          v_trxs_tbl(i).pais_receptor_name := 'X';
+          debug(g_indent || v_calling_sequence || ' No se informo Pais del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).contributor_source is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'El cliente no tiene informado el contributor source en el maestro';
+          debug(g_indent || v_calling_sequence || ' No se informo contributor_source del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).customer_doc_type not in ('RUT' ,'RUN' ,'PASS')) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '020_INVALID_CONFIGURATION';
+          v_trxs_tbl(i).error_messages := 'Tipo de Documento de Cliente Invalido o Nulo: '||v_trxs_tbl(i).customer_doc_type;
+          debug(g_indent || v_calling_sequence || ' Se informo un tipo de documento de Cliente nulo o invalido para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).giro_emisor_meaning is null or v_trxs_tbl(i).acteco_code is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'La entidad legal no tiene informado el giro comercial y/o la actividad economica';
+          debug(g_indent || v_calling_sequence || ' No se informo el giro/comercial y/o la actividad economica de la Entidad Legal para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).expedition_address is null or v_trxs_tbl(i).expedition_place is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'La entidad legal no tiene informado el domicilio y/o la ciudad';
+          debug(g_indent || v_calling_sequence || ' No se informo el domicilio y/o la ciudad de la Entidad Legal para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).contributor_source = 'DOMESTIC_ORIGIN' and v_trxs_tbl(i).giro_receptor_meaning is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'No se pudo obtener el giro comercial del cliente';
+          debug(g_indent || v_calling_sequence || ' No se informo el giro comercial del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_trxs_tbl(i).contributor_source = 'DOMESTIC_ORIGIN' and (v_trxs_tbl(i).province_receptor_name is null or v_trxs_tbl(i).city_receptor_name is null)) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'No se pudo obtener la provincia y/o comuna del cliente';
+          debug(g_indent || v_calling_sequence || ' No se informo la provincia y/o comuna del cliente para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+        elsif (v_amount_in_words is null) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+          v_trxs_tbl(i).error_messages := 'No se pudo calcular el monto en letras';
+          debug(g_indent || v_calling_sequence || ' No se pudo calcular el monto en letras para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+          /*-- Valido que el tipo de documento sea uno de los esperados*/
+        elsif (v_trxs_tbl(i).electr_doc_type not in ('39' ,'33' ,'61' ,'110' ,'112')) then
+          v_trxs_tbl(i).status         := 'ERROR';
+          v_trxs_tbl(i).error_code     := '020_INVALID_CONFIGURATION';
+          v_trxs_tbl(i).error_messages := 'Tipo de Doc de Fc Electronica Invalido: '||v_trxs_tbl(i).electr_doc_type;
+          debug(g_indent || v_calling_sequence || ' Tipo de Doc invalido para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+          continue;
+          /*-- Valido la informacion del comprobante referenciado para las NC*/
+        elsif (v_trxs_tbl(i).document_type = 'CM') then
+          /*-- Valido que exista la Referencia*/
+          if (v_trxs_tbl(i).ref_trx_number is null) then
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+            v_trxs_tbl(i).error_messages := 'No se pudo obtener la referencia a la FC: ';
+            debug(g_indent || v_calling_sequence || ' No se pudo obtener la referencia a la factura para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+            continue;
+          end if;
+          /*-- Valido que se haya obtenido la informacion del tipo de trx de la referencia*/
+          if (v_trxs_tbl(i).ref_electr_doc_type is null) then
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+            v_trxs_tbl(i).error_messages := 'No se pudo obtener el tipo de documento electronico para la FC referenciada('||v_trxs_tbl(i).ref_trx_number||')';
+            debug(g_indent || v_calling_sequence || ' No se pudo obtener el tipo de documento electronico para la FC referenciada para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+            continue;
+          end if;
+          /*-- Valido que la factura referenciada haya vuelto de factura electronica*/
+          if (nvl (v_trxs_tbl(i).ref_procesado_fc_electronica ,'N') = 'N') then
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '010_MISSING_VALUE';
+            v_trxs_tbl(i).error_messages := 'La factura referenciada ('|| v_trxs_tbl(i).ref_trx_number||') aun no fue procesada por fc electronica';
+            debug(g_indent || v_calling_sequence || 'La factura referenciada aun no fue procesada por fc electronica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+            continue;
+          end if;
+          /*-- Valido que los tipos de documentos relacionados esten Ok*/
+          if (v_trxs_tbl(i).electr_doc_type not in ('61' ,'112') or /*-- Nc*/
+             (v_trxs_tbl(i).electr_doc_type = '61' and v_trxs_tbl(i).ref_electr_doc_type not in ('33' ,'39')) or /*-- Fc Nacional*/
+             (v_trxs_tbl(i).electr_doc_type = '112' and v_trxs_tbl(i).ref_electr_doc_type not in ('110'))) then /*-- Fc Exportacion*/
+            v_trxs_tbl(i).status         := 'ERROR';
+            v_trxs_tbl(i).error_code     := '020_INVALID_CONFIGURATION';
+            v_trxs_tbl(i).error_messages := 'Tipo de Doc Invalido de Fc Electr para combinacion NC('||v_trxs_tbl(i).electr_doc_type||') '|| 'y Ref de Fc('||v_trxs_tbl(i).ref_electr_doc_type||')';
+            debug(g_indent || v_calling_sequence || ' Combinacion Invalida de Tipos de Doc de Fc Electr para NC/FC para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+            continue;
+          end if;
+        end if;
+        begin
+          v_send_line := '<DTE>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (v_trxs_tbl(i).electr_doc_type = '39') then
+            v_send_line                    := '<Boleta>'||g_eol;
+          elsif (v_trxs_tbl(i).electr_doc_type in ('110' ,'112')) then /*-- Fc Exportacion*/
+            v_send_line := '<Exportaciones>'||g_eol;
+          else
+            v_send_line := '<Documento>'||g_eol;
+          end if;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*----------------------- Inicio de Seccion Encabezado -----------------------------*/
+          v_send_line := '<Encabezado>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*----------------------- Inicio de Seccion IDoc ----------------------------------*/
+          v_send_line := '<IdDoc>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<TipoDTE>'||v_trxs_tbl(i).electr_doc_type||'</TipoDTE>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<Folio>'||v_trxs_tbl(i).trx_number||'</Folio>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<FchEmis>'||to_char(v_trxs_tbl(i).trx_date ,'YYYY-MM-DD')||'</FchEmis>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (v_trxs_tbl(i).electr_doc_type in ('39' ,'61')) then
+            v_send_line := '<IndServicio>'||v_trxs_tbl(i).electr_serv_type||'</IndServicio>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          v_send_line := '</IdDoc>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion IDoc --------------------------------------*/
+          /*-------------------------- Inicio de Seccion Emisor ----------------------------------*/
+          v_send_line := '<Emisor>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<RUTEmisor>'||v_trxs_tbl(i).legal_entity_identifier||'</RUTEmisor>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (v_trxs_tbl(i).electr_doc_type = '39') then
+            v_send_line                    := '<RznSocEmisor>'||v_trxs_tbl(i).legal_entity_name||'</RznSocEmisor>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          else
+            v_send_line := '<RznSoc>'||v_trxs_tbl(i).legal_entity_name||'</RznSoc>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          if (v_trxs_tbl(i).electr_doc_type = '39') then
+            v_send_line                    := '<GiroEmisor>'||v_trxs_tbl(i).giro_emisor_meaning||'</GiroEmisor>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          else
+            v_send_line := '<GiroEmis>'||v_trxs_tbl(i).giro_emisor_meaning||'</GiroEmis>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          if (v_trxs_tbl(i).electr_doc_type != '39') then
+            v_send_line                     := '<Acteco>'||v_trxs_tbl(i).acteco_code||'</Acteco>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          v_send_line := '<DirOrigen>'||v_trxs_tbl(i).expedition_address||'</DirOrigen>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<CmnaOrigen>'||v_trxs_tbl(i).expedition_place||'</CmnaOrigen>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</Emisor>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Emisor --------------------------------------*/
+          /*-------------------------- Inicio de Seccion Receptor -----------------------------------*/
+          v_send_line := '<Receptor>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (v_trxs_tbl(i).customer_doc_type in ('RUT' ,'RUN' ,'PASS')) then
+            v_send_line := '<RUTRecep>'||v_trxs_tbl(i).customer_doc_number || '-'||v_trxs_tbl(i).customer_doc_digit||'</RUTRecep>'||g_eol;
+          else
+            v_send_line := '<RUTRecep>'||v_trxs_tbl(i).customer_doc_number_full||'</RUTRecep>'||g_eol;
+          end if;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<RznSocRecep>'||psp_xmlgen.convert_xml_controls(v_trxs_tbl(i).customer_name)||'</RznSocRecep>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (v_trxs_tbl(i).electr_doc_type in ('33' ,'110')) then
+            v_send_line := '<GiroRecep>'||v_trxs_tbl(i).giro_receptor_meaning||'</GiroRecep>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          v_send_line := '<DirRecep>'||psp_xmlgen.convert_xml_controls(v_trxs_tbl(i).customer_address)||'</DirRecep>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-- Comprobante de Exportacion*/
+          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112')) then
+            v_send_line := '<CmnaRecep>'||'</CmnaRecep>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<CiudadRecep>'||v_trxs_tbl(i).city_receptor_name||'</CiudadRecep>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          else /*-- Comprobante Nacional*/
+            v_send_line := '<CmnaRecep>'||v_trxs_tbl(i).city_receptor_name||'</CmnaRecep>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<CiudadRecep>'||v_trxs_tbl(i).province_receptor_name||'</CiudadRecep>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          v_send_line := '</Receptor>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Receptor --------------------------------------*/
+          /*-------------------------- Inicio de Seccion Transporte -----------------------------------*/
+          /*-- Solo se imprime para comprobantes de exportacion*/
+          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112')) then
+            v_send_line := '<Transporte>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<Aduana>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<CodePaisDestin>'||v_trxs_tbl(i).pais_receptor_code||'</CodePaisDestin>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</Aduana>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</Transporte>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          /*-------------------------- Fin de Seccion Transporte --------------------------------------*/
+          /*-------------------------- Inicio de Seccion Totales --------------------------------------*/
+          v_send_line := '<Totales>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-- Solo se imprime para comprobantes que no son boleta  (Si es una Nc, su referencia no tiene que ser Boleta)*/
+          if (v_trxs_tbl(i).electr_doc_type != '39' and nvl (v_trxs_tbl(i).ref_electr_doc_type ,'X') != '39') then
+            /*-- Solo se imprime para comprobantes de exportacion*/
+            if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112')) then
+              v_send_line := '<TpoMoneda>'||v_trxs_tbl(i).printing_currency_code||'</TpoMoneda>'||g_eol;
+              dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+              v_send_line := '<MntExe>'||v_trxs_tbl(i).net_amount_exento_pcc||'</MntExe>'||g_eol;
+              dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            else /*-- Solo se imprime para comprobantes Nacionales*/
+              v_send_line := '<MntNeto>'||v_trxs_tbl(i).net_amount_gravado_pcc||'</MntNeto>'||g_eol;
+              dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+              v_send_line := '<TasaIVA>'||v_trxs_tbl(i).vat_percentage||'</TasaIVA>'||g_eol;
+              dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+              v_send_line := '<IVA>'||v_trxs_tbl(i).tax_amount_iva_pcc||'</IVA>'||g_eol;
+              dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            end if;
+          end if;
+          v_send_line := '<MntTotal>'||v_trxs_tbl(i).total_amount_pcc||'</MntTotal>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</Totales>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Totales --------------------------------------------*/
+          /*----------------------- Fin de Seccion Encabezado -----------------------------*/
+          v_send_line := '</Encabezado>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_nro_lin_det := 0;
+          /*-------------------------- Inicio de Seccion Detalles ----------------------------------------*/
+          v_send_line := '<Detalle>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          for r_trxs_lines in c_trx_lines(p_customer_trx_id        => v_trxs_tbl(i).customer_trx_id
+                                         ,p_vat_tax                => g_vat_tax
+                                         ,p_printing_currency_code => v_trxs_tbl(i).printing_currency_code
+                                         ,p_invoice_currency_code  => v_trxs_tbl(i).invoice_currency_code
+                                         ,p_exchange_rate          => v_trxs_tbl(i).exchange_rate
+                                         ,p_cust_trx_concept       => v_trxs_tbl(i).cust_trx_concept)
+          loop
+            if (r_trxs_lines.item_description is null) then
+              v_trxs_tbl(i).status     := 'ERROR';
+              v_trxs_tbl(i).error_code := '020_INVALID_CONFIGURATION';
+              select 'No se pudo obtener descripcion para articulo '
+                     ||msib.segment1
+                     ||' y '
+                     ||v_trxs_tbl(i).cust_trx_type_name
+              into   v_trxs_tbl(i).error_messages
+              from   mtl_system_items_b msib
+              where  1=1
+              and    msib.inventory_item_id = r_trxs_lines.inventory_item_id
+              and    msib.organization_id   = r_trxs_lines.organization_id;
+              debug(g_indent || v_calling_sequence || v_trxs_tbl(i).error_messages ,'1' );
+              continue;
+            end if;
+            v_nro_lin_det := v_nro_lin_det + 1;
+            v_send_line   := '<NroLinDet>'||v_nro_lin_det||'</NroLinDet>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<NmbItem>'||psp_xmlgen.convert_xml_controls(r_trxs_lines.item_description)||'</NmbItem>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<QtyItem>'||r_trxs_lines.quantity||'</QtyItem>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<UnmdItem>'||'UNID'||'</UnmdItem>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<PrcItem>'||r_trxs_lines.net_amount_pcc||'</PrcItem>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<MontoItem>'||r_trxs_lines.net_amount_pcc||'</MontoItem>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end loop;
+          v_send_line := '</Detalle>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Detalle --------------------------------------------*/
+          /*---------------------- Solo se completa para Notas de Credito ----------------------------------*/
+          /*-------------------------- Inicio de Seccion Referencias  --------------------------------------*/
+          if (v_trxs_tbl(i).electr_doc_type in ('61' ,'112')) then
+            v_send_line := '<Referencias>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<TpoDocRef>'||v_trxs_tbl(i).ref_electr_doc_type||'</TpoDocRef>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<FolioRef>'||v_trxs_tbl(i).ref_trx_number||'</FolioRef>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<FchRef>'||v_trxs_tbl(i).ref_trx_date||'</FchRef>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<CodRef>'||'3'||'</CodRef>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</Referencias>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          /*-------------------------- Fin de Seccion Referencias  ------------------------------------------*/
+          /*---- Monto en Letras*/
+          /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||v_amount_in_words||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          /*---- Informacion de Terceros*/
+          for r_trxs_lines_terceros in c_trx_lines_terceros(p_customer_trx_id        => v_trxs_tbl(i).customer_trx_id
+                                                           ,p_printing_currency_code => v_trxs_tbl(i).printing_currency_code
+                                                           ,p_invoice_currency_code  => v_trxs_tbl(i).invoice_currency_code
+                                                           ,p_exchange_rate          => v_trxs_tbl(i).exchange_rate)
+          loop
+            /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+            v_send_line := '<DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<NombreDA>'||'gastos_terceros'||'</NombreDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<ValorDA>'||r_trxs_lines_terceros.tercero_amount||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+            /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+            v_send_line := '<DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<NombreDA>'||'nom_terceros'||'</NombreDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<ValorDA>'||r_trxs_lines_terceros.tercero_description||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          end loop;
+          /*---- Informacion Adicional*/
+          for r_trx_lines_inf_adic in c_trx_lines_inf_adic(p_customer_trx_id       => v_trxs_tbl(i).customer_trx_id
+                                                          ,p_collection_type       => v_trxs_tbl(i).collection_type
+                                                          ,p_hotel_stmt_trx_number => v_trxs_tbl(i).hotel_stmt_trx_number)
+          loop
+            v_send_line := '<DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<ValorDA>'||r_trx_lines_inf_adic.info_adic||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end loop;
+          /*---- Leyendas para Transacciones Manuales*/
+          /*-- Verifica si el origen es manual y es cuenta corriente*/
+          /*-- Imprime domicilio*/
+          if (    v_trxs_tbl(i).batch_source_type = 'INV'
+              and v_trxs_tbl(i).generic_customer  = 'N'
+              and v_trxs_tbl(i).print_address_flag = 'Y') then
+            v_send_line := '<DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '<ValorDA>'||v_trxs_tbl(i).customer_address||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+            v_send_line := '</DatosAdjuntos>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          /*-- Leyenda Adicional*/
+          /*-- Imprime Extracto/Reserva*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          if (nvl(v_trxs_tbl(i).collection_type ,'XX') = 'PD') then
+            v_send_line := '<ValorDA>'||v_trxs_tbl(i).hotel_stmt_trx_number||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          else
+            v_send_line := '<ValorDA>'||v_trxs_tbl(i).purchase_order||'</ValorDA>'||g_eol;
+            dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          end if;
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-- Leyenda Adicional*/
+          /*-- Imprime Comentarios*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||v_trxs_tbl(i).comments||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*---- Agencia*/
+          /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'Agencia_SII'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||'SUCURSAL SII'||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          /*---- Numero de Resolucion*/
+          /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'NumRes_SII'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||'118'||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          /*---- Fecha de Resolucion*/
+          /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'FechaRes_SII'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||'30-09-2008'||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          /*---- Condicion de Pago*/
+          /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
+          v_send_line := '<DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<NombreDA>'||'FORMAPAGO'||'</NombreDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<ValorDA>'||v_trxs_tbl(i).receipt_method_name||'</ValorDA>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DatosAdjuntos>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
+          /*-------------------------- Fin de Seccion Boleta/DTE --------------------------------------*/
+          if (v_trxs_tbl(i).electr_doc_type = '39') then
+            v_send_line := '</Boleta>'||g_eol;
+          elsif (v_trxs_tbl(i).electr_doc_type in ('110' ,'112')) then /*-- Fc Exportacion*/
+            v_send_line := '</Exportaciones>'||g_eol;
+          else
+            v_send_line := '</Documento>'||g_eol;
+          end if;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '</DTE>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+        exception
+          when others then
+            v_mesg_error := 'Error cargando el contenido del archivo en la tabla de Envios de Transacciones ' || '(xx_ar_raxinv_pk). Texto: ' || v_send_line || '. ' || sqlerrm;
+        end;
+        if (v_mesg_error is null and v_trxs_tbl(i).status != 'ERROR') then
+          debug(g_indent || v_calling_sequence || ' Copiando lob' ,'1' );
+          dbms_lob.createtemporary(v_trxs_tbl(i).send_file ,false);
+          dbms_lob.copy(v_trxs_tbl(i).send_file ,v_send_file ,dbms_lob.getlength(v_send_file));
+          dbms_lob.freetemporary(v_send_file);
+          debug(g_indent || v_calling_sequence || ' Copiado de lob finalizado' ,'1' );
+        end if;
+      end loop; /*--  Loop Principal*/
+    end if; /*--  Fin Completa detalles a imprimir*/
+    /*-- Genera los archivos*/
+    if (v_mesg_error is null) then
+      debug(g_indent || v_calling_sequence || ' Generando archivos' ,'1' );
+      begin
+        if not print_text(p_print_output => null ,p_mesg_error => v_mesg_error ) then
+          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
+        end if;
+        if not print_text(p_print_output => 'Y' ,p_mesg_error => v_mesg_error ) then
+          v_mesg_error := 'Error generando archivos: '||v_mesg_error;
+        end if;
+      exception
+      when others then
+        v_mesg_error := v_calling_sequence || '. Error llamando a la funcion ' || 'PRINT_TEXT. ' || sqlerrm;
+      end;
+    end if; /*-- Genera los archivos*/
+    /*-- Inserta registros en tabla de intercambio*/
+    if (v_mesg_error is null) then
+      for i in 1..v_trxs_tbl.count
+      loop
+        if v_trxs_tbl(i).status = 'ERROR' then
+          v_error_qty          := v_error_qty + 1;
+        else
+          v_success_qty := v_success_qty + 1;
+        end if;
+        begin
+          /*-- Se obtiene extracto del comprobante relacionado cuando corresponde*/
+          v_hotel_stmt_trx_number := xx_ar_utilities_pk.get_hotel_stmt_trx_number(v_trxs_tbl(i).customer_trx_id);
+          /*-- Se obtiene el periodo del extracto*/
+          xx_ar_utilities_pk.get_hotel_stmt_info(p_hotel_stmt_trx_number => v_hotel_stmt_trx_number ,x_period_name => v_month_billed);
+          select
+            case
+              when nvl(v_trxs_tbl(i).collection_type ,'XX') = 'PD'
+              then null
+              else decode(rctl.interface_line_context ,'ORDER ENTRY' ,oos.name ,'XX_MANUAL' )
+            end
+          ,ooh.orig_sys_document_ref
+          ,xahsh.stmt_source
+          into v_order_source
+          ,v_orig_sys_document_ref
+          ,v_stmt_source
+          from oe_order_sources oos
+          ,oe_order_headers ooh
+          ,oe_order_lines ool
+          ,ra_customer_trx rct
+          ,ra_customer_trx_lines rctl
+          ,xx_ap_hotel_statements_hdr xahsh
+          where 1                                                                                     = 1
+          and v_trxs_tbl(i).customer_trx_id                                                           = rct.customer_trx_id
+          and rct.customer_trx_id                                                                     = rctl.customer_trx_id
+          and rctl.line_type                                                                          = 'LINE'
+          and rctl.interface_line_attribute6                                                          = ool.line_id(+)
+          and ool.header_id                                                                           = ooh.header_id(+)
+          and xx_ar_utilities_pk.get_hotel_stmt_trx_number(rct.customer_trx_id)                       = xahsh.hotel_stmt_trx_number(+)
+          and decode(rctl.interface_line_context ,'ORDER ENTRY' ,rctl.interface_line_attribute1 ,-1 ) = decode(rctl.interface_line_context ,'ORDER ENTRY' ,ooh.order_number ,-1 )
+          and ooh.order_source_id                                                                     = oos.order_source_id(+)
+          and rownum                                                                                  = 1;
+        exception
+        when others then
+          v_order_source          := null;
+          v_orig_sys_document_ref := null;
+          v_stmt_source           := null;
+        end;
+        /*----------------------------*/
+        /*-- Calcula datos adicionales*/
+        /*----------------------------*/
+        begin
+          insert
+          into xx_ar_reg_invoice_request
+            (
+              customer_trx_id
+            ,trx_number_ori
+            ,reference
+            ,receive_date
+            ,trx_number_new
+            ,link
+            ,cae
+            ,fecha_cae
+            ,file_name
+            ,status
+            ,error_code
+            ,error_messages
+            ,created_by
+            ,creation_date
+            ,last_updated_by
+            ,last_update_date
+            ,last_update_login
+            ,purchase_order
+            ,request_number
+            ,order_source
+            ,orig_sys_document_ref
+            ,collection_type
+            ,document_type
+            ,email
+            ,source_system_number
+            ,legal_entity
+            ,legal_entity_code
+            ,request_id
+            ,stmt_source
+            ,hotel_stmt_trx_number
+            ,attribute_category
+            ,attribute1
+            ,attribute2
+            ,attribute3
+            ,attribute4
+            ,attribute5
+            ,attribute6
+            ,attribute7
+            ,attribute8
+            ,attribute9
+            ,attribute10
+            ,net_amount
+            ,net_amount_pcc
+            ,tax_amount
+            ,tax_amount_pcc
+            ,total_amount
+            ,total_amount_pcc
+            ,trx_date
+            ,collection_country
+            ,month_billed
+            ,invoice_currency_code
+            ,printing_currency_code
+            )
+            values
+            (
+              v_trxs_tbl(i).customer_trx_id /*-- CUSTOMER_TRX_ID*/
+            ,v_trxs_tbl(i).trx_number /*-- TRX_NUMBER_ORI*/
+            ,v_trxs_tbl(i).customer_name /*-- REFERENCE*/
+            ,null /*-- RECEIVE_DATE*/
+            ,null /*-- TRX_NUMBER_NEW*/
+            ,null /*-- LINK*/
+            ,null /*-- CAE*/
+            ,null /*-- FECHA_CAE*/
+            ,v_trxs_tbl(i).output_file /*-- FILE_NAME*/
+            ,decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW') /*-- STATUS*/
+            ,v_trxs_tbl(i).error_code /*-- ERROR_CODE*/
+            ,v_trxs_tbl(i).error_messages /*-- ERROR_MESSAGES*/
+            ,fnd_global.user_id /*-- CREATED_BY*/
+            ,sysdate /*-- CREATION_DATE*/
+            ,fnd_global.user_id /*-- LAST_UPDATED_BY*/
+            ,sysdate /*-- LAST_UPDATE_DATE*/
+            ,fnd_global.login_id /*-- LAST_UPDATE_LOGIN*/
+            ,v_trxs_tbl(i).purchase_order /*-- PURCHASE_ORDER*/
+            ,v_trxs_tbl(i).request_number /*-- REQUEST_NUMBER*/
+            ,v_order_source /*-- ORDER_SOURCE*/
+            ,v_orig_sys_document_ref /*-- ORIG_SYS_DOCUMENT_REF*/
+            ,v_trxs_tbl(i).collection_type /*-- COLLECTION_TYPE*/
+            ,v_trxs_tbl(i).document_type /*-- DOCUMENT_TYPE*/
+            ,v_trxs_tbl(i).customer_email /*-- EMAIL*/
+            ,v_trxs_tbl(i).source_system_number /*-- SOURCE_SYSTEM_NUMBER*/
+            ,v_trxs_tbl(i).legal_entity_name /*-- LEGAL_ENTITY*/
+            ,v_trxs_tbl(i).legal_entity_id /*-- LEGAL_ENTITY_CODE*/
+            ,fnd_global.conc_request_id /*-- REQUEST_ID*/
+            ,v_stmt_source /*-- STMT_SOURCE*/
+            ,v_hotel_stmt_trx_number /*-- HOTEL_STMT_TRX_NUMBER*/
+            ,p_territory_code /*-- ATTRIBUTE_CATEGORY*/
+            ,v_trxs_tbl(i).electr_doc_type /*-- ATTRIBUTE1*/
+            ,v_trxs_tbl(i).legal_entity_identifier /*-- ATTRIBUTE2*/
+            ,null /*-- ATTRIBUTE3*/
+            ,null /*-- ATTRIBUTE4*/
+            ,null /*-- ATTRIBUTE5*/
+            ,null /*-- ATTRIBUTE6*/
+            ,null /*-- ATTRIBUTE7*/
+            ,null /*-- ATTRIBUTE8*/
+            ,null /*-- ATTRIBUTE9*/
+            ,null /*-- ATTRIBUTE10*/
+            ,v_trxs_tbl(i).net_amount /*-- NET_AMOUNT*/
+            ,v_trxs_tbl(i).net_amount_pcc /*-- NET_AMOUNT_PCC*/
+            ,v_trxs_tbl(i).tax_amount /*-- TAX_AMOUNT*/
+            ,v_trxs_tbl(i).tax_amount_pcc /*-- TAX_AMOUNT_PCC*/
+            ,v_trxs_tbl(i).total_amount /*-- TOTAL_AMOUNT*/
+            ,v_trxs_tbl(i).total_amount_pcc /*-- TOTAL_AMOUNT_PCC*/
+            ,v_trxs_tbl(i).trx_date /*-- TRX_DATE*/
+            ,v_trxs_tbl(i).collection_country /*-- COLLECTION_COUNTRY*/
+            ,v_month_billed /*-- MONTH_BILLED*/
+            ,v_trxs_tbl(i).invoice_currency_code /*-- INVOICE_CURRENCY_CODE*/
+            ,v_trxs_tbl(i).printing_currency_code/*-- PRINTING_CURRENCY_CODE*/
+            );
+        exception
+        when dup_val_on_index then
+          update xx_ar_reg_invoice_request
+          set trx_number_ori                  = v_trxs_tbl(i).trx_number
+          ,reference                          = v_trxs_tbl(i).customer_name
+          ,receive_date                       = null
+          ,trx_number_new                     = null
+          ,link                               = null
+          ,cae                                = null
+          ,fecha_cae                          = null
+          ,file_name                          = v_trxs_tbl(i).output_file
+          ,status                             = decode(v_trxs_tbl(i).status , 'ERROR' ,'PROCESSING_ERROR_ORACLE' ,'NEW')
+          ,error_code                         = v_trxs_tbl(i).error_code
+          ,error_messages                     = v_trxs_tbl(i).error_messages
+          ,last_updated_by                    = fnd_global.user_id
+          ,last_update_date                   = sysdate
+          ,last_update_login                  = fnd_global.login_id
+          ,purchase_order                     = v_trxs_tbl(i).purchase_order
+          ,request_number                     = v_trxs_tbl(i).request_number
+          ,order_source                       = v_order_source
+          ,orig_sys_document_ref              = v_orig_sys_document_ref
+          ,collection_type                    = v_trxs_tbl(i).collection_type
+          ,document_type                      = v_trxs_tbl(i).document_type
+          ,email                              = v_trxs_tbl(i).customer_email
+          ,source_system_number               = v_trxs_tbl(i).source_system_number
+          ,legal_entity                       = v_trxs_tbl(i).legal_entity_name
+          ,legal_entity_code                  = v_trxs_tbl(i).legal_entity_id
+          ,request_id                         = fnd_global.conc_request_id
+          ,stmt_source                        = v_stmt_source
+          ,hotel_stmt_trx_number              = v_hotel_stmt_trx_number
+          ,attribute_category                 = p_territory_code
+          ,attribute1                         = v_trxs_tbl(i).electr_doc_type
+          ,attribute2                         = v_trxs_tbl(i).legal_entity_identifier
+          ,attribute3                         = null
+          ,attribute4                         = null
+          ,attribute5                         = null
+          ,attribute6                         = null
+          ,attribute7                         = null
+          ,attribute8                         = null
+          ,attribute9                         = null
+          ,attribute10                        = null
+          ,net_amount                         = v_trxs_tbl(i).net_amount
+          ,net_amount_pcc                     =v_trxs_tbl(i).net_amount_pcc
+          ,tax_amount                         = v_trxs_tbl(i).tax_amount
+          ,tax_amount_pcc                     = v_trxs_tbl(i).tax_amount_pcc
+          ,total_amount                       = v_trxs_tbl(i).total_amount
+          ,total_amount_pcc                   = v_trxs_tbl(i).total_amount_pcc
+          ,trx_date                           = v_trxs_tbl(i).trx_date
+          ,collection_country                 = v_trxs_tbl(i).collection_country
+          ,month_billed                       = v_month_billed
+          ,invoice_currency_code              = v_trxs_tbl(i).invoice_currency_code
+          ,printing_currency_code             = v_trxs_tbl(i).printing_currency_code
+          where v_trxs_tbl(i).customer_trx_id = customer_trx_id;
+        end;
+      end loop;
+    end if;
+    /*-- ---------------------------------------------------------------------------*/
+    /*-- Verifico si se produjo un error.*/
+    /*-- ---------------------------------------------------------------------------*/
+    if v_mesg_error is not null and v_mesg_error != 'NO_DATA_FOUND' then
+      debug(g_indent || v_calling_sequence || '. ' || v_mesg_error ,'1' );
+      fnd_file.put(fnd_file.log ,g_indent || v_calling_sequence || '. ' || v_mesg_error );
+      fnd_file.new_line(fnd_file.log ,1);
+      debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
+      rollback;
+      retcode := '2';
+      errbuf  := substr(v_mesg_error ,1 ,2000);
+    else
+      if upper(nvl(p_draft_mode ,'N')) = 'N' then
+        debug(g_indent || v_calling_sequence || '. Realizando commit' ,'1' );
+        commit;
+      else
+        debug(g_indent || v_calling_sequence || '. Realizando rollback' ,'1' );
+        rollback;
+      end if;
+      retcode := '0';
+    end if;
+    fnd_file.put(fnd_file.log ,'---------------------------------------------------------------------');
+    fnd_file.new_line(fnd_file.log ,1);
+    fnd_file.put(fnd_file.log ,' Registros procesados exitosamente: '||v_success_qty);
+    fnd_file.new_line(fnd_file.log ,1);
+    fnd_file.put(fnd_file.log ,' Registros procesados con error   : '||v_error_qty);
+    fnd_file.new_line(fnd_file.log ,1);
+    fnd_file.put(fnd_file.log ,'---------------------------------------------------------------------');
+    fnd_file.new_line(fnd_file.log ,1);
+    debug(g_indent || v_calling_sequence || '. Fin de proceso' ,'1' );
+  exception
+  when others then
+    v_mesg_error := 'Error general generando factura electronica. ' || sqlerrm;
+    debug(v_calling_sequence || '. ' || v_mesg_error ,'1' );
+    fnd_file.put(fnd_file.log ,g_indent || v_calling_sequence || '. ' || v_mesg_error );
+    fnd_file.new_line(fnd_file.log ,1);
+    retcode := '2';
+    errbuf  := substr(v_mesg_error ,1 ,2000);
+  end main_cl_rn;
 end xx_ar_raxinv_pk;
 /
 show errors
