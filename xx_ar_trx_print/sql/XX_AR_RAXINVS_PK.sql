@@ -267,6 +267,42 @@ procedure report
   ,p_request_id     in number
   ,p_delete_flag    in varchar2
   ,p_debug_flag     in varchar2);
+/*=========================================================================+
+|                                                                          |
+| Public Procedure                                                         |
+|    main_cl_rn                                                            |
+|                                                                          |
+| Description                                                              |
+|    Procedimiento que genera los archivos de nota de cobro para Chile     |
+|                                                                          |
+| Parameters                                                               |
+|    errbuf            OUT VARCHAR2 Uso interno del concurrente.           |
+|    retcode           OUT VARCHAR2 Uso interno del concurrente.           |
+|    p_draft_mode      IN  VARCHAR2 Modo draft (Y/N).                      |
+|    p_debug_flag      IN  VARCHAR2 Flag de debug.                         |
+|    p_cust_trx_type   IN  NUMBER   Tipo de Transaccion.                   |
+|    p_batch_source    IN  VARCHAR2 Origen.                                |
+|    p_trx_number_from IN  VARCHAR2 Numero de Transaccion desde.           |
+|    p_trx_number_to   IN  VARCHAR2 Numero de Transaccion hasta.           |
+|    p_date_from       IN  DATE     Fecha desde.                           |
+|    p_date_to         IN  DATE     Fecha hasta.                           |
+|    p_customer_id     IN  NUMBER   Cliente.                               |
+|    p_territory_code  IN  VARCHAR2 Pa�s.                                  |
+|                                                                          |
++=========================================================================*/
+procedure main_cl_rn
+  (errbuf out varchar2
+  ,retcode out number
+  ,p_draft_mode in varchar2
+  ,p_debug_flag in varchar2
+  ,p_batch_source in varchar2
+  ,p_cust_trx_type in number
+  ,p_trx_number_from in varchar2
+  ,p_trx_number_to in varchar2
+  ,p_date_from in varchar2
+  ,p_date_to in varchar2
+  ,p_customer_id in number
+  ,p_territory_code in varchar2);
 end xx_ar_raxinv_pk;
 /
 show errors
