@@ -3209,6 +3209,8 @@ create or replace package body xx_ar_raxinv_pk as
           end if;
         end if;
         begin
+          v_send_line := '<?xml version=''1.0'' encoding=''iso-8859-1''?>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<DTE>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           if (v_trxs_tbl(i).electr_doc_type = '39') then
