@@ -170,14 +170,14 @@ create or replace package body xx_ar_raxinv_pk as
     and rct.cust_trx_type_id     = nvl(p_cust_trx_type_id ,rct.cust_trx_type_id)
     and rct.bill_to_customer_id  = nvl(p_customer_id ,rct.bill_to_customer_id)
     and rct.complete_flag        = 'Y'
-    and nvl(rct.attribute9 ,'N') = 'N'
+    --and nvl(rct.attribute9 ,'N') = 'N' --PAM PD Procesado
     and p_draft_mode             = 'N'
     and rct.batch_source_id      = rbs.batch_source_id
-    and rbs.attribute3           = 'Y'
+    --and rbs.attribute3           = 'Y' --Fact. Elec: Origen de Comprobante Electronico
     and rct.customer_trx_id      = xarir.customer_trx_id (+)
     and nvl(xarir.status ,'@')  in ('@' ,'PROCESSING_ERROR_ORACLE' ,'ERROR_OAS')
     and rct.cust_trx_type_id     = rctt.cust_trx_type_id
-    and rctt.attribute12         = 'Y'
+    --and rctt.attribute12         = 'Y' --Fact. Elec: Comprobante Electronico
     and rct.org_id               = hou.organization_id
     and hou.location_id          = hl_org.location_id
     and rct.bill_to_customer_id  = hca.cust_account_id
@@ -289,10 +289,10 @@ create or replace package body xx_ar_raxinv_pk as
     and rct.complete_flag       = 'Y'
     and p_draft_mode            = 'Y'
     and rct.batch_source_id     = rbs.batch_source_id
-    and rbs.attribute3          = 'Y'
+    --and rbs.attribute3          = 'Y' --Fact. Elec: Origen de Comprobante Electronico
     and rct.customer_trx_id     = xarir.customer_trx_id (+)
     and rct.cust_trx_type_id    = rctt.cust_trx_type_id
-    and rctt.attribute12        = 'Y'
+    --and rctt.attribute12        = 'Y' --Fact. Elec: Comprobante Electronico
     and rct.org_id              = hou.organization_id
     and hou.location_id         = hl_org.location_id
     and rct.bill_to_customer_id = hca.cust_account_id
@@ -745,12 +745,12 @@ create or replace package body xx_ar_raxinv_pk as
             if (dbms_lob.getlength(v_trxs_tbl(i).send_file) > 4000) then
               dbms_lob.read(v_trxs_tbl(i).send_file ,v_amount ,4001 ,v_text3);
             end if;
-            fnd_file.put(fnd_file.output ,'Numero Factura: ' || v_trxs_tbl(i).trx_number );
-            fnd_file.new_line(fnd_file.output ,1 );
+            --fnd_file.put(fnd_file.output ,'Numero Factura: ' || v_trxs_tbl(i).trx_number );
+            --fnd_file.new_line(fnd_file.output ,1 );
             fnd_file.put(fnd_file.output ,v_text1 || v_text2 || v_text3 );
             fnd_file.new_line(fnd_file.output ,1 );
-            fnd_file.put(fnd_file.output ,'----------------------------------------------------------' );
-            fnd_file.new_line(fnd_file.output ,1 );
+            --fnd_file.put(fnd_file.output ,'----------------------------------------------------------' );
+            --fnd_file.new_line(fnd_file.output ,1 );
           end if;
         exception
         when others then
@@ -3048,42 +3048,43 @@ create or replace package body xx_ar_raxinv_pk as
           debug(g_indent||v_calling_sequence||' Error inesperado obteniendo valores para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
           continue;
         end if;
-        /*-- Obtengo la Tasa de Iva de la Factura, No puede haber mas de un porcentaje.*/
-        begin
-          select zx_rate.percentage_rate
-          into   v_trxs_tbl(i).vat_percentage
-          from   ra_customer_trx_lines_all rctlt
-                ,zx_lines zx_line
-                ,zx_rates_vl zx_rate
-          where  1=1
-          and    rctlt.line_type(+)                   = 'TAX'
-          and    zx_rate.tax_rate_id(+)               = zx_line.tax_rate_id
-          and    zx_line.tax_line_id(+)               = rctlt.tax_line_id
-          and    zx_line.entity_code                  = 'TRANSACTIONS'
-          and    zx_rate.tax                          = g_vat_tax
-          and    zx_line.application_id               = 222
-          and    rctlt.customer_trx_id                = v_trxs_tbl(i).customer_trx_id
-          and    (    (    v_trxs_tbl(i).electr_doc_type not in ('110' ,'112')
-                      and nvl (zx_rate.percentage_rate ,0)    != 0)
-                   or /*-- Fac Nacional, solo me interesan las lineas != 0*/
-                     (v_trxs_tbl(i).electr_doc_type in ('110' ,'112'))) /*-- Fac Exportacion*/
-          group by zx_rate.percentage_rate;
-          /*-- Para la Factura de Exportacion la tasa siempre debe ser 0*/
-          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112') and v_trxs_tbl(i).vat_percentage != 0) then
-            v_trxs_tbl(i).status         := 'ERROR';
-            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
-            v_trxs_tbl(i).error_messages := 'La Tasa de Iva para el comprobante de exportacion debe ser siempre 0.';
-            debug(g_indent||v_calling_sequence||'  La Tasa de Iva para el comprobante de exportacion debe ser siempre 0 para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
-            continue;
-          end if;
-        exception
-          when others then
-            v_trxs_tbl(i).status         := 'ERROR';
-            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
-            v_trxs_tbl(i).error_messages := 'No se pudo obtener la Tasa de Iva para el comprobante. Debe existir una tasa unica de iva.'||sqlerrm;
-            debug(g_indent || v_calling_sequence || '  No se pudo obtener una Tasa de Iva unica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id||' '||sqlerrm ,'1' );
-            continue;
-        end;
+--      /*No hay impuestos en la nota de cobro*/
+--        /*-- Obtengo la Tasa de Iva de la Factura, No puede haber mas de un porcentaje.*/
+--        begin
+--          select zx_rate.percentage_rate
+--          into   v_trxs_tbl(i).vat_percentage
+--          from   ra_customer_trx_lines_all rctlt
+--                ,zx_lines zx_line
+--                ,zx_rates_vl zx_rate
+--          where  1=1
+--          and    rctlt.line_type(+)                   = 'TAX'
+--          and    zx_rate.tax_rate_id(+)               = zx_line.tax_rate_id
+--          and    zx_line.tax_line_id(+)               = rctlt.tax_line_id
+--          and    zx_line.entity_code                  = 'TRANSACTIONS'
+--          and    zx_rate.tax                          = g_vat_tax
+--          and    zx_line.application_id               = 222
+--          and    rctlt.customer_trx_id                = v_trxs_tbl(i).customer_trx_id
+--          and    (    (    v_trxs_tbl(i).electr_doc_type not in ('110' ,'112')
+--                      and nvl (zx_rate.percentage_rate ,0)    != 0)
+--                   or /*-- Fac Nacional, solo me interesan las lineas != 0*/
+--                     (v_trxs_tbl(i).electr_doc_type in ('110' ,'112'))) /*-- Fac Exportacion*/
+--          group by zx_rate.percentage_rate;
+--          /*-- Para la Factura de Exportacion la tasa siempre debe ser 0*/
+--          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112') and v_trxs_tbl(i).vat_percentage != 0) then
+--            v_trxs_tbl(i).status         := 'ERROR';
+--            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+--            v_trxs_tbl(i).error_messages := 'La Tasa de Iva para el comprobante de exportacion debe ser siempre 0.';
+--            debug(g_indent||v_calling_sequence||'  La Tasa de Iva para el comprobante de exportacion debe ser siempre 0 para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+--            continue;
+--          end if;
+--        exception
+--          when others then
+--            v_trxs_tbl(i).status         := 'ERROR';
+--            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+--            v_trxs_tbl(i).error_messages := 'No se pudo obtener la Tasa de Iva para el comprobante. Debe existir una tasa unica de iva.'||sqlerrm;
+--            debug(g_indent || v_calling_sequence || '  No se pudo obtener una Tasa de Iva unica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id||' '||sqlerrm ,'1' );
+--            continue;
+--        end;
         /*-- Llamo a la funcion que calcula el monto en letras*/
         v_amount_in_words := xx_ar_reg_send_invoices_pk.get_amount_in_words(p_amount                => v_trxs_tbl(i).total_amount_pcc
                                                                            ,p_country_currency_code => g_func_currency_code
@@ -3229,6 +3230,10 @@ create or replace package body xx_ar_raxinv_pk as
           v_send_line := '<Folio>'||v_trxs_tbl(i).trx_number||'</Folio>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<FchEmis>'||to_char(v_trxs_tbl(i).trx_date ,'YYYY-MM-DD')||'</FchEmis>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<comments>'||v_trxs_tbl(i).comments||'</comments>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<cust_trx_concept>'||v_trxs_tbl(i).cust_trx_concept||'</cust_trx_concept>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           if (v_trxs_tbl(i).electr_doc_type in ('39' ,'61')) then
             v_send_line := '<IndServicio>'||v_trxs_tbl(i).electr_serv_type||'</IndServicio>'||g_eol;
@@ -3486,13 +3491,13 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           /*-- Leyenda Adicional*/
           /*-- Imprime Comentarios*/
-          v_send_line := '<DatosAdjuntos>'||g_eol;
+          v_send_line := '<DatosAdjuntos_CMNTS>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<ValorDA>'||v_trxs_tbl(i).comments||'</ValorDA>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
-          v_send_line := '</DatosAdjuntos>'||g_eol;
+          v_send_line := '</DatosAdjuntos_CMNTS>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           /*---- Agencia*/
           /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
