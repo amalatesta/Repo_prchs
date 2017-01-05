@@ -3231,6 +3231,10 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<FchEmis>'||to_char(v_trxs_tbl(i).trx_date ,'YYYY-MM-DD')||'</FchEmis>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<comments>'||v_trxs_tbl(i).comments||'</comments>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+          v_send_line := '<cust_trx_concept>'||v_trxs_tbl(i).cust_trx_concept||'</cust_trx_concept>'||g_eol;
+          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           if (v_trxs_tbl(i).electr_doc_type in ('39' ,'61')) then
             v_send_line := '<IndServicio>'||v_trxs_tbl(i).electr_serv_type||'</IndServicio>'||g_eol;
             dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
@@ -3487,13 +3491,13 @@ create or replace package body xx_ar_raxinv_pk as
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           /*-- Leyenda Adicional*/
           /*-- Imprime Comentarios*/
-          v_send_line := '<DatosAdjuntos>'||g_eol;
+          v_send_line := '<DatosAdjuntos_CMNTS>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<NombreDA>'||'Observacion'||'</NombreDA>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           v_send_line := '<ValorDA>'||v_trxs_tbl(i).comments||'</ValorDA>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
-          v_send_line := '</DatosAdjuntos>'||g_eol;
+          v_send_line := '</DatosAdjuntos_CMNTS>'||g_eol;
           dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           /*---- Agencia*/
           /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
