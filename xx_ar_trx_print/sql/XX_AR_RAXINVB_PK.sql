@@ -3048,42 +3048,43 @@ create or replace package body xx_ar_raxinv_pk as
           debug(g_indent||v_calling_sequence||' Error inesperado obteniendo valores para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
           continue;
         end if;
-        /*-- Obtengo la Tasa de Iva de la Factura, No puede haber mas de un porcentaje.*/
-        begin
-          select zx_rate.percentage_rate
-          into   v_trxs_tbl(i).vat_percentage
-          from   ra_customer_trx_lines_all rctlt
-                ,zx_lines zx_line
-                ,zx_rates_vl zx_rate
-          where  1=1
-          and    rctlt.line_type(+)                   = 'TAX'
-          and    zx_rate.tax_rate_id(+)               = zx_line.tax_rate_id
-          and    zx_line.tax_line_id(+)               = rctlt.tax_line_id
-          and    zx_line.entity_code                  = 'TRANSACTIONS'
-          and    zx_rate.tax                          = g_vat_tax
-          and    zx_line.application_id               = 222
-          and    rctlt.customer_trx_id                = v_trxs_tbl(i).customer_trx_id
-          and    (    (    v_trxs_tbl(i).electr_doc_type not in ('110' ,'112')
-                      and nvl (zx_rate.percentage_rate ,0)    != 0)
-                   or /*-- Fac Nacional, solo me interesan las lineas != 0*/
-                     (v_trxs_tbl(i).electr_doc_type in ('110' ,'112'))) /*-- Fac Exportacion*/
-          group by zx_rate.percentage_rate;
-          /*-- Para la Factura de Exportacion la tasa siempre debe ser 0*/
-          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112') and v_trxs_tbl(i).vat_percentage != 0) then
-            v_trxs_tbl(i).status         := 'ERROR';
-            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
-            v_trxs_tbl(i).error_messages := 'La Tasa de Iva para el comprobante de exportacion debe ser siempre 0.';
-            debug(g_indent||v_calling_sequence||'  La Tasa de Iva para el comprobante de exportacion debe ser siempre 0 para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
-            continue;
-          end if;
-        exception
-          when others then
-            v_trxs_tbl(i).status         := 'ERROR';
-            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
-            v_trxs_tbl(i).error_messages := 'No se pudo obtener la Tasa de Iva para el comprobante. Debe existir una tasa unica de iva.'||sqlerrm;
-            debug(g_indent || v_calling_sequence || '  No se pudo obtener una Tasa de Iva unica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id||' '||sqlerrm ,'1' );
-            continue;
-        end;
+--      /*No hay impuestos en la nota de cobro*/
+--        /*-- Obtengo la Tasa de Iva de la Factura, No puede haber mas de un porcentaje.*/
+--        begin
+--          select zx_rate.percentage_rate
+--          into   v_trxs_tbl(i).vat_percentage
+--          from   ra_customer_trx_lines_all rctlt
+--                ,zx_lines zx_line
+--                ,zx_rates_vl zx_rate
+--          where  1=1
+--          and    rctlt.line_type(+)                   = 'TAX'
+--          and    zx_rate.tax_rate_id(+)               = zx_line.tax_rate_id
+--          and    zx_line.tax_line_id(+)               = rctlt.tax_line_id
+--          and    zx_line.entity_code                  = 'TRANSACTIONS'
+--          and    zx_rate.tax                          = g_vat_tax
+--          and    zx_line.application_id               = 222
+--          and    rctlt.customer_trx_id                = v_trxs_tbl(i).customer_trx_id
+--          and    (    (    v_trxs_tbl(i).electr_doc_type not in ('110' ,'112')
+--                      and nvl (zx_rate.percentage_rate ,0)    != 0)
+--                   or /*-- Fac Nacional, solo me interesan las lineas != 0*/
+--                     (v_trxs_tbl(i).electr_doc_type in ('110' ,'112'))) /*-- Fac Exportacion*/
+--          group by zx_rate.percentage_rate;
+--          /*-- Para la Factura de Exportacion la tasa siempre debe ser 0*/
+--          if (v_trxs_tbl(i).electr_doc_type in ('110' ,'112') and v_trxs_tbl(i).vat_percentage != 0) then
+--            v_trxs_tbl(i).status         := 'ERROR';
+--            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+--            v_trxs_tbl(i).error_messages := 'La Tasa de Iva para el comprobante de exportacion debe ser siempre 0.';
+--            debug(g_indent||v_calling_sequence||'  La Tasa de Iva para el comprobante de exportacion debe ser siempre 0 para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id ,'1' );
+--            continue;
+--          end if;
+--        exception
+--          when others then
+--            v_trxs_tbl(i).status         := 'ERROR';
+--            v_trxs_tbl(i).error_code     := '030_UNEXPECTED_ERROR';
+--            v_trxs_tbl(i).error_messages := 'No se pudo obtener la Tasa de Iva para el comprobante. Debe existir una tasa unica de iva.'||sqlerrm;
+--            debug(g_indent || v_calling_sequence || '  No se pudo obtener una Tasa de Iva unica para customer_trx_id:'||' '||v_trxs_tbl(i).customer_trx_id||' '||sqlerrm ,'1' );
+--            continue;
+--        end;
         /*-- Llamo a la funcion que calcula el monto en letras*/
         v_amount_in_words := xx_ar_reg_send_invoices_pk.get_amount_in_words(p_amount                => v_trxs_tbl(i).total_amount_pcc
                                                                            ,p_country_currency_code => g_func_currency_code
