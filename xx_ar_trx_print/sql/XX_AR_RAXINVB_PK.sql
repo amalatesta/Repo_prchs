@@ -745,12 +745,12 @@ create or replace package body xx_ar_raxinv_pk as
             if (dbms_lob.getlength(v_trxs_tbl(i).send_file) > 4000) then
               dbms_lob.read(v_trxs_tbl(i).send_file ,v_amount ,4001 ,v_text3);
             end if;
-            fnd_file.put(fnd_file.output ,'Numero Factura: ' || v_trxs_tbl(i).trx_number );
-            fnd_file.new_line(fnd_file.output ,1 );
+            --fnd_file.put(fnd_file.output ,'Numero Factura: ' || v_trxs_tbl(i).trx_number );
+            --fnd_file.new_line(fnd_file.output ,1 );
             fnd_file.put(fnd_file.output ,v_text1 || v_text2 || v_text3 );
             fnd_file.new_line(fnd_file.output ,1 );
-            fnd_file.put(fnd_file.output ,'----------------------------------------------------------' );
-            fnd_file.new_line(fnd_file.output ,1 );
+            --fnd_file.put(fnd_file.output ,'----------------------------------------------------------' );
+            --fnd_file.new_line(fnd_file.output ,1 );
           end if;
         exception
         when others then
