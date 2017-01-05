@@ -3534,14 +3534,14 @@ create or replace package body xx_ar_raxinv_pk as
           /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
           /*---- Condicion de Pago*/
           /*-------------------------- Inicio de Seccion Datos Adjuntos -------------------------------*/
-          v_send_line := '<DatosAdjuntos>'||g_eol;
-          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
-          v_send_line := '<NombreDA>'||'FORMAPAGO'||'</NombreDA>'||g_eol;
-          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
-          v_send_line := '<ValorDA>'||v_trxs_tbl(i).receipt_method_name||'</ValorDA>'||g_eol;
-          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
-          v_send_line := '</DatosAdjuntos>'||g_eol;
-          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+--          v_send_line := '<DatosAdjuntos>'||g_eol;
+--          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+--          v_send_line := '<NombreDA>'||'FORMAPAGO'||'</NombreDA>'||g_eol;
+--          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+--          v_send_line := '<ValorDA>'||v_trxs_tbl(i).receipt_method_name||'</ValorDA>'||g_eol;
+--          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
+--          v_send_line := '</DatosAdjuntos>'||g_eol;
+--          dbms_lob.writeappend(v_send_file ,length(v_send_line) ,v_send_line);
           /*-------------------------- Fin de Seccion Datos Adjuntos ----------------------------------*/
           /*-------------------------- Fin de Seccion Boleta/DTE --------------------------------------*/
           if (v_trxs_tbl(i).electr_doc_type = '39') then
