@@ -37,11 +37,11 @@ begin patch xx_ar_trx_print_db_v1
 
   copy xbol /admin/AR/xx_ar_trx_print/import rgu_xx_ar_trx_print_cag_db_v1.ldt
 
-#  copy xbol /admin/AR/xx_ar_trx_print/import xdo_xxraxinv_cl_rn_v1.ldt
+  copy xbol /admin/AR/xx_ar_trx_print/import xdo_xxraxinv_cl_rn_v1.ldt
 
 #  copy xbol /admin/AR/xx_ar_trx_print/import XXRAXINV_CL_RN.xml
 
-#  copy xbol /admin/AR/xx_ar_trx_print/import XXRAXINV_CL_RN.rtf
+  copy xbol /admin/AR/xx_ar_trx_print/import XXRAXINV_CL_RN.rtf
 
   copy xbol /admin/AR/xx_ar_trx_print/sql XX_AR_RAXINVS_PK.sql
 
@@ -57,11 +57,11 @@ begin patch xx_ar_trx_print_db_v1
 
     exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_trx_print/import/rgu_xx_ar_trx_print_cag_db_v1.ldt
 
-#    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ar_trx_print/import/xdo_xxraxinv_cl_rn_v1.ldt - CUSTOM_MODE=FORCE
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ar_trx_print/import/xdo_xxraxinv_cl_rn_v1.ldt - CUSTOM_MODE=FORCE
 
 #    java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME apps -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE DATA_TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXRAXINV_CL_RN -LANGUAGE en  -XDO_FILE_TYPE XML-DATA-TEMPLATE -FILE_NAME $XBOL_TOP/admin/AR/xx_ar_trx_print/import/XXRAXINV_CL_RN.xml -CUSTOM_MODE FORCE
 
-#    java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME apps -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXRAXINV_CL_RN -LANGUAGE en -XDO_FILE_TYPE RTF -NLS_LANG US -FILE_NAME $XBOL_TOP/admin/AR/xx_ar_trx_print/import/XXRAXINV_CL_RN.rtf -LOG_FILE ./XXRAXINV_CL_RN.log -CUSTOM_MODE FORCE
+    java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME apps -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXRAXINV_CL_RN -LANGUAGE en -XDO_FILE_TYPE RTF -NLS_LANG US -FILE_NAME $XBOL_TOP/admin/AR/xx_ar_trx_print/import/XXRAXINV_CL_RN.rtf -LOG_FILE ./XXRAXINV_CL_RN.log -CUSTOM_MODE FORCE
 
   end connection apps
 
