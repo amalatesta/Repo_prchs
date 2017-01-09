@@ -10,7 +10,7 @@ REM | DESCRIPTION                                                           |
 REM |     Script de desinstalacion de customizacion.                        |
 REM |                                                                       |
 REM | HISTORY                                                               |
-REM |     03-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
+REM |     06-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
 REM |                                                                       |
 REM +=======================================================================|
 
@@ -51,7 +51,7 @@ DECLARE
     and    fa.application_id           = fcp.application_id
     and    fcp.concurrent_program_id   = fcpt.concurrent_program_id
     and    fcpt.language               = 'ESA'
-    and    fcp.concurrent_program_name = 'XXRAXINV_CL_RN'
+    and    fcp.concurrent_program_name = 'XXZXCLRSLL'
     and    upper(nvl('&p_cnc','N'))    = 'Y'
     order by fcp.concurrent_program_name;
 BEGIN
@@ -86,7 +86,7 @@ DECLARE
     and    fa.application_id  = fe.application_id
     and    fe.executable_id   = fet.executable_id
     and    fet.language       = 'ESA'
-    and    fe.executable_name = 'XXRAXINV_CL_RN'
+    and    fe.executable_name = 'XXZXARRECV'
     and    upper(nvl('&p_exe','N')) = 'Y'
     order by fe.executable_name;
 BEGIN
