@@ -53,19 +53,19 @@ begin patch xx_ar_sales_ledger_db_v1
 
   begin connection apps
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_us_xx_ar_sales_ledger_db_v1.ldt
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_us_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
     exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/xdo_us_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_esa_xx_ar_sales_ledger_db_v1.ldt
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_esa_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
     exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/xdo_esa_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_ptb_xx_ar_sales_ledger_db_v1.ldt
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/pc_ptb_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
     exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/xdo_ptb_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/rgu_us_xx_ar_sales_ledger_db_v1.ldt
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/rgu_us_xx_ar_sales_ledger_db_v1.ldt - CUSTOM_MODE=FORCE
 
     java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME apps -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXRAXINV_CL_RN -LANGUAGE en -XDO_FILE_TYPE RTF -NLS_LANG US -FILE_NAME $XBOL_TOP/admin/AR/xx_ar_sales_ledger/import/XXZXCLRSLL.rtf -LOG_FILE ./XXZXCLRSLL.log -CUSTOM_MODE FORCE
 
