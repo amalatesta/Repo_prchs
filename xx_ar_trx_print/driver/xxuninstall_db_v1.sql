@@ -45,13 +45,14 @@ declare
   cursor del is
     select xtb.application_short_name
           ,xtb.template_code
-          ,xtb.template_name
+          ,xtt.template_name
     from   xdo_templates_tl xtt
           ,xdo_templates_b  xtb
     where  1=1
+    and    xtb.application_short_name        = xtt.application_short_name
     and    xtb.template_code                 = xtt.template_code
+    and    xtt.language                      = 'ESA'
     and    xtb.template_code                 = 'XXRAXINV_CL_RN'
-    and    xtb.language                      = 'ESA'
     and    upper(nvl('&p_xml_template','N')) = 'Y'
     order by xtb.template_code;
 begin
@@ -65,20 +66,49 @@ begin
       when others then
         raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
     end;
+    begin
+      delete from xdo_lobs xl
+      where  1=1
+      and    xl.application_short_name = i.application_short_name
+      and    xl.lob_code               = i.template_code
+      and    xl.lob_type in ('TEMPLATE_SOURCE','TEMPLATE'); 
+    exception
+      when others then
+        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+    end;
   end loop;
 end;
 /
-
-
-
-
-
-
-
-
-
-
-
+prompt Eliminando definicion de datos xml
+set serveroutput on size 1000000
+declare
+  cursor del is
+    select xddb.application_short_name
+          ,xddb.data_source_code
+          ,xddt.data_source_name
+    from   xdo_ds_definitions_tl xddt
+          ,xdo_ds_definitions_b  xddb
+    where  1=1
+    and    xddb.application_short_name   = xddt.application_short_name
+    and    xddb.data_source_code         = xddt.data_source_code
+    and    xddt.language                 = 'ESA'
+    and    xddb.data_source_code         = 'XXRAXINV_CL_RN'
+    and    upper(nvl('&p_xml_data','N')) = 'Y'
+    order by xddb.data_source_code;
+begin
+  for i in del loop
+    dbms_output.put_line('Eliminando definicion de datos XML: ' || i.data_source_code);
+    dbms_output.put_line('Con nombre de programa: ' || i.data_source_name);
+    begin
+      xdo_ds_definitions_pkg.delete_row(x_application_short_name => i.application_short_name
+                                       ,x_data_source_code       => i.data_source_code);
+    exception
+      when others then
+        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+    end;
+  end loop;
+end;
+/
 prompt Eliminando los concurrentes
 set serveroutput on size 1000000
 declare
@@ -112,7 +142,6 @@ begin
   end loop;
 end;
 /
-
 prompt Eliminando los ejecutables
 set serveroutput on size 1000000
 declare
@@ -146,7 +175,6 @@ begin
   end loop;
 end;
 /
-
 prompt Confirmando o cancelando los cambios
 begin
   if upper(nvl('&p_draft_mode','Y')) = 'N' then
@@ -161,7 +189,6 @@ exception
     raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
 end;
 /
-
 set feed on
 set verify on
 
