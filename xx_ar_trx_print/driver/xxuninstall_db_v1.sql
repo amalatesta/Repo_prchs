@@ -14,33 +14,75 @@ REM |     03-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
 REM |                                                                       |
 REM +=======================================================================|
 
-SPOOL xxuninstall_db_v1.log
+spool xxuninstall_db_v1.log
 
-PROMPT  '====================================================================='
-PROMPT  'Script xxuninstall_db_v1.sql'
-PROMPT  '====================================================================='
+prompt  '====================================================================='
+prompt  'Script xxuninstall_db_v1.sql'
+prompt  '====================================================================='
 
-ACCEPT base PROMPT 'Ingrese el nombre de la base de datos: '
-ACCEPT apps_pwd PROMPT 'Ingrese la clave del usuario APPS: ' HIDE
+accept base prompt 'Ingrese el nombre de la base de datos: '
+accept apps_pwd prompt 'Ingrese la clave del usuario APPS: ' hide
 
-CONNECT apps/&apps_pwd@&base
-SHOW USER
+connect apps/&apps_pwd@&base
+show user
 
-SELECT name base_de_datos FROM v$database;
+select name base_de_datos from v$database;
 
-SELECT TO_CHAR(SYSDATE,'DD-MON-YYYY HH24:MI:SS') Inicio FROM dual;
+select to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') inicio from dual;
 
-ACCEPT p_draft_mode PROMPT 'Modo Draft (Default Y): '
-ACCEPT p_cnc PROMPT 'Elimina Concurrentes (Default N): '
-ACCEPT p_exe PROMPT 'Elimina Ejecutables (Default N): '
+accept p_draft_mode prompt 'Modo Draft (Default Y): '
+accept p_xml_template prompt 'Elimina plantillas XML (Default N): '
+accept p_xml_data prompt 'Elimina definiciones de datos XML (Default N): '
+accept p_cnc prompt 'Elimina Concurrentes (Default N): '
+accept p_exe prompt 'Elimina Ejecutables (Default N): '
 
-SET FEED OFF
-SET VERIFY OFF
+set feed off
+set verify off
 
-PROMPT Eliminando los Concurrentes
-SET SERVEROUTPUT ON SIZE 1000000
-DECLARE
-  CURSOR del IS
+prompt Eliminando plantilla xml
+set serveroutput on size 1000000
+declare
+  cursor del is
+    select xtb.application_short_name
+          ,xtb.template_code
+          ,xtb.template_name
+    from   xdo_templates_tl xtt
+          ,xdo_templates_b  xtb
+    where  1=1
+    and    xtb.template_code                 = xtt.template_code
+    and    xtb.template_code                 = 'XXRAXINV_CL_RN'
+    and    xtb.language                      = 'ESA'
+    and    upper(nvl('&p_xml_template','N')) = 'Y'
+    order by xtb.template_code;
+begin
+  for i in del loop
+    dbms_output.put_line('Eliminando plantilla XML: ' || i.template_code);
+    dbms_output.put_line('Con nombre de programa: ' || i.template_name);
+    begin
+      xdo_templates_pkg.delete_row(x_application_short_name => i.application_short_name
+                                  ,x_template_code          => i.template_code);
+    exception
+      when others then
+        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+    end;
+  end loop;
+end;
+/
+
+
+
+
+
+
+
+
+
+
+
+prompt Eliminando los concurrentes
+set serveroutput on size 1000000
+declare
+  cursor del is
     select fa.application_short_name
           ,fcp.concurrent_program_name
           ,fcpt.user_concurrent_program_name
@@ -54,28 +96,27 @@ DECLARE
     and    fcp.concurrent_program_name = 'XXRAXINV_CL_RN'
     and    upper(nvl('&p_cnc','N'))    = 'Y'
     order by fcp.concurrent_program_name;
-BEGIN
-  FOR cd IN del LOOP
+begin
+  for cd in del loop
     dbms_output.put_line('Eliminando abreviatura de concurrente: ' || cd.concurrent_program_name);
     dbms_output.put_line('Con nombre de programa: ' || cd.user_concurrent_program_name);
-    BEGIN
+    begin
       fnd_program.delete_program
          (program_short_name => cd.concurrent_program_name
          ,application        => cd.application_short_name
          );
-    EXCEPTION
-      WHEN others THEN
-        RAISE_APPLICATION_ERROR(-20000,NVL(fnd_program.message,SQLERRM));
-    END;
-  END LOOP;
-END;
+    exception
+      when others then
+        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+    end;
+  end loop;
+end;
 /
 
-
-PROMPT Eliminando los Ejecutables
-SET SERVEROUTPUT ON SIZE 1000000
-DECLARE
-  CURSOR del IS
+prompt Eliminando los ejecutables
+set serveroutput on size 1000000
+declare
+  cursor del is
     select fa.application_short_name
           ,fe.executable_name
           ,fet.user_executable_name
@@ -89,43 +130,43 @@ DECLARE
     and    fe.executable_name = 'XXRAXINV_CL_RN'
     and    upper(nvl('&p_exe','N')) = 'Y'
     order by fe.executable_name;
-BEGIN
-  FOR cd IN del LOOP
+begin
+  for cd in del loop
     dbms_output.put_line('Eliminando abreviatura de ejecutable: ' || cd.executable_name);
     dbms_output.put_line('Con nombre de programa: ' || cd.user_executable_name);
-    BEGIN
+    begin
       fnd_program.delete_executable
          (executable_short_name => cd.executable_name
          ,application           => cd.application_short_name
          );
-    EXCEPTION
-      WHEN others THEN
-        RAISE_APPLICATION_ERROR(-20000,NVL(fnd_program.message,SQLERRM));
-    END;
-  END LOOP;
-END;
+    exception
+      when others then
+        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+    end;
+  end loop;
+end;
 /
 
-PROMPT Confirmando o cancelando los cambios
-BEGIN
-  IF UPPER(NVL('&p_draft_mode','Y')) = 'N' THEN
+prompt Confirmando o cancelando los cambios
+begin
+  if upper(nvl('&p_draft_mode','Y')) = 'N' then
     dbms_output.put_line('Confirmando cambios');
-    COMMIT;
-  ELSE
+    commit;
+  else
     dbms_output.put_line('Cancelando cambios');
-    ROLLBACK;
-  END IF;
-EXCEPTION
-  WHEN others THEN
-    RAISE_APPLICATION_ERROR(-20000,NVL(fnd_program.message,SQLERRM));
-END;
+    rollback;
+  end if;
+exception
+  when others then
+    raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
+end;
 /
 
-SET FEED ON
-SET VERIFY ON
+set feed on
+set verify on
 
-SELECT TO_CHAR(SYSDATE,'DD-MON-YYYY HH24:MI:SS') Fin FROM dual;
+select to_char(sysdate,'DD-MON-YYYY HH24:MI:SS') fin from dual;
 
-SPOOL OFF
+spool off
 
-EXIT
+exit
