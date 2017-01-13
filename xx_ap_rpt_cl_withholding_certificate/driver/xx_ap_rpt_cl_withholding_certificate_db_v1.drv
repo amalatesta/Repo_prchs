@@ -1,0 +1,74 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_ap_rpt_cl_withholding_certificate_db_v1.drv                     |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script drivers para reporte SQL                                    |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    12-ENE-2017 - 1.0 - AMalatesta - DSP - Created                     |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_ap_rpt_cl_withholding_certificate_db_v1
+
+  begin patch_info 
+  release  1
+  server   DB
+  language US
+  end patch_info 
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/driver xx_ap_rpt_cl_withholding_certificate_db_v1.drv
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/driver buildpatch_db_v1.sh
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/driver xxuninstall_db_v1.sql
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import xxdownload_db_v1.sh
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import pc_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import xdo_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import pc_esa_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import xdo_esa_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import pc_ptb_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import xdo_ptb_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import rgu_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt
+
+  copy xbol /admin/AR/xx_ap_rpt_cl_withholding_certificate/import XXJLCLPWTC.rtf
+
+  copy xbol /reports/US XXJLCLPWTC.rdf
+
+  begin connection apps
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/pc_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/xdo_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/pc_esa_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/xdo_esa_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/pc_ptb_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/xdo_ptb_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/rgu_us_xx_ap_rpt_cl_withholding_certificate_db_v1.ldt - CUSTOM_MODE=FORCE
+
+    java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME apps -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXJLCLPWTC -LANGUAGE en -XDO_FILE_TYPE RTF -NLS_LANG US -FILE_NAME $XBOL_TOP/admin/AR/xx_ap_rpt_cl_withholding_certificate/import/XXJLCLPWTC.rtf -LOG_FILE ./XXJLCLPWTC.log -CUSTOM_MODE FORCE
+
+  end connection apps
+
+end patch xx_ap_rpt_cl_withholding_certificate_db_v1
