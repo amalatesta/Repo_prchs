@@ -805,7 +805,7 @@ END VALUE_SET
 
 BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/01/12 17:44:11"
+  LAST_UPDATE_DATE = "2017/01/16 00:00:00"
   TABLE_APPLICATION_SHORT_NAME = "FND"
   APPLICATION_TABLE_NAME = "FND_SRS_MASTER"
   CONTEXT_COLUMN_NAME = "STRUCTURE_COLUMN"
@@ -823,23 +823,26 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
 
   BEGIN DFF_CONTEXT "Global Data Elements"
     OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+    LAST_UPDATE_DATE = "2017/01/12 00:00:00"
     ENABLED_FLAG = "Y"
     GLOBAL_FLAG = "Y"
     DESCRIPTIVE_FLEX_CONTEXT_NAME = "Global Data Elements"
   
     BEGIN DFF_SEGMENT "P_REPORTING_LEVEL" "ATTRIBUTE1"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:06"
+      LAST_UPDATE_DATE = "2017/01/23 10:44:00"
       COLUMN_SEQ_NUM = "5"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "XLE_LEGAL_REPORTING_LEVEL"
       DISPLAY_SIZE = "50"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select meaning from fnd_lookups where lookup_type='FND_MO_REPORTING_LEVEL' and lookup_code = '2000'"
       SRW_PARAM = "P_REPORTING_LEVEL"
       FORM_LEFT_PROMPT = "Nivel de Información"
       FORM_ABOVE_PROMPT = "Nivel de Información"
@@ -848,16 +851,19 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_REPORTING_CONTEXT" "ATTRIBUTE2"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/23 10:44:00"
       COLUMN_SEQ_NUM = "6"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "XLE_LEGAL_REPORTING_CONTEXT"
       DISPLAY_SIZE = "50"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select xep.name from xle_entity_profiles xep ,hr_organization_information hoi ,hr_all_organization_units haou where haou.organization_id = hoi.organization_id and hoi.org_information2 = xep.legal_entity_id  and hoi.org_information_context = 'Operating Unit Information' and haou.organization_id = fnd_profile.value('ORG_ID')"
       SRW_PARAM = "P_REPORTING_CONTEXT"
       FORM_LEFT_PROMPT = "Contexto de Información"
       FORM_ABOVE_PROMPT = "Contexto de Información"
@@ -866,10 +872,10 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_LEGAL_ENTITY_ID" "ATTRIBUTE3"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/23 10:44:00"
       COLUMN_SEQ_NUM = "10"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "ZX_COMPANY_NAME"
@@ -884,7 +890,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_CA_SET_OF_BOOKS_ID" "ATTRIBUTE4"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "20"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -902,7 +908,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_SOB_ID" "ATTRIBUTE5"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "30"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -922,7 +928,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_ORG_ID" "ATTRIBUTE6"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "40"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -942,7 +948,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_COMPANY_ID" "ATTRIBUTE7"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "50"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -962,7 +968,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_YEAR" "ATTRIBUTE8"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/23 10:44:00"
       COLUMN_SEQ_NUM = "60"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -972,6 +978,8 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
       DISPLAY_SIZE = "4"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE = "select to_char(sysdate,'YYYY')from dual"
       SRW_PARAM = "P_YEAR"
       FORM_LEFT_PROMPT = "Año de Certificado"
       FORM_ABOVE_PROMPT = "Año de Certificado"
@@ -980,16 +988,19 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_REPORT_MODE" "ATTRIBUTE9"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/20 00:00:00"
       COLUMN_SEQ_NUM = "70"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "JLCL_AP_REPORT_MODE"
       DISPLAY_SIZE = "15"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select meaning from fnd_lookups where lookup_type='JLCL_AP_REPORT_MODE' and lookup_code = 'PREVIEW'"
       SRW_PARAM = "P_REPORT_MODE"
       FORM_LEFT_PROMPT = "Modo Informe"
       FORM_ABOVE_PROMPT = "Modo Informe"
@@ -998,7 +1009,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_RUT_NUMBER" "ATTRIBUTE10"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "80"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -1016,16 +1027,19 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_CPI_FACTOR" "ATTRIBUTE11"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/23 10:49:50"
       COLUMN_SEQ_NUM = "90"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "JLCL_AP_PRICE_INDEXES"
       DISPLAY_SIZE = "15"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select price_index_name from fa_price_indexes where rownum = 1"
       SRW_PARAM = "P_CPI_FACTOR"
       FORM_LEFT_PROMPT = "Índice Precios"
       FORM_ABOVE_PROMPT = "Índice Precios"
@@ -1034,7 +1048,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXJLCLPWTC"
     
     BEGIN DFF_SEGMENT "P_COMPANY_INFO" "ATTRIBUTE12"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/01/12 17:43:07"
+      LAST_UPDATE_DATE = "2017/01/12 00:00:00"
       COLUMN_SEQ_NUM = "100"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -1059,7 +1073,7 @@ END DESC_FLEX
 
 BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/01/12"
+  LAST_UPDATE_DATE = "2017/01/16"
   USER_CONCURRENT_PROGRAM_NAME =
  "XX AP Certificado de Retenção na Fonte do Payables Chileno"
   EXEC = "XXJLCLPWTC" "XBOL"
@@ -1077,7 +1091,7 @@ BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
   REQUIRED_STYLE = "N"
   OUTPUT_PRINT_STYLE = "LANDSCAPE"
   MINIMUM_WIDTH = "132"
-  OUTPUT_FILE_TYPE = "TEXT"
+  OUTPUT_FILE_TYPE = "XML"
   RESTART = "Y"
   NLS_COMPLIANT = "Y"
   MLS_EXEC = "" ""
@@ -1086,11 +1100,11 @@ BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
   AUTO_ANNOTATION =
  "/**\n\
   * @param P_REPORTING_LEVEL Nivel de Información\n\
-  * @rep:paraminfo {@rep:type XLE_LEGAL_REPORTING_LEVEL} {@rep:displayed Y} {@rep:required}\n\
+  * @rep:paraminfo {@rep:type XLE_LEGAL_REPORTING_LEVEL} {@rep:displayed N} {@rep:required}\n\
   * @param P_REPORTING_CONTEXT Contexto de Información\n\
-  * @rep:paraminfo {@rep:type XLE_LEGAL_REPORTING_CONTEXT} {@rep:displayed Y} {@rep:required}\n\
+  * @rep:paraminfo {@rep:type XLE_LEGAL_REPORTING_CONTEXT} {@rep:displayed N} {@rep:required}\n\
   * @param P_LEGAL_ENTITY_ID Entidad Legal\n\
-  * @rep:paraminfo {@rep:type ZX_COMPANY_NAME} {@rep:displayed Y}\n\
+  * @rep:paraminfo {@rep:type ZX_COMPANY_NAME} {@rep:displayed N}\n\
   * @param P_CA_SET_OF_BOOKS_ID Divisa de Mayor\n\
   * @rep:paraminfo {@rep:type ZX_TRL_LE_CA_CURRENCY} {@rep:displayed Y}\n\
   * @param P_SOB_ID ID de Mayor\n\
@@ -1102,11 +1116,11 @@ BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
   * @param P_YEAR Año\n\
   * @rep:paraminfo {@rep:type AP_SRS_30_NUMERIC} {@rep:displayed Y} {@rep:required}\n\
   * @param P_REPORT_MODE Modo Informe\n\
-  * @rep:paraminfo {@rep:type JLCL_AP_REPORT_MODE} {@rep:displayed Y} {@rep:required}\n\
+  * @rep:paraminfo {@rep:type JLCL_AP_REPORT_MODE} {@rep:displayed N} {@rep:required}\n\
   * @param P_RUT_NUMBER ID de Contribuyente(Reimprimir)\n\
   * @rep:paraminfo {@rep:type JLCL_AP_RUT_NUM} {@rep:displayed Y}\n\
   * @param P_CPI_FACTOR Índice Precios\n\
-  * @rep:paraminfo {@rep:type JLCL_AP_PRICE_INDEXES} {@rep:displayed Y} {@rep:required}\n\
+  * @rep:paraminfo {@rep:type JLCL_AP_PRICE_INDEXES} {@rep:displayed N} {@rep:required}\n\
   * @param P_COMPANY_INFO Imprimir Información de Compañía\n\
   * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed Y}\n\
   */"
@@ -1120,7 +1134,7 @@ BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
     INCOMPATIBILITY_TYPE = "D"
   END INCOMPATABILITY
   
-  BEGIN INCOMPATABILITY "XXCLPWTC" "JL"
+  BEGIN INCOMPATABILITY "XXJLCLPWTC" "XBOL"
     OWNER = "AMALATESTA"
     LAST_UPDATE_DATE = "2017/01/12"
     RUNNING_TYPE = "P"
@@ -1128,9 +1142,9 @@ BEGIN PROGRAM "XXJLCLPWTC" "XBOL"
     INCOMPATIBILITY_TYPE = "D"
   END INCOMPATABILITY
   
-  BEGIN INCOMPATABILITY "XXJLCLPWTC" "XBOL"
-    OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/01/12"
+  BEGIN INCOMPATABILITY "XXCLPWTC" "XBOL"
+    OWNER = "PABLO.MAZAL"
+    LAST_UPDATE_DATE = "2017/01/18"
     RUNNING_TYPE = "P"
     TO_RUN_TYPE = "P"
     INCOMPATIBILITY_TYPE = "D"
