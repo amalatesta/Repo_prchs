@@ -10,7 +10,7 @@ REM | DESCRIPTION                                                           |
 REM |     Script de desinstalacion de customizacion.                        |
 REM |                                                                       |
 REM | HISTORY                                                               |
-REM |     03-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
+REM |     20-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
 REM |                                                                       |
 REM +=======================================================================|
 
@@ -52,7 +52,7 @@ declare
     and    xtb.application_short_name        = xtt.application_short_name
     and    xtb.template_code                 = xtt.template_code
     and    xtt.language                      = 'ESA'
-    and    xtb.template_code                 = 'XXRAXINV_CL_RN'
+    and    xtb.template_code                 = 'XXJLCLPWTC'
     and    upper(nvl('&p_xml_template','N')) = 'Y'
     order by xtb.template_code;
 begin
@@ -92,7 +92,7 @@ declare
     and    xddb.application_short_name   = xddt.application_short_name
     and    xddb.data_source_code         = xddt.data_source_code
     and    xddt.language                 = 'ESA'
-    and    xddb.data_source_code         = 'XXRAXINV_CL_RN'
+    and    xddb.data_source_code         = 'XXJLCLPWTC'
     and    upper(nvl('&p_xml_data','N')) = 'Y'
     order by xddb.data_source_code;
 begin
@@ -123,7 +123,7 @@ declare
     and    fa.application_id           = fcp.application_id
     and    fcp.concurrent_program_id   = fcpt.concurrent_program_id
     and    fcpt.language               = 'ESA'
-    and    fcp.concurrent_program_name = 'XXRAXINV_CL_RN'
+    and    fcp.concurrent_program_name = 'XXJLCLPWTC'
     and    upper(nvl('&p_cnc','N'))    = 'Y'
     order by fcp.concurrent_program_name;
 begin
@@ -156,7 +156,7 @@ declare
     and    fa.application_id  = fe.application_id
     and    fe.executable_id   = fet.executable_id
     and    fet.language       = 'ESA'
-    and    fe.executable_name = 'XXRAXINV_CL_RN'
+    and    fe.executable_name = 'XXJLCLPWTC'
     and    upper(nvl('&p_exe','N')) = 'Y'
     order by fe.executable_name;
 begin
