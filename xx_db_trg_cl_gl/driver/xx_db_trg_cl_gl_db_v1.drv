@@ -1,0 +1,40 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_db_trg_cl_gl_db_v1.drv                                          |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Trigger OM AR PO (GO_LIVE)                                         |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    24-ENE-2017 1.0      Generic          Created                      |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_db_trg_cl_gl_db_v1
+
+   begin patch_info 
+      release  1
+      server   DB
+      language US
+   end patch_info 
+
+   copy xbol /admin/XBOL/xx_db_trg_cl_gl/driver xx_db_trg_cl_gl_db_v1.drv
+
+   copy xbol /admin/XBOL/xx_db_trg_cl_gl/driver buildpatch_db.sh
+ 
+   copy xbol /admin/XBOL/xx_db_trg_cl_gl/sql xx_db_trg_cl_gl_db_v1.sql
+
+   begin connection pkg_user virtual
+
+      sql xbol admin/XBOL/xx_db_trg_cl_gl/sql xx_db_trg_cl_gl_db_v1.sql
+
+   end connection pkg_user 
+
+end patch xx_db_trg_cl_gl_db_v1
