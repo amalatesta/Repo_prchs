@@ -1,7 +1,39 @@
---20170125 - AMalatesta - DSP
---Adding more columns for several regional adaptations
+REM +==========================================================================+
+REM |             Copyright (c) 2017 Oracle Argentina, Buenos Aires            |
+REM |                         All rights reserved.                             |
+REM +==========================================================================+
+REM |  FILENAME                                                                |
+REM |    xx_ap_inv_int_db_v1.sql                                               |
+REM |                                                                          |
+REM |  DESCRIPTION                                                             |
+REM |    Realiza alter de la tabla xx_ap_inv_int para agregar campos           |
+REM |    para la consideracion de las localizaciones para cada pais            |
+REM |    a nivel regional                                                      |
+REM |    Adding more columns for several regional adaptations                  |
+REM |                                                                          |
+REM |  LANGUAGE                                                                |
+REM |    PL/SQL                                                                |
+REM |                                                                          |
+REM |  PRODUCT                                                                 |
+REM |    Oracle Financials                                                     |
+REM |                                                                          |
+REM |  HISTORY                                                                 |
+REM |    26-ENE-17 - AMalatesta - DSP - Created                                |
+REM |                                                                          |
+REM | NOTES                                                                    |
+REM |                                                                          |
+REM +==========================================================================+
+
+SPOOL xx_ap_inv_int_db_v1.log
+
+prompt =========================================================================
+prompt script xx_ap_inv_int_db_v1.sql
+prompt =========================================================================
+
+prompt Realizando alter de la tabla bolinf.xx_ap_inv_int
 alter table bolinf.xx_ap_inv_int add
-(global_attribute1 varchar2(150)
+(document_sub_type varchar2(150)
+,global_attribute1 varchar2(150)
 ,global_attribute2 varchar2(150)
 ,global_attribute3 varchar2(150)
 ,global_attribute4 varchar2(150)
@@ -68,5 +100,8 @@ alter table bolinf.xx_ap_inv_int add
 ,attribute12_l varchar2(150)
 ,attribute13_l varchar2(150)
 ,attribute14_l varchar2(150)
-,attribute15_l varchar2(150)
-,document_sub_type varchar2(150));
+,attribute15_l varchar2(150));
+/
+show errors
+spool off
+exit

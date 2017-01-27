@@ -4,15 +4,13 @@
 --  All rights reserved except as may be permitted by prior 
 --  written consent. 
 -- 
---  File Name:   XXAPINVREG.sql
+--  File Name: XXAPREGINV.sql
 --  Attribute Label: XXAP
 -- 
 --  Description:  Carga la intefaz de facturas de AP. Tabla XX_AP_INV_INT
 -- 
 --  Modification History:
---     26-MAY-2014 - Amalatesta - Created
---     29-JUN-2016 - Amalatesta - Created - Nueva version en copia para incluir MEX
---     25-ENE-2017 - Amalatesta - Created - Nueva version en copia para adaptarlo a nivel regional
+--     25-ENE-2017 - Amalatesta - Created - Se crea una copia de XXAPINVMX para adaptarlo a nivel regional
 -- 
 -- parameters : p_date_from  : Fecha desde
 --              p_date_to    : Fecha hasta
@@ -36,11 +34,7 @@
 --------------------------------------------------------------------------------
 -- date        author                            description 
 -- ----------- --------------------------------- -------------------------------
--- 26-MAY-2014 AMalatesta [Despegar]             Created -
--- 17-JUN-2014 AMalatesta [Despegar]             Modified - Se agrega UY
--- 29-JUN-2016 AMalatesta [Despegar]             Created - Se crea una copia para MX
--- 26-DIC-2016 NCano      [Despegar]             Modified - SOE-11285
--- 25-ENE-2017 AMalatesta [Despegar]             Created - Se crea una copia para adaptarlo a nivel regional
+-- 25-ENE-2017 AMalatesta [Despegar]             Created - Se crea una copia de XXAPINVMX para adaptarlo a nivel regional
 -- *****************************************************************************
 set serveroutput on size 1000000 
 whenever sqlerror exit failure 
@@ -78,6 +72,7 @@ declare
           ,xaii.operating_unit                 --operating_unit
           ,xaii.payment_method_code            --payment_method_code
           ,xaii.accts_pay_code_combination     --accts_pay_code_combination
+          ,xaii.document_sub_type              --document_sub_type
           ,xaii.global_attribute_category      --global_attribute_category
           ,xaii.global_attribute1              --global_attribute1
           ,xaii.global_attribute2              --global_attribute2
@@ -145,6 +140,7 @@ declare
             ,xaii.operating_unit                 --operating_unit
             ,xaii.payment_method_code            --payment_method_code
             ,xaii.accts_pay_code_combination     --accts_pay_code_combination
+            ,xaii.document_sub_type              --document_sub_type
             ,xaii.global_attribute_category      --global_attribute_category
             ,xaii.global_attribute1              --global_attribute1
             ,xaii.global_attribute2              --global_attribute2
@@ -328,6 +324,7 @@ declare
                   ||p_chardelim||'DIST_CODE_COMBINATION'
                   ||p_chardelim||'SHIP_TO_LOCATION_ID'
                   ||p_chardelim||'SHIP_TO_LOCATION'
+                  ||p_chardelim||'DOCUMENT_SUB_TYPE'
                   ||p_chardelim||'GLOBAL_ATTRIBUTE_CATEGORY'
                   ||p_chardelim||'GLOBAL_ATTRIBUTE1'
                   ||p_chardelim||'GLOBAL_ATTRIBUTE2'
@@ -464,6 +461,7 @@ declare
                   ||p_chardelim||i_fact.dist_code_combination
                   ||p_chardelim||i_fact.ship_to_location_id
                   ||p_chardelim||i_fact.ship_to_location
+                  ||p_chardelim||i_fact.document_sub_type
                   ||p_chardelim||i_fact.global_attribute_category
                   ||p_chardelim||i_fact.global_attribute1
                   ||p_chardelim||i_fact.global_attribute2
@@ -663,6 +661,7 @@ begin
                 ,payment_method_code
                 ,exchange_rate_type
                 ,exchange_date
+                ,document_sub_type
                 ,global_attribute_category
                 ,global_attribute1
                 ,global_attribute2
@@ -735,6 +734,7 @@ begin
                 ,i_fact_int.payment_method_code            --payment_method_code
                 ,p_exchange_rate_type                      --exchange_rate_type
                 ,i_fact_int.invoice_date                   --exchange_date
+                ,i_fact_int.document_sub_type              --document_sub_type
                 ,i_fact_int.global_attribute_category      --global_attribute_category
                 ,i_fact_int.global_attribute1              --global_attribute1
                 ,i_fact_int.global_attribute2              --global_attribute2
