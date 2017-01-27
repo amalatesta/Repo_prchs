@@ -1,0 +1,80 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_ap_inv_int_db_v1.drv                                            |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script drivers para reporte SQL                                    |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    26-ENE-2017 - 1.0 - AMalatesta - DSP - Created                     |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_ap_inv_int_db_v1
+
+  begin patch_info 
+  release  1
+  server   DB
+  language US
+  end patch_info 
+
+  copy xbol /admin/AP/xx_ap_inv_int/driver xx_ap_inv_int_db_v1.drv
+
+  copy xbol /admin/AP/xx_ap_inv_int/driver buildpatch_db_v1.sh
+
+  copy xbol /admin/AP/xx_ap_inv_int/driver xxuninstall_db_v1.sql
+
+  copy xbol /admin/AP/xx_ap_inv_int/import xxdownload_db_v1.sh
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_esa_xx_ap_inv_int_db_v1_01.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_esa_xx_ap_inv_int_db_v1_02.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_ptb_xx_ap_inv_int_db_v1_01.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_ptb_xx_ap_inv_int_db_v1_02.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_us_xx_ap_inv_int_db_v1_01.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import pc_us_xx_ap_inv_int_db_v1_02.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import rgu_us_xx_ap_inv_int_db_v1_01.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/import rgu_us_xx_ap_inv_int_db_v1_02.ldt
+
+  copy xbol /admin/AP/xx_ap_inv_int/sql xx_ap_inv_int_db_v1.sql
+
+  copy xbol /bin XX_AP_REG_INV_INT.ctl
+
+  copy xbol /sql XXAPREGINV.sql
+
+  begin connection apps
+
+    sql xbol $XBOL_TOP/admin/AP/xx_ap_inv_int/sql xx_ap_inv_int_db_v1.sql
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_esa_xx_ap_inv_int_db_v1_01.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_esa_xx_ap_inv_int_db_v1_02.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_us_xx_ap_inv_int_db_v1_01.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_us_xx_ap_inv_int_db_v1_02.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_ptb_xx_ap_inv_int_db_v1_01.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/pc_ptb_xx_ap_inv_int_db_v1_02.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/rgu_us_xx_ap_inv_int_db_v1_01.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AP/xx_ap_inv_int/import/rgu_us_xx_ap_inv_int_db_v1_02.ldt - CUSTOM_MODE=FORCE
+
+  end connection apps
+
+end patch xx_ap_inv_int_db_v1
