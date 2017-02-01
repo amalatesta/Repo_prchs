@@ -65,6 +65,7 @@ alter table bolinf.xx_ap_inv_int add
 ,attribute13 varchar2(150)
 ,attribute14 varchar2(150)
 ,attribute15 varchar2(150)
+,global_attribute_category_l varchar2(150)
 ,global_attribute1_l varchar2(150)
 ,global_attribute2_l varchar2(150)
 ,global_attribute3_l varchar2(150)
