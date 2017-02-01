@@ -192,7 +192,8 @@ declare
     and    xaii.status           = c_status
     and    xaii.vendor_num       = c_vendor_num
     and    xaii.vendor_site_code = c_vendor_site_code
-    and    xaii.invoice_num      = c_invoice_num;
+    and    xaii.invoice_num      = c_invoice_num
+    order by xaii.line_number;
   /*--Parametros--*/
   p_group_id               xx_ap_inv_int.group_id%type                   := '&&1';
   p_draft                  varchar2(3)                                   := '&&2';
@@ -218,6 +219,8 @@ declare
   vc_tax_status_code       zx_rates_b.tax_status_code%type := null;
   vn_tax_rate_id           zx_rates_b.tax_rate_id%type := 0;
   vc_tax_rate_code         zx_rates_b.tax_rate_code%type := null;
+  v_line_number            ap_invoice_lines_interface.line_number%type;
+  v_flag                   ap_invoice_lines_interface.line_number%type;
   function get_org_id
   (p_ou_name in hr_operating_units.name%type)
   return hr_operating_units.organization_id%type
@@ -561,8 +564,10 @@ begin
   if p_draft = 'Y' then
     savepoint rstrpnt;
   end if;
-  v_count   := 0;
-  v_control := 0;
+  v_count       := 0;
+  v_control     := 0;
+  v_line_number := 0;
+  v_flag        := 0;
   for i_fact_int in c_fact_int_hdr(c_group_id => p_group_id
                                   ,c_status   => p_status)
   loop
@@ -580,19 +585,9 @@ begin
         v_error_text := v_error_text ||'Get_Invoice_id.Error: '||sqlerrm;
         v_invoice_id := -1;
     end;
-    begin
-      select ap_invoice_lines_interface_s.nextval
-      into   v_invoice_line_id
-      from   dual;
-    exception
-      when others then
-        v_error_text := v_error_text ||'Get_Invoice_Line_id.Error: '||sqlerrm;
-        v_invoice_line_id := -1;
-    end;
     if   v_org_id = -1
       or v_accts_pay_code_comb = -1
-      or v_invoice_id = -1
-      or v_invoice_line_id = -1 then
+      or v_invoice_id = -1 then
       v_dummy := fnd_concurrent.set_completion_status('WARNING','Error en los registros. Verifique la salida. Contador: '||v_count);
       begin
         update xx_ap_inv_int xaii
@@ -609,6 +604,159 @@ begin
           v_error_text := v_error_text ||'Update.xx_ap_inv_int.Error: '||sqlerrm;
       end;
     else
+      v_flag := 0;
+      begin
+        insert into ap_invoices_interface
+          (invoice_id
+          ,invoice_num
+          ,invoice_type_lookup_code
+          ,invoice_date
+          ,gl_date
+          ,terms_date
+          ,vendor_num
+          ,vendor_site_code
+          ,invoice_amount
+          ,invoice_currency_code
+          ,terms_name
+          ,description
+          ,source
+          ,group_id
+          ,payment_cross_rate_date
+          ,payment_cross_rate
+          ,payment_currency_code
+          ,pay_group_lookup_code
+          ,accts_pay_code_combination_id
+          ,exclusive_payment_flag
+          ,org_id
+          ,calc_tax_during_import_flag
+          ,add_tax_to_inv_amt_flag
+          ,taxation_country
+          ,legal_entity_id
+          ,operating_unit
+          ,payment_method_code
+          ,exchange_rate_type
+          ,exchange_date
+          ,document_sub_type
+          ,global_attribute_category
+          ,global_attribute1
+          ,global_attribute2
+          ,global_attribute3
+          ,global_attribute4
+          ,global_attribute5
+          ,global_attribute6
+          ,global_attribute7
+          ,global_attribute8
+          ,global_attribute9
+          ,global_attribute10
+          ,global_attribute11
+          ,global_attribute12
+          ,global_attribute13
+          ,global_attribute14
+          ,global_attribute15
+          ,global_attribute16
+          ,global_attribute17
+          ,global_attribute18
+          ,global_attribute19
+          ,global_attribute20
+          ,attribute_category
+          ,attribute1
+          ,attribute2
+          ,attribute3
+          ,attribute4
+          ,attribute5
+          ,attribute6
+          ,attribute7
+          ,attribute8
+          ,attribute9
+          ,attribute10
+          ,attribute11
+          ,attribute12
+          ,attribute13
+          ,attribute14
+          ,attribute15
+          ,creation_date
+          ,created_by
+          ,last_update_date
+          ,last_updated_by
+          ,last_update_login)
+        values
+          (v_invoice_id                              --invoice_id
+          ,i_fact_int.invoice_num                    --invoice_num
+          ,i_fact_int.invoice_type_lookup_code       --invoice_type_lookup_code
+          ,i_fact_int.invoice_date                   --invoice_date
+          ,i_fact_int.gl_date                        --gl_date
+          ,i_fact_int.terms_date                     --terms_date
+          ,i_fact_int.vendor_num                     --vendor_num
+          ,i_fact_int.vendor_site_code               --vendor_site_code
+          ,i_fact_int.invoice_amount                 --invoice_amount
+          ,i_fact_int.invoice_currency_code          --invoice_currency_code
+          ,i_fact_int.terms_name                     --terms_name
+          ,i_fact_int.description                    --description
+          ,i_fact_int.source                         --source
+          ,i_fact_int.group_id                       --group_id
+          ,i_fact_int.payment_cross_rate_date        --payment_cross_rate_date
+          ,i_fact_int.payment_cross_rate             --payment_cross_rate
+          ,i_fact_int.payment_currency_code          --payment_currency_code
+          ,i_fact_int.pay_group_lookup_code          --pay_group_lookup_code
+          ,v_accts_pay_code_comb                     --accts_pay_code_combination_id
+          ,i_fact_int.exclusive_payment_flag         --exclusive_payment_flag
+          ,v_org_id                                  --org_id
+          ,i_fact_int.calc_tax_during_import_flag    --calc_tax_during_import_flag
+          ,i_fact_int.add_tax_to_inv_amt_flag        --add_tax_to_inv_amt_flag
+          ,i_fact_int.taxation_country               --taxation_country
+          ,i_fact_int.legal_entity_id                --legal_entity_id
+          ,i_fact_int.operating_unit                 --operating_unit
+          ,i_fact_int.payment_method_code            --payment_method_code
+          ,p_exchange_rate_type                      --exchange_rate_type
+          ,i_fact_int.invoice_date                   --exchange_date
+          ,i_fact_int.document_sub_type              --document_sub_type
+          ,i_fact_int.global_attribute_category      --global_attribute_category
+          ,i_fact_int.global_attribute1              --global_attribute1
+          ,i_fact_int.global_attribute2              --global_attribute2
+          ,i_fact_int.global_attribute3              --global_attribute3
+          ,i_fact_int.global_attribute4              --global_attribute4
+          ,i_fact_int.global_attribute5              --global_attribute5
+          ,i_fact_int.global_attribute6              --global_attribute6
+          ,i_fact_int.global_attribute7              --global_attribute7
+          ,i_fact_int.global_attribute8              --global_attribute8
+          ,i_fact_int.global_attribute9              --global_attribute9
+          ,i_fact_int.global_attribute10             --global_attribute10
+          ,i_fact_int.global_attribute11             --global_attribute11
+          ,i_fact_int.global_attribute12             --global_attribute12
+          ,i_fact_int.global_attribute13             --global_attribute13
+          ,i_fact_int.global_attribute14             --global_attribute14
+          ,i_fact_int.global_attribute15             --global_attribute15
+          ,i_fact_int.global_attribute16             --global_attribute16
+          ,i_fact_int.global_attribute17             --global_attribute17
+          ,i_fact_int.global_attribute18             --global_attribute18
+          ,i_fact_int.global_attribute19             --global_attribute19
+          ,i_fact_int.global_attribute20             --global_attribute20
+          ,i_fact_int.attribute_category             --attribute_category
+          ,i_fact_int.attribute1                     --attribute1
+          ,i_fact_int.attribute2                     --attribute2
+          ,i_fact_int.attribute3                     --attribute3
+          ,i_fact_int.attribute4                     --attribute4
+          ,i_fact_int.attribute5                     --attribute5
+          ,i_fact_int.attribute6                     --attribute6
+          ,i_fact_int.attribute7                     --attribute7
+          ,i_fact_int.attribute8                     --attribute8
+          ,i_fact_int.attribute9                     --attribute9
+          ,i_fact_int.attribute10                    --attribute10
+          ,i_fact_int.attribute11                    --attribute11
+          ,i_fact_int.attribute12                    --attribute12
+          ,i_fact_int.attribute13                    --attribute13
+          ,i_fact_int.attribute14                    --attribute14
+          ,i_fact_int.attribute15                    --attribute15
+          ,sysdate                                   --creation_date
+          ,to_number(fnd_profile.value('USER_ID'))   --created_by
+          ,sysdate                                   --last_update_date
+          ,to_number(fnd_profile.value('USER_ID'))   --last_updated_by
+          ,to_number(fnd_profile.value('LOGIN_ID')));--last_update_login
+      exception
+        when others then
+          v_control := -1;
+          v_dummy := fnd_concurrent.set_completion_status('WARNING','Error en los registros. Verifique la salida. Contador: '||v_count);
+      end;
       for i_fact_int_lns in c_fact_int_lns(c_group_id         => i_fact_int.group_id
                                           ,c_status           => i_fact_int.status
                                           ,c_vendor_num       => i_fact_int.vendor_num
@@ -617,7 +765,16 @@ begin
       loop
         if v_control = 0 then
           v_dist_code_comb := get_gl_comb_id(p_code_combinations => i_fact_int_lns.dist_code_combination);
-          if v_dist_code_comb = -1 then
+          begin
+            select ap_invoice_lines_interface_s.nextval
+            into   v_invoice_line_id
+            from   dual;
+          exception
+            when others then
+              v_error_text := v_error_text ||'Get_Invoice_Line_id.Error: '||sqlerrm;
+              v_invoice_line_id := -1;
+          end;
+          if v_dist_code_comb = -1 or v_invoice_line_id = -1 then
             v_control := -1;
             v_dummy := fnd_concurrent.set_completion_status('WARNING','Error en los registros. Verifique la salida. Contador: '||v_count);
             update xx_ap_inv_int xaii
@@ -630,153 +787,12 @@ begin
             and    xaii.vendor_site_code = i_fact_int.vendor_site_code
             and    xaii.invoice_num      = i_fact_int.invoice_num;
           else
+            if v_flag = 0 then
+              v_line_number := 0;
+              v_flag := 1;
+            end if;
+            v_line_number := v_line_number + 1;
             begin
-              insert into ap_invoices_interface
-                (invoice_id
-                ,invoice_num
-                ,invoice_type_lookup_code
-                ,invoice_date
-                ,gl_date
-                ,terms_date
-                ,vendor_num
-                ,vendor_site_code
-                ,invoice_amount
-                ,invoice_currency_code
-                ,terms_name
-                ,description
-                ,source
-                ,group_id
-                ,payment_cross_rate_date
-                ,payment_cross_rate
-                ,payment_currency_code
-                ,pay_group_lookup_code
-                ,accts_pay_code_combination_id
-                ,exclusive_payment_flag
-                ,org_id
-                ,calc_tax_during_import_flag
-                ,add_tax_to_inv_amt_flag
-                ,taxation_country
-                ,legal_entity_id
-                ,operating_unit
-                ,payment_method_code
-                ,exchange_rate_type
-                ,exchange_date
-                ,document_sub_type
-                ,global_attribute_category
-                ,global_attribute1
-                ,global_attribute2
-                ,global_attribute3
-                ,global_attribute4
-                ,global_attribute5
-                ,global_attribute6
-                ,global_attribute7
-                ,global_attribute8
-                ,global_attribute9
-                ,global_attribute10
-                ,global_attribute11
-                ,global_attribute12
-                ,global_attribute13
-                ,global_attribute14
-                ,global_attribute15
-                ,global_attribute16
-                ,global_attribute17
-                ,global_attribute18
-                ,global_attribute19
-                ,global_attribute20
-                ,attribute_category
-                ,attribute1
-                ,attribute2
-                ,attribute3
-                ,attribute4
-                ,attribute5
-                ,attribute6
-                ,attribute7
-                ,attribute8
-                ,attribute9
-                ,attribute10
-                ,attribute11
-                ,attribute12
-                ,attribute13
-                ,attribute14
-                ,attribute15
-                ,creation_date
-                ,created_by
-                ,last_update_date
-                ,last_updated_by
-                ,last_update_login)
-              values
-                (v_invoice_id                              --invoice_id
-                ,i_fact_int.invoice_num                    --invoice_num
-                ,i_fact_int.invoice_type_lookup_code       --invoice_type_lookup_code
-                ,i_fact_int.invoice_date                   --invoice_date
-                ,i_fact_int.gl_date                        --gl_date
-                ,i_fact_int.terms_date                     --terms_date
-                ,i_fact_int.vendor_num                     --vendor_num
-                ,i_fact_int.vendor_site_code               --vendor_site_code
-                ,i_fact_int.invoice_amount                 --invoice_amount
-                ,i_fact_int.invoice_currency_code          --invoice_currency_code
-                ,i_fact_int.terms_name                     --terms_name
-                ,i_fact_int.description                    --description
-                ,i_fact_int.source                         --source
-                ,i_fact_int.group_id                       --group_id
-                ,i_fact_int.payment_cross_rate_date        --payment_cross_rate_date
-                ,i_fact_int.payment_cross_rate             --payment_cross_rate
-                ,i_fact_int.payment_currency_code          --payment_currency_code
-                ,i_fact_int.pay_group_lookup_code          --pay_group_lookup_code
-                ,v_accts_pay_code_comb                     --accts_pay_code_combination_id
-                ,i_fact_int.exclusive_payment_flag         --exclusive_payment_flag
-                ,v_org_id                                  --org_id
-                ,i_fact_int.calc_tax_during_import_flag    --calc_tax_during_import_flag
-                ,i_fact_int.add_tax_to_inv_amt_flag        --add_tax_to_inv_amt_flag
-                ,i_fact_int.taxation_country               --taxation_country
-                ,i_fact_int.legal_entity_id                --legal_entity_id
-                ,i_fact_int.operating_unit                 --operating_unit
-                ,i_fact_int.payment_method_code            --payment_method_code
-                ,p_exchange_rate_type                      --exchange_rate_type
-                ,i_fact_int.invoice_date                   --exchange_date
-                ,i_fact_int.document_sub_type              --document_sub_type
-                ,i_fact_int.global_attribute_category      --global_attribute_category
-                ,i_fact_int.global_attribute1              --global_attribute1
-                ,i_fact_int.global_attribute2              --global_attribute2
-                ,i_fact_int.global_attribute3              --global_attribute3
-                ,i_fact_int.global_attribute4              --global_attribute4
-                ,i_fact_int.global_attribute5              --global_attribute5
-                ,i_fact_int.global_attribute6              --global_attribute6
-                ,i_fact_int.global_attribute7              --global_attribute7
-                ,i_fact_int.global_attribute8              --global_attribute8
-                ,i_fact_int.global_attribute9              --global_attribute9
-                ,i_fact_int.global_attribute10             --global_attribute10
-                ,i_fact_int.global_attribute11             --global_attribute11
-                ,i_fact_int.global_attribute12             --global_attribute12
-                ,i_fact_int.global_attribute13             --global_attribute13
-                ,i_fact_int.global_attribute14             --global_attribute14
-                ,i_fact_int.global_attribute15             --global_attribute15
-                ,i_fact_int.global_attribute16             --global_attribute16
-                ,i_fact_int.global_attribute17             --global_attribute17
-                ,i_fact_int.global_attribute18             --global_attribute18
-                ,i_fact_int.global_attribute19             --global_attribute19
-                ,i_fact_int.global_attribute20             --global_attribute20
-                ,i_fact_int.attribute_category             --attribute_category
-                ,i_fact_int.attribute1                     --attribute1
-                ,i_fact_int.attribute2                     --attribute2
-                ,i_fact_int.attribute3                     --attribute3
-                ,i_fact_int.attribute4                     --attribute4
-                ,i_fact_int.attribute5                     --attribute5
-                ,i_fact_int.attribute6                     --attribute6
-                ,i_fact_int.attribute7                     --attribute7
-                ,i_fact_int.attribute8                     --attribute8
-                ,i_fact_int.attribute9                     --attribute9
-                ,i_fact_int.attribute10                    --attribute10
-                ,i_fact_int.attribute11                    --attribute11
-                ,i_fact_int.attribute12                    --attribute12
-                ,i_fact_int.attribute13                    --attribute13
-                ,i_fact_int.attribute14                    --attribute14
-                ,i_fact_int.attribute15                    --attribute15
-                ,sysdate                                   --creation_date
-                ,to_number(fnd_profile.value('USER_ID'))   --created_by
-                ,sysdate                                   --last_update_date
-                ,to_number(fnd_profile.value('USER_ID'))   --last_updated_by
-                ,to_number(fnd_profile.value('LOGIN_ID')));--last_update_login
               insert into ap_invoice_lines_interface
                 (invoice_id
                 ,invoice_line_id
@@ -832,7 +848,8 @@ begin
               values
                 (v_invoice_id                               --invoice_id
                 ,v_invoice_line_id                          --invoice_line_id
-                ,i_fact_int_lns.line_number                 --line_number
+                --,i_fact_int_lns.line_number                 --line_number
+                ,v_line_number                              --line_number
                 ,i_fact_int_lns.line_type_lookup_code       --line_type_lookup_code
                 ,i_fact_int_lns.amount                      --amount
                 ,v_dist_code_comb                           --dist_code_combination_id
@@ -881,6 +898,22 @@ begin
                 ,sysdate                                    --last_update_date
                 ,to_number(fnd_profile.value('USER_ID'))    --last_updated_by
                 ,to_number(fnd_profile.value('LOGIN_ID'))); --last_update_login
+              update xx_ap_inv_int xaii
+              set    xaii.status                        = 'PROCESSED'
+                    ,xaii.error_messages                = null
+                    ,xaii.org_id                        = v_org_id
+                    ,xaii.invoice_id                    = v_invoice_id
+                    ,xaii.invoice_line_id               = v_invoice_line_id
+                    ,xaii.accts_pay_code_combination_id = v_accts_pay_code_comb
+                    ,xaii.dist_code_combination_id      = v_dist_code_comb
+                    ,xaii.last_update_date              = sysdate
+                    ,xaii.last_update_login             = to_number(fnd_profile.value('LOGIN_ID'))
+                    ,xaii.last_updated_by               = to_number(fnd_profile.value('USER_ID'))
+              where  1=1
+              and    xaii.inv_int_id = i_fact_int_lns.inv_int_id;
+              print_trace(p_debug=>p_ext_debug,p_str=>'--  print_lines(+)');
+              print_lines(p_inv_int_id=>i_fact_int_lns.inv_int_id,p_debug=>p_ext_debug,p_chardelim=>p_char_delim);
+              print_trace(p_debug=>p_ext_debug,p_str=>'--  print_lines(-)');
               begin
                 select percentage_rate
                       ,tax_regime_code
@@ -916,6 +949,7 @@ begin
                     v_error_text := v_error_text ||'Get_Invoice_Line_id.Error: '||sqlerrm;
                     v_invoice_line_id := -1;
                 end;
+                v_line_number := v_line_number + 1;
                 insert into ap_invoice_lines_interface
                   (invoice_id
                   ,invoice_line_id
@@ -938,7 +972,8 @@ begin
                 values
                   (v_invoice_id                              --invoice_id
                   ,v_invoice_line_id                         --invoice_line_id
-                  ,i_fact_int_lns.line_number+1              --line_number del ITEM + 1
+                  --,i_fact_int_lns.line_number+1              --line_number del ITEM + 1
+                  ,v_line_number                             --line_number
                   ,'TAX'                                     --line_type_lookup_code
                   ,vc_tax_regime_code                        --tax_regime_code
                   ,vc_tax                                    --tax
@@ -955,22 +990,6 @@ begin
                   ,to_number(fnd_profile.value('USER_ID'))   --last_updated_by
                   ,to_number(fnd_profile.value('LOGIN_ID')));--last_update_login
               end if;
-              update xx_ap_inv_int xaii
-              set    xaii.status                        = 'PROCESSED'
-                    ,xaii.error_messages                = null
-                    ,xaii.org_id                        = v_org_id
-                    ,xaii.invoice_id                    = v_invoice_id
-                    ,xaii.invoice_line_id               = v_invoice_line_id
-                    ,xaii.accts_pay_code_combination_id = v_accts_pay_code_comb
-                    ,xaii.dist_code_combination_id      = v_dist_code_comb
-                    ,xaii.last_update_date              = sysdate
-                    ,xaii.last_update_login             = to_number(fnd_profile.value('LOGIN_ID'))
-                    ,xaii.last_updated_by               = to_number(fnd_profile.value('USER_ID'))
-              where  1=1
-              and    xaii.inv_int_id = i_fact_int_lns.inv_int_id;
-              print_trace(p_debug=>p_ext_debug,p_str=>'--  print_lines(+)');
-              print_lines(p_inv_int_id=>i_fact_int_lns.inv_int_id,p_debug=>p_ext_debug,p_chardelim=>p_char_delim);
-              print_trace(p_debug=>p_ext_debug,p_str=>'--  print_lines(-)');
             exception
               when others then
                 v_error_text := v_error_text ||'INS_UPD_ap_invoices_interface_ap_invoice_lines_interface_xx_ap_inv_int.Error: '||sqlerrm;

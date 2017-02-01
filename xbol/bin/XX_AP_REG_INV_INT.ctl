@@ -11,6 +11,7 @@ trailing nullcols
   ,vendor_site_code            char
   ,group_id                    char
   ,invoice_type_lookup_code    char
+  ,document_sub_type           char
   ,invoice_num                 char
   ,description                 char
   ,invoice_date                date 'DD/MM/YYYY'
@@ -36,7 +37,6 @@ trailing nullcols
   ,tax_classification_code     char
   ,dist_code_combination       char
   ,ship_to_location            char
-  ,document_sub_type           char
   ,global_attribute_category   char
   ,global_attribute1           char
   ,global_attribute2           char
