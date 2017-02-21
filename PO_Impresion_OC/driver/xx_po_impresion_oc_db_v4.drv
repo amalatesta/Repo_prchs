@@ -1,0 +1,43 @@
+# +=======================================================================+
+# |    Copyright (c) 2006 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    po_impresion_oc_db_v4.drv                                          |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script de Drivers                                                  |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    20-FEB-2017 1.0      Generic          Created                      |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch po_impresion_oc_db_v4
+
+  begin patch_info 
+     release  1
+     server   DB
+     language US
+  end patch_info 
+
+  copy xbol admin/PO/PO_Impresion_OC/driver xx_po_impresion_oc_db_v4.drv
+  copy xbol admin/PO/PO_Impresion_OC/driver buildpatch_db_v4.sh
+  copy xbol admin/PO/PO_Impresion_OC/import xxdownload_db_v4.sh
+  copy xbol admin/PO/PO_Impresion_OC/import XXPOCSTD_es_REG.rtf
+  copy xbol admin/PO/PO_Impresion_OC/import XX_XDO_XXPOCSTD_10.ldt
+  copy xbol reports/US XXPOCSTD.rdf
+
+  begin connection apps
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $XDO_TOP/patch/115/import/xdotmpl.lct $XBOL_TOP/admin/PO/PO_Impresion_OC/import/XX_XDO_XXPOCSTD_10.ldt - CUSTOM_MODE=FORCE
+
+    java oracle.apps.xdo.oa.util.XDOLoader UPLOAD -DB_USERNAME APPS -DB_PASSWORD &appspwd -JDBC_CONNECTION &db_host:&db_port:&db_name -LOB_TYPE TEMPLATE -APPS_SHORT_NAME XBOL -LOB_CODE XXPOCSTD -LANGUAGE en -XDO_FILE_TYPE RTF -NLS_LANG US -FILE_NAME $XBOL_TOP/admin/PO/PO_Impresion_OC/import/XXPOCSTD_es_REG.rtf -CUSTOM_MODE FORCE
+
+  end connection apps
+
+end patch po_impresion_oc_db_v4
