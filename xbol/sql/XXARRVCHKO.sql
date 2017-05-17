@@ -168,6 +168,7 @@ begin
   debug(v_indent||v_calling_sequence||'. Ancho de mensajes: '||p_message_length,'1');
   debug(v_indent||v_calling_sequence||'. Modo de Debug: '||p_debug_mode,'1');
   debug(v_indent||v_calling_sequence||'. Flag de Debug: '||p_debug_flag,'1');
+  debug(v_indent||v_calling_sequence||'. Delimitador de caracteres: '||p_char_delim,'1');
   debug(v_indent||v_calling_sequence||'. Inicio de proceso','1');
   debug(v_indent||v_calling_sequence||'. Fin de proceso','1');
 exception
