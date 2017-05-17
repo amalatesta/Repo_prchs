@@ -40,9 +40,10 @@ declare
   -- Parametros de programa.
   -- ---------------------------------------------------------------------------
   p_calling_sequence varchar2(32767) := '&&1';
-  p_message_length   number          := '&&1';
-  p_debug_mode       varchar2(32767) := '&&1';
-  p_debug_flag       varchar2(32767) := '&&1';
+  p_message_length   number          := '&&2';
+  p_debug_mode       varchar2(32767) := '&&3';
+  p_debug_flag       varchar2(32767) := '&&4';
+  p_char_delim       varchar2(32767) := '&&5';
   -- ---------------------------------------------------------------------------
   -- Definicion de variables.
   -- ---------------------------------------------------------------------------
