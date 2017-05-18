@@ -52,21 +52,21 @@ echo '====================================================================='
 
 export NLS_LANG="LATIN AMERICAN SPANISH_AMERICA.WE8ISO8859P1"
 
-echo 'ESA - Bajando Programa Concurrente XX_AR_REV_CHKOUT'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_esa_xx_ar_rev_chkout_v1_01.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XX_AR_REV_CHKOUT"
+echo 'ESA - Bajando Programa Concurrente XXARRVCHKO'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_esa_xx_ar_rev_chkout_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARRVCHKO"
 
 export NLS_LANG="BRAZILIAN PORTUGUESE_BRAZIL.WE8ISO8859P1"
 
-echo 'PTB - Bajando Programa Concurrente XX_AR_REV_CHKOUT'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_ptb_xx_ar_rev_chkout_db_v1_01.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XX_AR_REV_CHKOUT"
+echo 'PTB - Bajando Programa Concurrente XXARRVCHKO'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_ptb_xx_ar_rev_chkout_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARRVCHKO"
 
 export NLS_LANG="AMERICAN_AMERICA.US7ASCII"
 
-echo 'US - Bajando Programa Concurrente XX_AR_REV_CHKOUT'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_us_xx_ar_rev_chkout_db_v1_01.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XX_AR_REV_CHKOUT"
+echo 'US - Bajando Programa Concurrente XXARRVCHKO'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_us_xx_ar_rev_chkout_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARRVCHKO"
 
-echo 'US - Bajando Grupo de Solicitudes XX_AR_GERENTE para la unidad XX_AR_REV_CHKOUT'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpreqg.lct rgu_us_xx_ar_rev_chkout_db_v1_01.ldt REQUEST_GROUP REQUEST_GROUP_NAME="XX_AR_GERENTE" APPLICATION_SHORT_NAME="XBOL" REQUEST_GROUP_UNIT UNIT_APP="XBOL" UNIT_NAME="XX_AR_REV_CHKOUT"
+echo 'US - Bajando Grupo de Solicitudes XX_AR_GERENTE para la unidad XXARRVCHKO'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpreqg.lct rgu_us_xx_ar_rev_chkout_db_v1.ldt REQUEST_GROUP REQUEST_GROUP_NAME="XX_AR_GERENTE" APPLICATION_SHORT_NAME="XBOL" REQUEST_GROUP_UNIT UNIT_APP="XBOL" UNIT_NAME="XXARRVCHKO"
 
 echo '====================================================================='
 echo 'End Objects Download.'

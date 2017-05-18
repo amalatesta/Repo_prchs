@@ -10,7 +10,7 @@ REM | DESCRIPTION                                                           |
 REM |     Script de desinstalacion de customizacion.                        |
 REM |                                                                       |
 REM | HISTORY                                                               |
-REM |     17-MAY-2017 - 1.0 - AMalatesta - DSP - Created                    |
+REM |    18-MAY-2017 - 1.0 - AMalatesta - DSP - Created                     |
 REM |                                                                       |
 REM +=======================================================================|
 
@@ -37,7 +37,7 @@ accept p_exe prompt 'Elimina Ejecutables (Default N): '
 set feed off
 set verify off
 
-prompt Eliminando concurrente XXAPREGINV
+prompt Eliminando concurrente XXARRVCHKO
 set serveroutput on size 1000000
 declare
   cursor del is
@@ -51,7 +51,7 @@ declare
     and    fa.application_id           = fcp.application_id
     and    fcp.concurrent_program_id   = fcpt.concurrent_program_id
     and    fcpt.language               = 'ESA'
-    and    fcp.concurrent_program_name = 'XXAPREGINV'
+    and    fcp.concurrent_program_name = 'XXARRVCHKO'
     and    upper(nvl('&p_cnc','N'))    = 'Y'
     order by fcp.concurrent_program_name;
 begin
@@ -70,40 +70,7 @@ begin
   end loop;
 end;
 /
-prompt Eliminando concurrente XX_AP_REG_INV_INT
-set serveroutput on size 1000000
-declare
-  cursor del is
-    select fa.application_short_name
-          ,fcp.concurrent_program_name
-          ,fcpt.user_concurrent_program_name
-    from   fnd_concurrent_programs_tl fcpt
-          ,fnd_concurrent_programs    fcp
-          ,fnd_application            fa
-    where  1 = 1
-    and    fa.application_id           = fcp.application_id
-    and    fcp.concurrent_program_id   = fcpt.concurrent_program_id
-    and    fcpt.language               = 'ESA'
-    and    fcp.concurrent_program_name = 'XX_AP_REG_INV_INT'
-    and    upper(nvl('&p_cnc','N'))    = 'Y'
-    order by fcp.concurrent_program_name;
-begin
-  for cd in del loop
-    dbms_output.put_line('Eliminando abreviatura de concurrente: ' || cd.concurrent_program_name);
-    dbms_output.put_line('Con nombre de programa: ' || cd.user_concurrent_program_name);
-    begin
-      fnd_program.delete_program
-         (program_short_name => cd.concurrent_program_name
-         ,application        => cd.application_short_name
-         );
-    exception
-      when others then
-        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
-    end;
-  end loop;
-end;
-/
-prompt Eliminando ejecutable XXAPREGINV
+prompt Eliminando ejecutable XXARRVCHKO
 set serveroutput on size 1000000
 declare
   cursor del is
@@ -117,40 +84,7 @@ declare
     and    fa.application_id  = fe.application_id
     and    fe.executable_id   = fet.executable_id
     and    fet.language       = 'ESA'
-    and    fe.executable_name = 'XXAPREGINV'
-    and    upper(nvl('&p_exe','N')) = 'Y'
-    order by fe.executable_name;
-begin
-  for cd in del loop
-    dbms_output.put_line('Eliminando abreviatura de ejecutable: ' || cd.executable_name);
-    dbms_output.put_line('Con nombre de programa: ' || cd.user_executable_name);
-    begin
-      fnd_program.delete_executable
-         (executable_short_name => cd.executable_name
-         ,application           => cd.application_short_name
-         );
-    exception
-      when others then
-        raise_application_error(-20000,nvl(fnd_program.message,sqlerrm));
-    end;
-  end loop;
-end;
-/
-prompt Eliminando ejecutable XX_AP_REG_INV_INT
-set serveroutput on size 1000000
-declare
-  cursor del is
-    select fa.application_short_name
-          ,fe.executable_name
-          ,fet.user_executable_name
-    from   fnd_executables_tl fet
-          ,fnd_executables    fe
-          ,fnd_application    fa
-    where  1 = 1
-    and    fa.application_id  = fe.application_id
-    and    fe.executable_id   = fet.executable_id
-    and    fet.language       = 'ESA'
-    and    fe.executable_name = 'XX_AP_REG_INV_INT'
+    and    fe.executable_name = 'XXARRVCHKO'
     and    upper(nvl('&p_exe','N')) = 'Y'
     order by fe.executable_name;
 begin

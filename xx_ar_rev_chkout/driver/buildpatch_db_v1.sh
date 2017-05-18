@@ -19,7 +19,7 @@ rm -rf $XBOL_TOP/patches/xx_ar_rev_chkout_db_v1.tar
 
 # Creo el patch con el driver
 echo 'Creando el patch con el driver'
-$XBOL_TOP/bin/xxbuildpatch xx_ar_rev_chkout_db_v1.drv xx_ar_rev_chkout
+$XBOL_TOP/bin/xxbuildpatch xx_ar_rev_chkout_db_v1.drv xx_ar_rev_chkout_db_v1
 
 sleep 1
 

@@ -33,25 +33,25 @@ begin patch xx_ar_rev_chkout_db_v1
 
   copy xbol /admin/AR/xx_ar_rev_chkout/import xxdownload_db_v1.sh
 
-  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_us_xx_ar_rev_chkout_db_v1_01.ldt
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_us_xx_ar_rev_chkout_db_v1.ldt
 
-  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_esa_xx_ar_rev_chkout_db_v1_01.ldt
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_esa_xx_ar_rev_chkout_db_v1.ldt
 
-  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_ptb_xx_ar_rev_chkout_db_v1_01.ldt
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_ptb_xx_ar_rev_chkout_db_v1.ldt
 
-  copy xbol /admin/AR/xx_ar_rev_chkout/import rgu_xx_ar_rev_chkout_db_v1_01.ldt
+  copy xbol /admin/AR/xx_ar_rev_chkout/import rgu_us_xx_ar_rev_chkout_db_v1.ldt
 
   copy xbol /sql XXARRVCHKO.sql
 
   begin connection apps
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_us_xx_ar_rev_chkout_db_v1_01.ldt - CUSTOM_MODE=FORCE
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_us_xx_ar_rev_chkout_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_esa_xx_ar_rev_chkout_db_v1_01.ldt - CUSTOM_MODE=FORCE
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_esa_xx_ar_rev_chkout_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_ptb_xx_ar_rev_chkout_db_v1_01.ldt - CUSTOM_MODE=FORCE
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_ptb_xx_ar_rev_chkout_db_v1.ldt - CUSTOM_MODE=FORCE
 
-    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/rgu_us_xx_ar_rev_chkout_db_v1_01.ldt - CUSTOM_MODE=FORCE
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/rgu_us_xx_ar_rev_chkout_db_v1.ldt - CUSTOM_MODE=FORCE
 
   end connection apps
 
