@@ -1,40 +1,39 @@
-REM +=======================================================================+
-REM |    Copyright (c) 1997 Oracle Argentina, Buenos Aires                  |
-REM |                         All rights reserved.                          |
-REM +=======================================================================+
-REM | FILENAME                                                              |
-REM |    XX_AR_FE_PE_SENDS_PK.sql                                           |
-REM |                                                                       |
-REM | DESCRIPTION                                                           |
-REM |    Crea el paquete XX_AR_FE_PE_SENDS_PK                               |
-REM |    que contiene funciones y procedimientos para el proceso de         |
-REM |    envio de factura electronica de Peru.                              |
-REM |                                                                       |
-REM | LANGUAGE                                                              |
-REM |    PL/SQL                                                             |
-REM |                                                                       |
-REM | PRODUCT                                                               |
-REM |    Oracle Financials                                                  |
-REM |                                                                       |
-REM | HISTORY                                                               |
-REM |    23-ENE-17  abornanc         Created                                |
-REM |                                                                       |
-REM | NOTES                                                                 |
-REM |                                                                       |
-REM +=======================================================================+
+rem +=======================================================================+
+rem |    copyright (c) 2017 despegar.com argentina, buenos aires            |
+rem |                         all rights reserved.                          |
+rem +=======================================================================+
+rem | filename                                                              |
+rem |    XX_AR_TRX_PE_SENDSS_PK.sql                                         |
+rem |                                                                       |
+rem | description                                                           |
+rem |    crea el paquete xx_ar_trx_pe_sends_pk                              |
+rem |    que contiene funciones y procedimientos para el proceso de         |
+rem |    impresion de factura de peru.                                      |
+rem |    basado en el paquete xx_ar_fe_pe_sends_pk.                         |
+rem |                                                                       |
+rem | language                                                              |
+rem |    pl/sql                                                             |
+rem |                                                                       |
+rem | product                                                               |
+rem |    Oracle Financials                                                  |
+rem |                                                                       |
+rem | history                                                               |
+rem |    21-MAY-17  DSP-AMalatesta         Created                          |
+rem |                                                                       |
+rem | notes                                                                 |
+rem |                                                                       |
+rem +=======================================================================+
 
-spool xx_ar_fe_pe_sendss_pk.log
+spool xx_ar_trx_pe_sendss_pk.log
 
 PROMPT =====================================================================
-PROMPT Script XX_AR_FE_PE_SENDS_PK.sql
+PROMPT Script XX_AR_TRX_PE_SENDSS_PK.sql
 PROMPT =====================================================================
 
 PROMPT Creando paquete XX_AR_FE_PE_SENDS_PK
 
-create or replace package xx_ar_fe_pe_sends_pk authid current_user as
-
-/* $Id: XX_AR_FE_PE_SENDSS_PK.sql 7995 2017-04-11 21:54:27Z augusto.bornancin@oracle.com $ */
-
+create or replace package xx_ar_trx_pe_sends_pk authid current_user as
+/* $Id: XX_AR_TRX_PE_SENDSS_PK.sql 1 2017-05-21 20:46:37 amalatesta@despegar.com $ */
 -- -----------------------------------------------------------------------------
 -- Variables Globales.
 -- -----------------------------------------------------------------------------
@@ -44,7 +43,6 @@ create or replace package xx_ar_fe_pe_sends_pk authid current_user as
   g_message_length number(15);
   -- Indentacion.
   g_indent      varchar2(2000) := '';
-
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -69,9 +67,8 @@ function get_inventory_item_desc(p_organization_id   in  number
                                 ,p_taxpayer_id       in  varchar2
                                 ,p_taxpayer_doc_type in  varchar2
                                 ,p_print_item_line   in  varchar2
-                                ,p_line_description  in  varchar2
-                                ) return varchar2;
-
+                                ,p_line_description  in  varchar2)
+return varchar2;
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -86,9 +83,8 @@ function get_inventory_item_desc(p_organization_id   in  number
 |                                                                          |
 +=========================================================================*/
 function item_imprime_prestador(p_organization_id   in  number
-                      ,p_inventory_item_id in  number
-                       ) return varchar2;
-
+                               ,p_inventory_item_id in  number)
+return varchar2;
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -107,9 +103,8 @@ function item_imprime_prestador(p_organization_id   in  number
 function get_receipt_method(p_receipt_method_id        in  number
                            ,p_cust_trx_type            in  varchar2
                            ,p_previous_customer_trx_id in  number
-                           ,p_transaction_type         in  varchar2
-                           ) return varchar2;
-
+                           ,p_transaction_type         in  varchar2)
+return varchar2;
 /*=========================================================================+
 |                                                                          |
 | Private Function                                                         |
@@ -124,10 +119,9 @@ function get_receipt_method(p_receipt_method_id        in  number
 |                                                                          |
 +=========================================================================*/
 function get_supplier_name(p_taxpayer_id       in varchar2
-                         , p_taxpayer_doc_type in varchar2
-                         , p_org_id            in number
-                         ) return varchar2;
-
+                          ,p_taxpayer_doc_type in varchar2
+                          ,p_org_id            in number)
+return varchar2;
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -150,9 +144,8 @@ function get_desc_tercero(p_organization_id    in number
                          ,p_taxpayer_id        in varchar2
                          ,p_taxpayer_doc_type  in varchar2
                          ,p_org_id             in number
-                         ,p_prestador          in varchar2) return varchar2;
-
-
+                         ,p_prestador          in varchar2)
+return varchar2;
 /*====================================================================================+
 |                                                                                     |
 | Public Procedure                                                                    |
@@ -175,7 +168,6 @@ procedure  get_datos_trx (p_customer_trx_id             in number
                          ,x_trx_date                   out date
                          ,x_electr_doc_type            out varchar2
                          ,x_procesado_fc_electronica   out varchar2);
-
 /*=========================================================================+
 |                                                                          |
 | Public Procedure                                                         |
@@ -196,11 +188,11 @@ procedure  get_datos_trx (p_customer_trx_id             in number
 |    p_date_from       IN  DATE     Fecha desde.                           |
 |    p_date_to         IN  DATE     Fecha hasta.                           |
 |    p_customer_id     IN  NUMBER   Cliente.                               |
-|    p_territory_code  IN  VARCHAR2 Pa�s.                                  |
+|    p_territory_code  IN  VARCHAR2 Pais.                                  |
 |                                                                          |
 +=========================================================================*/
 procedure generate_files(errbuf            out varchar2
-				   ,retcode           out number
+                        ,retcode           out number
                         ,p_draft_mode      in  varchar2
                         ,p_debug_flag      in  varchar2
                         ,p_batch_source    in  varchar2
@@ -211,10 +203,8 @@ procedure generate_files(errbuf            out varchar2
                         ,p_date_to         in  varchar2
                         ,p_customer_id     in  number
                         ,p_territory_code  in  varchar2
-                        ,p_process_errors  in  varchar2
-                        );
-
-end xx_ar_fe_pe_sends_pk;
+                        ,p_process_errors  in  varchar2);
+end xx_ar_trx_pe_sends_pk;
 /
 
 show errors

@@ -27,6 +27,7 @@ begin patch xx_ar_trx_pe_db_v1
 
    copy xbol admin/AR/xx_ar_trx_pe/driver buildpatch_db_v1.sh
    copy xbol admin/AR/xx_ar_trx_pe/driver xx_ar_trx_pe_db_v1.drv
+   copy xbol admin/AR/xx_ar_trx_pe/driver xxuninstall_db_v1.sql
 
    copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
    copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
