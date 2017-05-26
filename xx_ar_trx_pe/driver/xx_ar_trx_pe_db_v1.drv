@@ -1,0 +1,50 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_ar_trx_pe_db_v1.drv                                             |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script de Drivers                                                  |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    24-MAY-2017 1.0      Generic          Created                      |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_ar_trx_pe_db_v1
+
+   begin patch_info 
+      release  1
+      server   DB
+      language ESA
+   end patch_info
+
+   copy xbol admin/AR/xx_ar_trx_pe/driver buildpatch_db_v1.sh
+   copy xbol admin/AR/xx_ar_trx_pe/driver xx_ar_trx_pe_db_v1.drv
+
+   copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
+   copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
+   copy xbol admin/AR/xx_ar_trx_pe/sql xxdir_XX_AR_TRX_PE_OUT_PRC_DIR.sql
+
+   copy xbol admin/AR/xx_ar_trx_pe/import xxdownload.sh
+
+   begin connection apps
+
+      sql  xbol admin/AR/xx_ar_trx_pe/sql xxdir_XX_AR_TRX_PE_OUT_PRC_DIR.sql
+
+   end connection apps
+
+   begin connection pkg_user virtual
+
+      sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
+      sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
+
+   end connection pkg_user 
+
+end patch xx_ar_trx_pe_db_v1
