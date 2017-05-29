@@ -1074,6 +1074,41 @@ end get_inventory_item_desc;
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
+|    Item_Imprime_Prestador                                                |
+|                                                                          |
+| Description                                                              |
+|    Funcion que indica si el articulo debe imprimir prestador             |
+|                                                                          |
+| Parameters                                                               |
+|    p_organization_id   IN  NUMBER  Id Orgnization de Inventario.         |
+|    p_inventory_item_id IN NUMBER   Id de Articulo de Inventario.         |
+|                                                                          |
++=========================================================================*/
+function item_imprime_prestador(p_organization_id   in  number
+                               ,p_inventory_item_id in  number)
+return varchar2
+is
+  v_item_imprime_prestador varchar2(1) := 'N';
+begin
+  select 'Y'
+  into v_item_imprime_prestador
+  from mtl_category_sets       mcs
+     , mtl_item_categories     mic
+     , mtl_categories          mc
+  where mcs.category_set_name  = 'XX_ITEM_DESPEGAR'
+    and mcs.category_set_id    = mic.category_set_id
+    and mc.category_id         = mic.category_id
+    and mc.segment1 in ('Hotel')
+    and mic.organization_id    = p_organization_id
+    and mic.inventory_item_id  = p_inventory_item_id;
+   return v_item_imprime_prestador;
+exception
+  when others then
+    return 'N';
+end item_imprime_prestador;
+/*=========================================================================+
+|                                                                          |
+| Public Function                                                          |
 |    Get_Receipt_Method                                                    |
 |                                                                          |
 | Description                                                              |
@@ -1165,41 +1200,6 @@ exception
   when others then
     return 'NO';
 end set_detraction_code;
-/*=========================================================================+
-|                                                                          |
-| Public Function                                                          |
-|    Item_Imprime_Prestador                                                |
-|                                                                          |
-| Description                                                              |
-|    Funcion que indica si el articulo debe imprimir prestador             |
-|                                                                          |
-| Parameters                                                               |
-|    p_organization_id   IN  NUMBER  Id Orgnization de Inventario.         |
-|    p_inventory_item_id IN NUMBER   Id de Articulo de Inventario.         |
-|                                                                          |
-+=========================================================================*/
-function item_imprime_prestador(p_organization_id   in  number
-                               ,p_inventory_item_id in  number)
-return varchar2
-is
-  v_item_imprime_prestador varchar2(1) := 'N';
-begin
-  select 'Y'
-  into v_item_imprime_prestador
-  from mtl_category_sets       mcs
-     , mtl_item_categories     mic
-     , mtl_categories          mc
-  where mcs.category_set_name  = 'XX_ITEM_DESPEGAR'
-    and mcs.category_set_id    = mic.category_set_id
-    and mc.category_id         = mic.category_id
-    and mc.segment1 in ('Hotel')
-    and mic.organization_id    = p_organization_id
-    and mic.inventory_item_id  = p_inventory_item_id;
-   return v_item_imprime_prestador;
-exception
-  when others then
-    return 'N';
-end item_imprime_prestador;
 /*=========================================================================+
 |                                                                          |
 | Private Function                                                         |
@@ -2639,9 +2639,11 @@ begin
                     , null                                  -- CAE
                     , null                                  -- FECHA_CAE
                     , v_trxs_tbl(i).output_file             -- FILE_NAME
-                    , decode(v_trxs_tbl(i).status,
-                          'ERROR', 'PROCESSING_ERROR_ORACLE'
-                        , 'NEW')                            -- STATUS
+                    , decode(v_trxs_tbl(i).status
+                          ,'ERROR','PROCESSING_ERROR_ORACLE'
+                    --    , 'NEW')                          -- STATUS -- NO PARA FACT ELECTRONICA
+                          ,'WORK_IN_PROGRESS')              -- STATUS
+                    --      ,'PICKED_OK_ORACLE')              -- STATUS -- Validar el estado que requiere OAS
                     , v_trxs_tbl(i).error_code              -- ERROR_CODE
                     , v_trxs_tbl(i).error_messages          -- ERROR_MESSAGES
                     , fnd_global.user_id                    -- CREATED_BY
@@ -2667,7 +2669,7 @@ begin
                     , v_trxs_tbl(i).legal_entity_identifier -- ATTRIBUTE2
                     , v_trxs_tbl(i).doc_sequence_value||
                       lpad(v_trxs_tbl(i).trx_number, 13 - length(v_trxs_tbl(i).doc_sequence_value), '0') -- ATTRIBUTE3
-                    , null                                  -- ATTRIBUTE4
+                    , 'TKT_FLG'                             -- ATTRIBUTE4 --Agregado para tickets
                     , null                                  -- ATTRIBUTE5
                     , null                                  -- ATTRIBUTE6
                     , null                                  -- ATTRIBUTE7
@@ -2697,9 +2699,11 @@ begin
                     , cae = null
                     , fecha_cae = null
                     , file_name = v_trxs_tbl(i).output_file
-                    , status = decode(v_trxs_tbl(i).status,
-                          'ERROR', 'PROCESSING_ERROR_ORACLE'
-                        , 'NEW')
+                    , status = decode(v_trxs_tbl(i).status
+                          ,'ERROR', 'PROCESSING_ERROR_ORACLE'
+                    --    , 'NEW')                          -- STATUS -- NO PARA FACT ELECTRONICA
+                          ,'WORK_IN_PROGRESS')              -- STATUS
+                    --      ,'PICKED_OK_ORACLE')            -- STATUS -- Validar el estado que requiere OAS
                     , error_code = v_trxs_tbl(i).error_code
                     , error_messages = v_trxs_tbl(i).error_messages
                     , last_updated_by = fnd_global.user_id
@@ -2722,7 +2726,7 @@ begin
                     , attribute1 = v_trxs_tbl(i).electr_doc_type
                     , attribute2 = v_trxs_tbl(i).legal_entity_identifier
                     , attribute3 = v_trxs_tbl(i).doc_sequence_value||lpad(v_trxs_tbl(i).trx_number, 13 - length(v_trxs_tbl(i).doc_sequence_value), '0')
-                    , attribute4 = null
+                    , attribute4 = 'TKT_FLG'   -- ATTRIBUTE4 --Agregado para tickets
                     , attribute5 = null
                     , attribute6 = null
                     , attribute7 = null
@@ -2743,6 +2747,57 @@ begin
                 where v_trxs_tbl(i).customer_trx_id = customer_trx_id;
             end;
         end loop;
+        if upper(nvl(p_draft_mode,'N')) = 'N' then
+            debug(g_indent              ||
+                  v_calling_sequence    ||
+                  '. Realizando commit'
+                 ,'1'
+                 );
+            commit;
+        else
+            debug(g_indent                ||
+                  v_calling_sequence      ||
+                  '. Realizando rollback'
+                  ,'1'
+                 );
+            rollback;
+        end if;
+        -- Luego de inserta dispara el bursting
+        if v_success_qty > 0 then
+                fnd_file.put_line(fnd_file.log, 'dispara bursting');
+                l_request_id := fnd_request.submit_request(application => 'XDO'
+                                                          ,program     => 'XDOBURSTREP'
+                                                          ,description =>  null
+                                                          ,start_time  =>  null
+                                                          ,sub_request =>  false
+                                                          ,argument1   =>  null
+                                                          ,argument2   =>  v_request_id
+                                                          ,argument3   =>  'Y');
+                commit;
+            if l_request_id != 0 then
+                l_result := true;
+                fnd_file.put_line(fnd_file.log, 'id bursting:'||l_request_id);
+                /*
+                lb_complete := fnd_concurrent.wait_for_request (request_id   => l_request_id,
+                                                INTERVAL     => 10,
+                                                max_wait     => 3000,
+                                                phase        => lc_phase,
+                                                status       => lc_status,
+                                                dev_phase    => lc_dev_phase,
+                                                dev_status   => lc_dev_status,
+                                                MESSAGE      => lc_message);
+                 */
+            else
+             -- Put message in log
+             fnd_file.put_line(fnd_file.log, 'Failed to launch bursting request');
+             update xx_ar_reg_invoice_request
+               set  status = 'PROCESSING_ERROR_ORACLE',
+                    error_code = '040_FILE_GENERATION_PROBLEM',
+                    error_messages = 'Error al disparar la solicitud de generacion de archivo'
+              where request_id = fnd_global.conc_request_id 
+               and  status = 'WORK_IN_PROGRESS';
+            end if;
+      end if;
     end if;
     -- ---------------------------------------------------------------------------
     -- Verifico si se produjo un error.
@@ -2820,6 +2875,111 @@ exception
         retcode := '2';
         errbuf  := substr(v_mesg_error, 1, 2000);
 end generate_files;
+/*=========================================================================+
+|                                                                          |
+| Public Procedure                                                         |
+|    validate_files                                                        |
+|                                                                          |
+| Description                                                              |
+|    Procedimiento que valida la generacion de archivos y ajusta estado.   |
+|                                                                          |
+| Parameters                                                               |
+|    errbuf            OUT VARCHAR2 Uso interno del concurrente.           |
+|    retcode           OUT VARCHAR2 Uso interno del concurrente.           |
+|    p_draft_mode      IN  VARCHAR2 Modo draft (Y/N).                      |
+|    p_debug_flag      IN  VARCHAR2 Flag de debug.                         |
+|                                                                          |
++=========================================================================*/
+procedure validate_files(errbuf            out varchar2
+                        ,retcode           out number
+                        ,p_draft_mode      in  varchar2)
+is
+  cursor c_xx_ar_reg_invoice_request(p_req_id number)
+  is
+  select rowid
+        ,customer_trx_id
+        ,file_name
+  from   xx_ar_reg_invoice_request
+  where  status  = 'WORK_IN_PROGRESS'
+  and    request_id = p_req_id;
+  xx_ar_reg_invoice_request_type  c_xx_ar_reg_invoice_request%rowtype;
+  v_exists                varchar2(1);
+  v_directory_path        varchar2(100);
+  l_gen_file_req_id       number;
+  l_bursting_request_id   number;
+  lb_complete             boolean;
+  lc_phase                varchar2 (100);
+  lc_status               varchar2 (100);
+  lc_dev_phase            varchar2 (100);
+  lc_dev_status           varchar2 (100);
+  lc_message              varchar2 (100);
+begin
+  fnd_file.put_line (fnd_file.log, 'p_draft_mode = '||p_draft_mode);
+  select directory_path
+  into   v_directory_path
+  from   all_directories
+  where  directory_name = 'XX_CO_INVOICE_WORK_PATH';
+  /* get bursting request_id */
+  select fcr1.request_id
+        ,fcr2.request_id
+  into   l_gen_file_req_id
+        ,l_bursting_request_id
+  from   fnd_concurrent_requests fcr1 -- XXARCOFEG
+        ,fnd_concurrent_programs_vl fcpv
+        ,fnd_concurrent_requests fcr2 --  XDOBURSTREP
+        ,fnd_concurrent_requests fcr -- XXARCOFEV
+  where  fcr.request_id = fnd_global.conc_request_id
+  and    fcr1.priority_request_id =fcr.priority_request_id
+  and    fcpv.concurrent_program_id = fcr1.concurrent_program_id
+  and    fcpv.concurrent_program_name = 'XXARCOFEG'
+  and    fcr2.parent_request_id = fcr1.request_id;
+  fnd_file.put_line (fnd_file.log, 'l_bursting_request_id : '||l_bursting_request_id);
+  lc_dev_phase := 'X';
+  while (upper (lc_dev_phase) != 'COMPLETE')
+  loop
+    lb_complete :=
+    fnd_concurrent.wait_for_request (request_id      => l_bursting_request_id
+                                    ,interval        => 2
+                                    ,max_wait        => 60
+                                    -- out arguments
+                                    ,phase           => lc_phase
+                                    ,status          => lc_status
+                                    ,dev_phase       => lc_dev_phase
+                                    ,dev_status      => lc_dev_status
+                                    ,message         => lc_message);
+    fnd_file.put_line (fnd_file.log, 'Bursting Concurrent request completed');
+  end loop;
+  open c_xx_ar_reg_invoice_request(l_gen_file_req_id);
+  loop fetch c_xx_ar_reg_invoice_request into xx_ar_reg_invoice_request_type;
+  exit when c_xx_ar_reg_invoice_request%notfound;
+    -- Chequea archivo generado y marca comprobante como impreso
+    if upper(nvl(p_draft_mode,'N')) = 'N' then
+      v_exists := xx_ar_fe_file_manager_pk.exists(v_directory_path||'/'||xx_ar_reg_invoice_request_type.file_name);
+      if v_exists = 'Y' then
+        update xx_ar_reg_invoice_request
+        set  status = 'NEW'
+        where request_id = l_gen_file_req_id
+        and  status = 'WORK_IN_PROGRESS'
+        and  customer_trx_id = xx_ar_reg_invoice_request_type.customer_trx_id;
+        update ra_customer_trx_all rct
+        set rct.attribute9 = 'Y'
+        where rct.customer_trx_id = xx_ar_reg_invoice_request_type.customer_trx_id;
+      else
+        update xx_ar_reg_invoice_request
+        set    status = 'PROCESSING_ERROR_ORACLE'
+              ,error_code = '040_FILE_GENERATION_PROBLEM'
+              ,error_messages = 'No se encuentra el archivo generado en el servidor '||xx_ar_reg_invoice_request_type.file_name
+        where  request_id = l_gen_file_req_id
+        and    status = 'WORK_IN_PROGRESS'
+        and    customer_trx_id = xx_ar_reg_invoice_request_type.customer_trx_id;
+      end if;
+    end if;
+  end loop;
+  commit;
+exception
+  when others then
+    fnd_file.put_line (fnd_file.log, 'Error : ' || sqlerrm);
+end validate_files;
 end xx_ar_trx_pe_sends_pk;
 /
 
