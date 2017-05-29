@@ -204,6 +204,24 @@ procedure generate_files(errbuf            out varchar2
                         ,p_customer_id     in  number
                         ,p_territory_code  in  varchar2
                         ,p_process_errors  in  varchar2);
+/*=========================================================================+
+|                                                                          |
+| Public Procedure                                                         |
+|    validate_files                                                        |
+|                                                                          |
+| Description                                                              |
+|    Procedimiento que valida la generacion de archivos y ajusta estado.   |
+|                                                                          |
+| Parameters                                                               |
+|    errbuf            OUT VARCHAR2 Uso interno del concurrente.           |
+|    retcode           OUT VARCHAR2 Uso interno del concurrente.           |
+|    p_draft_mode      IN  VARCHAR2 Modo draft (Y/N).                      |
+|    p_debug_flag      IN  VARCHAR2 Flag de debug.                         |
+|                                                                          |
++=========================================================================*/
+procedure validate_files(errbuf            out varchar2
+                        ,retcode           out number
+                        ,p_draft_mode      in  varchar2);
 end xx_ar_trx_pe_sends_pk;
 /
 

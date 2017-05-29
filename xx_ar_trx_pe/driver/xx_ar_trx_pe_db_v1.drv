@@ -19,33 +19,45 @@
 # +=======================================================================+
 begin patch xx_ar_trx_pe_db_v1
 
-   begin patch_info 
-      release  1
-      server   DB
-      language ESA
-   end patch_info
+  begin patch_info 
+    release  1
+    server   DB
+    language ESA
+  end patch_info
 
-   copy xbol admin/AR/xx_ar_trx_pe/driver buildpatch_db_v1.sh
-   copy xbol admin/AR/xx_ar_trx_pe/driver xx_ar_trx_pe_db_v1.drv
-   copy xbol admin/AR/xx_ar_trx_pe/driver xxuninstall_db_v1.sql
+  copy xbol admin/AR/xx_ar_trx_pe/driver buildpatch_db_v1.sh
+  copy xbol admin/AR/xx_ar_trx_pe/driver xx_ar_trx_pe_db_v1.drv
+  copy xbol admin/AR/xx_ar_trx_pe/driver xxuninstall_db_v1.sql
 
-   copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
-   copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
-   copy xbol admin/AR/xx_ar_trx_pe/sql xxdir_XX_AR_TRX_PE_OUT_PRC_DIR.sql
+  copy xbol /admin/AR/xx_ar_trx_pe/import xxdownload_db_v1.sh
+  copy xbol /admin/AR/xx_ar_trx_pe/import pc_us_xx_ar_trx_pe_db_v1.ldt
+  copy xbol /admin/AR/xx_ar_trx_pe/import pc_esa_xx_ar_trx_pe_db_v1.ldt
+  copy xbol /admin/AR/xx_ar_trx_pe/import pc_ptb_xx_ar_trx_pe_db_v1.ldt
+  copy xbol /admin/AR/xx_ar_trx_pe/import rgu_us_xx_ar_trx_pe_db_v1.ldt
 
-   copy xbol admin/AR/xx_ar_trx_pe/import xxdownload.sh
+  copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
+  copy xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
+  copy xbol admin/AR/xx_ar_trx_pe/sql XXDIR_XX_AR_TRX_PE_OUT_PRC_DIR.sql
 
-   begin connection apps
+  begin connection apps
 
-      sql  xbol admin/AR/xx_ar_trx_pe/sql xxdir_XX_AR_TRX_PE_OUT_PRC_DIR.sql
+    sql  xbol admin/AR/xx_ar_trx_pe/sql XXDIR_XX_AR_TRX_PE_OUT_PRC_DIR.sql
 
-   end connection apps
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_trx_pe/import/pc_us_xx_ar_trx_pe_db_v1.ldt - CUSTOM_MODE=FORCE
 
-   begin connection pkg_user virtual
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_trx_pe/import/pc_ptb_xx_ar_trx_pe_db_v1.ldt - CUSTOM_MODE=FORCE
 
-      sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
-      sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_trx_pe/import/pc_esa_xx_ar_trx_pe_db_v1.ldt - CUSTOM_MODE=FORCE
 
-   end connection pkg_user 
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_trx_pe/import/rgu_us_xx_ar_trx_pe_db_v1.ldt - CUSTOM_MODE=FORCE
+
+  end connection apps
+
+  begin connection pkg_user virtual
+
+    sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSS_PK.sql
+    sql  xbol admin/AR/xx_ar_trx_pe/sql XX_AR_TRX_PE_SENDSB_PK.sql
+
+  end connection pkg_user
 
 end patch xx_ar_trx_pe_db_v1
