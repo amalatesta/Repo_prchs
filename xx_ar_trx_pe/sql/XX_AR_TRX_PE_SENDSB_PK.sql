@@ -933,9 +933,9 @@ begin
                  fnd_file.new_line(fnd_file.output
                                   ,1
                                   );
---                 fnd_file.put(fnd_file.output
---                             ,'----------------------------------------------------------'
---                             );
+                 --fnd_file.put(fnd_file.output
+                 --            ,'----------------------------------------------------------'
+                 --            );
                  fnd_file.new_line(fnd_file.output
                                   ,1
                                   );
@@ -2718,11 +2718,11 @@ begin
              );
 
         begin
-           if not print_text(p_print_output => null
-                            ,p_mesg_error   => v_mesg_error
-                            ) then
-              v_mesg_error := 'Error generando archivos: '||v_mesg_error;
-           end if;
+           --if not print_text(p_print_output => null
+           --                 ,p_mesg_error   => v_mesg_error
+           --                 ) then
+           --   v_mesg_error := 'Error generando archivos: '||v_mesg_error;
+           --end if;
 
            if not print_text(p_print_output => 'Y'
                             ,p_mesg_error   => v_mesg_error
