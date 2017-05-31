@@ -399,7 +399,7 @@ BEGIN VALUE_SET "Yes_No"
   ALPHANUMERIC_ALLOWED_FLAG = "Y"
   UPPERCASE_ONLY_FLAG = "N"
   NUMERIC_MODE_ENABLED_FLAG = "N"
-  DESCRIPTION = "Este juego de valores solo contiene S=Si y N=No."
+  DESCRIPTION = "Este juego de valores sólo contiene S=Sí y N=No."
 
 
   BEGIN VSET_TABLE
@@ -430,9 +430,9 @@ BEGIN VALUE_SET "Yes_No"
 
 END VALUE_SET
 
-BEGIN VALUE_SET "XX_PE_FE_AR_BATCH_SOURCES"
-  OWNER = "ANONYMOUS"
-  LAST_UPDATE_DATE = "2012/02/17 00:00:00"
+BEGIN VALUE_SET "XX_PE_TRX_AR_BATCH_SOURCES"
+  OWNER = "AMALATESTA"
+  LAST_UPDATE_DATE = "2017/05/29 13:54:38"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -442,12 +442,12 @@ BEGIN VALUE_SET "XX_PE_FE_AR_BATCH_SOURCES"
   ALPHANUMERIC_ALLOWED_FLAG = "Y"
   UPPERCASE_ONLY_FLAG = "N"
   NUMERIC_MODE_ENABLED_FLAG = "N"
-  DESCRIPTION = "XX PE Fact. Elec: Origenes de Lotes"
+  DESCRIPTION = "XX PE Fact. Origenes de Lotes"
 
 
   BEGIN VSET_TABLE
-    OWNER = "ORACLE12.1.3"
-    LAST_UPDATE_DATE = "2016/05/10 00:00:00"
+    OWNER = "AMALATESTA"
+    LAST_UPDATE_DATE = "2017/05/29 13:54:38"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME = "RA_BATCH_SOURCES"
     SUMMARY_ALLOWED_FLAG = "N"
@@ -456,7 +456,7 @@ BEGIN VALUE_SET "XX_PE_FE_AR_BATCH_SOURCES"
     VALUE_COLUMN_SIZE = "50"
     ID_COLUMN_NAME = "BATCH_SOURCE_ID"
     ID_COLUMN_TYPE = "N"
-    ID_COLUMN_SIZE = "22"
+    ID_COLUMN_SIZE = "15"
     MEANING_COLUMN_NAME = "DESCRIPTION"
     MEANING_COLUMN_TYPE = "V"
     MEANING_COLUMN_SIZE = "240"
@@ -475,9 +475,9 @@ BEGIN VALUE_SET "XX_PE_FE_AR_BATCH_SOURCES"
 
 END VALUE_SET
 
-BEGIN VALUE_SET "XX_PE_FE_AR_CUST_TRX_TYPES"
-  OWNER = "ORACLE12.1.3"
-  LAST_UPDATE_DATE = "2015/02/13 00:00:00"
+BEGIN VALUE_SET "XX_PE_TRX_AR_CUST_TRX_TYPES"
+  OWNER = "AMALATESTA"
+  LAST_UPDATE_DATE = "2017/05/29 13:58:45"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -487,12 +487,12 @@ BEGIN VALUE_SET "XX_PE_FE_AR_CUST_TRX_TYPES"
   ALPHANUMERIC_ALLOWED_FLAG = "Y"
   UPPERCASE_ONLY_FLAG = "N"
   NUMERIC_MODE_ENABLED_FLAG = "N"
-  DESCRIPTION = "XX PE Fact. Elec: Tipos de Comprobantes de AR"
+  DESCRIPTION = "XX PE Fact.Tipos de Comprobantes de AR"
 
 
   BEGIN VSET_TABLE
-    OWNER = "ORACLE12.1.3"
-    LAST_UPDATE_DATE = "2015/02/13 00:00:00"
+    OWNER = "AMALATESTA"
+    LAST_UPDATE_DATE = "2017/05/29 14:00:28"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME = "RA_CUST_TRX_TYPES"
     SUMMARY_ALLOWED_FLAG = "N"
@@ -501,7 +501,7 @@ BEGIN VALUE_SET "XX_PE_FE_AR_CUST_TRX_TYPES"
     VALUE_COLUMN_SIZE = "20"
     ID_COLUMN_NAME = "CUST_TRX_TYPE_ID"
     ID_COLUMN_TYPE = "N"
-    ID_COLUMN_SIZE = "22"
+    ID_COLUMN_SIZE = "15"
     MEANING_COLUMN_NAME = "DESCRIPTION"
     MEANING_COLUMN_TYPE = "V"
     MEANING_COLUMN_SIZE = "80"
@@ -512,11 +512,9 @@ BEGIN VALUE_SET "XX_PE_FE_AR_CUST_TRX_TYPES"
     END_DATE_COLUMN_NAME = "to_date(null)"
     SUMMARY_COLUMN_NAME = "'N'"
     ADDITIONAL_WHERE_CLAUSE =
- "WHERE NVL(START_DATE,SYSDATE) <= SYSDATE\n\
-  AND NVL(END_DATE,SYSDATE) >= SYSDATE\n\
-  AND ATTRIBUTE12 = 'Y'\n\
-  ORDER BY NAME\n\
-" 
+ "WHERE NVL(ATTRIBUTE12,'N') = 'N' /*--No es fact electonica--*/\n\
+AND NVL(ATTRIBUTE13,'N') = 'Y' /*--Comprobante e-Ticket--*/\n\
+ORDER BY NAME"
   END VSET_TABLE
   
 
@@ -526,9 +524,9 @@ BEGIN VALUE_SET "XX_PE_FE_AR_CUST_TRX_TYPES"
 
 END VALUE_SET
 
-BEGIN VALUE_SET "XX_PE_FE_AR_TRX_NUMBERS"
-  OWNER = "ORACLE12.1.3"
-  LAST_UPDATE_DATE = "2017/02/14 00:00:00"
+BEGIN VALUE_SET "XX_PE_TRX_AR_NUMBERS"
+  OWNER = "AMALATESTA"
+  LAST_UPDATE_DATE = "2017/05/29 14:14:04"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -538,12 +536,12 @@ BEGIN VALUE_SET "XX_PE_FE_AR_TRX_NUMBERS"
   ALPHANUMERIC_ALLOWED_FLAG = "Y"
   UPPERCASE_ONLY_FLAG = "N"
   NUMERIC_MODE_ENABLED_FLAG = "N"
-  DESCRIPTION = "XX PE Fact. Elec: Numeros de Comprobantes"
+  DESCRIPTION = "XX PE Fact. Numeros de Comprobantes"
 
 
   BEGIN VSET_TABLE
-    OWNER = "ORACLE12.1.3"
-    LAST_UPDATE_DATE = "2017/02/14 00:00:00"
+    OWNER = "AMALATESTA"
+    LAST_UPDATE_DATE = "2017/05/29 14:14:04"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME =
  "xx_ar_reg_invoice_request xarir, ra_cust_trx_types rctt, ra_batch_sources rbs, ra_customer_trx rct"
@@ -551,6 +549,8 @@ BEGIN VALUE_SET "XX_PE_FE_AR_TRX_NUMBERS"
     VALUE_COLUMN_NAME = "rct.trx_number"
     VALUE_COLUMN_TYPE = "V"
     VALUE_COLUMN_SIZE = "20"
+    ID_COLUMN_TYPE = "C"
+    MEANING_COLUMN_TYPE = "C"
     ENABLED_COLUMN_NAME = "'Y'"
     COMPILED_ATTRIBUTE_COLUMN_NAME = "NULL"
     HIERARCHY_LEVEL_COLUMN_NAME = "NULL"
@@ -558,17 +558,20 @@ BEGIN VALUE_SET "XX_PE_FE_AR_TRX_NUMBERS"
     END_DATE_COLUMN_NAME = "to_date(null)"
     SUMMARY_COLUMN_NAME = "'N'"
     ADDITIONAL_WHERE_CLAUSE =
- "WHERE 1 = 1\n\
-  AND rct.complete_flag          = 'Y'\n\
-  AND rct.batch_source_id        = rbs.batch_source_id\n\
-  AND rbs.attribute3             = 'Y'\n\
-  AND rct.cust_trx_type_id       = rctt.cust_trx_type_id\n\
-  AND rctt.attribute12           = 'Y'\n\
-  AND rct.customer_trx_id        = xarir.customer_trx_id(+)\n\
-  AND NVL(rct.attribute9, 'N')   = 'N'\n\
-  AND NVL(xarir.status,'X') NOT IN ('NEW','PROCESSING_OAS','SUCCESS_OAS','PICKED_OK_ORACLE', 'SEND_OK_OAS')\n\
-  ORDER BY rct.trx_number\n\
-" 
+ "where rct.batch_source_id        = rbs.batch_source_id\n\
+and   rct.cust_trx_type_id       = rctt.cust_trx_type_id\n\
+and   rct.customer_trx_id        = xarir.customer_trx_id (+)\n\
+and   rct.complete_flag          = 'Y' /*--Transaccion completa--*/\n\
+and   nvl(rbs.attribute3,'N')    = 'N' /*--Origen electronico--*/\n\
+and   nvl(rct.attribute9,'N')    = 'N' /*--Transaccion no procesada--*/\n\
+and   nvl(rctt.attribute12,'N')  = 'N' /*--Tipo electronico--*/\n\
+and   nvl(rctt.attribute13,'N')  = 'Y' /*--Tipo e-ticket--*/\n\
+and   nvl(xarir.status,'X') not in ('NEW'              /*--Valor para fact elect--*/\n\
+                                   ,'PROCESSING_OAS'   /*--Valor para fact elect--*/\n\
+                                   ,'SUCCESS_OAS'      /*--Valor para fact elect--*/\n\
+                                   ,'PICKED_OK_ORACLE' /*--Valor esperado por OAS--*/\n\
+                                   ,'SEND_OK_OAS')     /*--Ya procesado por OAS--*/\n\
+order by rct.trx_number"
   END VSET_TABLE
   
 
@@ -691,7 +694,7 @@ END VALUE_SET
 
 BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/26 12:44:22"
+  LAST_UPDATE_DATE = "2017/05/31 12:10:29"
   TABLE_APPLICATION_SHORT_NAME = "FND"
   APPLICATION_TABLE_NAME = "FND_SRS_MASTER"
   CONTEXT_COLUMN_NAME = "STRUCTURE_COLUMN"
@@ -703,23 +706,23 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
   CONTEXT_OVERRIDE_VALUE_SET_NAM = ""
   TITLE = "$SRS$.XXARPETRXP"
   FORM_CONTEXT_PROMPT = "Context Value"
-  DESCRIPTION = "XX AR Proceso de Generacion de Factura Electronica Peru"
+  DESCRIPTION = "XX AR Proceso de Impresion de transacciones para Peru"
 
 
 
   BEGIN DFF_CONTEXT "Global Data Elements"
     OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/05/26 12:44:22"
+    LAST_UPDATE_DATE = "2017/05/26 00:00:00"
     ENABLED_FLAG = "Y"
     GLOBAL_FLAG = "Y"
     DESCRIPTIVE_FLEX_CONTEXT_NAME = "Global Data Elements"
   
     BEGIN DFF_SEGMENT "P_DRAFT_MODE" "ATTRIBUTE1"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:48:31"
+      LAST_UPDATE_DATE = "2017/05/31 13:56:25"
       COLUMN_SEQ_NUM = "10"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "Yes_No"
@@ -728,18 +731,18 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       CONCATENATION_DESCRIPTION_LEN = "25"
       DEFAULT_TYPE = "S"
       DEFAULT_VALUE =
- "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'N'"
-      FORM_LEFT_PROMPT = "Draft Mode"
+ "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'Y'"
+      FORM_LEFT_PROMPT = "Modo draft"
       FORM_ABOVE_PROMPT = "Modo draft"
-      DESCRIPTION = "Draft Mode"
+      DESCRIPTION = "Modo draft"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_DEBUG_FLAG" "ATTRIBUTE2"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:48:31"
+      LAST_UPDATE_DATE = "2017/05/31 13:54:37"
       COLUMN_SEQ_NUM = "20"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "Yes_No"
@@ -749,84 +752,84 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       DEFAULT_TYPE = "S"
       DEFAULT_VALUE =
  "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'N'"
-      FORM_LEFT_PROMPT = "Debug Flag"
+      FORM_LEFT_PROMPT = "Flag de debug"
       FORM_ABOVE_PROMPT = "Flag de debug"
-      DESCRIPTION = "Debug Flag"
+      DESCRIPTION = "Flag de debug"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_NUMBER1" "ATTRIBUTE3"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:48:31"
+      LAST_UPDATE_DATE = "2017/05/29 14:18:28"
       COLUMN_SEQ_NUM = "30"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
-      FLEX_VALUE_SET_NAME = "XX_PE_FE_AR_BATCH_SOURCES"
+      FLEX_VALUE_SET_NAME = "XX_PE_TRX_AR_BATCH_SOURCES"
       DISPLAY_SIZE = "50"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
-      FORM_LEFT_PROMPT = "Batch Source"
+      FORM_LEFT_PROMPT = "Origen de Lote"
       FORM_ABOVE_PROMPT = "Origen de Lote"
-      DESCRIPTION = "Batch Source"
+      DESCRIPTION = "Origen de Lote"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_NUMBER2" "ATTRIBUTE4"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:48:53"
+      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
       COLUMN_SEQ_NUM = "40"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
-      FLEX_VALUE_SET_NAME = "XX_PE_FE_AR_CUST_TRX_TYPES"
+      FLEX_VALUE_SET_NAME = "XX_PE_TRX_AR_CUST_TRX_TYPES"
       DISPLAY_SIZE = "20"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
-      FORM_LEFT_PROMPT = "Transaction Type"
-      FORM_ABOVE_PROMPT = "Tipo Transaccion"
-      DESCRIPTION = "Transaction Type"
+      FORM_LEFT_PROMPT = "Tipo Transacción"
+      FORM_ABOVE_PROMPT = "Tipo Transacción"
+      DESCRIPTION = "Tipo Transacción"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_CHAR1" "ATTRIBUTE5"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
       COLUMN_SEQ_NUM = "50"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
-      FLEX_VALUE_SET_NAME = "XX_PE_FE_AR_TRX_NUMBERS"
+      FLEX_VALUE_SET_NAME = "XX_PE_TRX_AR_NUMBERS"
       DISPLAY_SIZE = "20"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
       RANGE_CODE = "L"
-      FORM_LEFT_PROMPT = "Trx Number from"
-      FORM_ABOVE_PROMPT = "Numero de Transaccion Desde"
-      DESCRIPTION = "Trx Number from"
+      FORM_LEFT_PROMPT = "Número de Transacción Desde"
+      FORM_ABOVE_PROMPT = "Número de Transacción Desde"
+      DESCRIPTION = "Número de Transacción Desde"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_CHAR2" "ATTRIBUTE6"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
       COLUMN_SEQ_NUM = "60"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
-      FLEX_VALUE_SET_NAME = "XX_PE_FE_AR_TRX_NUMBERS"
+      FLEX_VALUE_SET_NAME = "XX_PE_TRX_AR_NUMBERS"
       DISPLAY_SIZE = "20"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
       RANGE_CODE = "H"
-      FORM_LEFT_PROMPT = "Trx Number to"
+      FORM_LEFT_PROMPT = "Nuero de Transaccion Hasta"
       FORM_ABOVE_PROMPT = "Nuero de Transaccion Hasta"
-      DESCRIPTION = "Trx Number to"
+      DESCRIPTION = "Número de Transacción Hasta"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_DATE1" "ATTRIBUTE7"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/26 00:00:00"
       COLUMN_SEQ_NUM = "70"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -837,14 +840,14 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
       RANGE_CODE = "L"
-      FORM_LEFT_PROMPT = "Trx Date from"
+      FORM_LEFT_PROMPT = "Fecha Desde"
       FORM_ABOVE_PROMPT = "Fecha Desde"
-      DESCRIPTION = "Trx Date from"
+      DESCRIPTION = "Fecha Desde"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_DATE2" "ATTRIBUTE8"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/26 00:00:00"
       COLUMN_SEQ_NUM = "80"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -855,14 +858,14 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
       RANGE_CODE = "H"
-      FORM_LEFT_PROMPT = "Trx Date to"
+      FORM_LEFT_PROMPT = "Fecha Hasta"
       FORM_ABOVE_PROMPT = "Fecha Hasta"
-      DESCRIPTION = "Trx Date to"
+      DESCRIPTION = "Fecha Hasta"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_NUMBER3" "ATTRIBUTE9"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/26 00:00:00"
       COLUMN_SEQ_NUM = "90"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -872,14 +875,14 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       DISPLAY_SIZE = "30"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
-      FORM_LEFT_PROMPT = "Customer"
+      FORM_LEFT_PROMPT = "Cliente"
       FORM_ABOVE_PROMPT = "Cliente"
-      DESCRIPTION = "Customer"
+      DESCRIPTION = "Cliente"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_COUNTRY_CODE" "ATTRIBUTE10"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/26 00:00:00"
       COLUMN_SEQ_NUM = "100"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -891,17 +894,17 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       CONCATENATION_DESCRIPTION_LEN = "25"
       DEFAULT_TYPE = "C"
       DEFAULT_VALUE = "PE"
-      FORM_LEFT_PROMPT = "Country"
+      FORM_LEFT_PROMPT = "Pais"
       FORM_ABOVE_PROMPT = "Pais"
-      DESCRIPTION = "Country"
+      DESCRIPTION = "Pais"
     END DFF_SEGMENT
     
     BEGIN DFF_SEGMENT "P_PROCESS_ERRORS" "ATTRIBUTE11"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/26 12:51:22"
+      LAST_UPDATE_DATE = "2017/05/31 13:56:25"
       COLUMN_SEQ_NUM = "110"
       ENABLED_FLAG = "Y"
-      DISPLAY_FLAG = "Y"
+      DISPLAY_FLAG = "N"
       REQUIRED_FLAG = "Y"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "Yes_No"
@@ -910,10 +913,10 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       CONCATENATION_DESCRIPTION_LEN = "25"
       DEFAULT_TYPE = "S"
       DEFAULT_VALUE =
- "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'Y'"
-      FORM_LEFT_PROMPT = "Process errors"
+ "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'N'"
+      FORM_LEFT_PROMPT = "Procesa Errores"
       FORM_ABOVE_PROMPT = "Procesa Errores"
-      DESCRIPTION = "Process errors"
+      DESCRIPTION = "Procesa Errores"
     END DFF_SEGMENT
     
   END DFF_CONTEXT
@@ -922,7 +925,7 @@ END DESC_FLEX
 
 BEGIN PROGRAM "XXARPETRXP" "XBOL"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/26"
+  LAST_UPDATE_DATE = "2017/05/31"
   USER_CONCURRENT_PROGRAM_NAME =
  "XX AR Proceso de Impresion de transacciones para Peru"
   EXEC = "XXARPETRXP" "XBOL"
@@ -938,7 +941,7 @@ BEGIN PROGRAM "XXARPETRXP" "XBOL"
   DESCRIPTION = "XX AR Proceso de Generacion de Factura Electronica Peru"
   SAVE_OUTPUT_FLAG = "Y"
   REQUIRED_STYLE = "N"
-  OUTPUT_FILE_TYPE = "TEXT"
+  OUTPUT_FILE_TYPE = "XML"
   RESTART = "Y"
   NLS_COMPLIANT = "Y"
   MLS_EXEC = "" ""
@@ -946,28 +949,28 @@ BEGIN PROGRAM "XXARPETRXP" "XBOL"
   SRS_FLEX = "XBOL" "$SRS$.XXARPETRXP"
   AUTO_ANNOTATION =
  "/**\n\
-  * @param P_DRAFT_MODE Draft Mode\n\
-  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed Y} {@rep:required}\n\
-  * @param P_DEBUG_FLAG Debug Flag\n\
-  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed Y} {@rep:required}\n\
-  * @param P_NUMBER1 Batch Source\n\
-  * @rep:paraminfo {@rep:type XX_PE_FE_AR_BATCH_SOURCES} {@rep:displayed Y}\n\
-  * @param P_NUMBER2 Transaction Type\n\
-  * @rep:paraminfo {@rep:type XX_PE_FE_AR_CUST_TRX_TYPES} {@rep:displayed Y}\n\
-  * @param P_CHAR1 Trx Number from\n\
-  * @rep:paraminfo {@rep:type XX_PE_FE_AR_TRX_NUMBERS} {@rep:displayed Y}\n\
-  * @param P_CHAR2 Trx Number to\n\
-  * @rep:paraminfo {@rep:type XX_PE_FE_AR_TRX_NUMBERS} {@rep:displayed Y}\n\
-  * @param P_DATE1 Trx Date from\n\
+  * @param P_DRAFT_MODE Modo draft\n\
+  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed N} {@rep:required}\n\
+  * @param P_DEBUG_FLAG Flag de debug\n\
+  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed N} {@rep:required}\n\
+  * @param P_NUMBER1 Origen de Lote\n\
+  * @rep:paraminfo {@rep:type XX_PE_TRX_AR_BATCH_SOURCES} {@rep:displayed Y}\n\
+  * @param P_NUMBER2 Tipo Transacción\n\
+  * @rep:paraminfo {@rep:type XX_PE_TRX_AR_CUST_TRX_TYPES} {@rep:displayed Y}\n\
+  * @param P_CHAR1 Número de Transacción Desde\n\
+  * @rep:paraminfo {@rep:type XX_PE_TRX_AR_NUMBERS} {@rep:displayed Y}\n\
+  * @param P_CHAR2 Número de Transacción Hasta\n\
+  * @rep:paraminfo {@rep:type XX_PE_TRX_AR_NUMBERS} {@rep:displayed Y}\n\
+  * @param P_DATE1 Fecha Desde\n\
   * @rep:paraminfo {@rep:type FND_STANDARD_DATE} {@rep:displayed Y}\n\
-  * @param P_DATE2 Trx Date to\n\
+  * @param P_DATE2 Fecha Hasta\n\
   * @rep:paraminfo {@rep:type FND_STANDARD_DATE} {@rep:displayed Y}\n\
-  * @param P_NUMBER3 Customer\n\
+  * @param P_NUMBER3 Cliente\n\
   * @rep:paraminfo {@rep:type XX_AR_SRS_CUSTOMER_ID} {@rep:displayed Y}\n\
-  * @param P_COUNTRY_CODE Country\n\
+  * @param P_COUNTRY_CODE Pais\n\
   * @rep:paraminfo {@rep:type FND_TERRITORIES} {@rep:displayed N} {@rep:required}\n\
-  * @param P_PROCESS_ERRORS Process errors\n\
-  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed Y} {@rep:required}\n\
+  * @param P_PROCESS_ERRORS Procesa Errores\n\
+  * @rep:paraminfo {@rep:type Yes_No} {@rep:displayed N} {@rep:required}\n\
   */"
   MULTI_ORG_CATEGORY = "S"
 

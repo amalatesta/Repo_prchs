@@ -50,23 +50,26 @@ echo '====================================================================='
 echo 'Begin Objects Download.'
 echo '====================================================================='
 
-export NLS_LANG="LATIN AMERICAN SPANISH_AMERICA.WE8ISO8859P1"
-
-echo 'ESA - Bajando Programa Concurrente XXARPETRXP'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_esa_xx_ar_trx_pe_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARPETRXP"
-
-export NLS_LANG="BRAZILIAN PORTUGUESE_BRAZIL.WE8ISO8859P1"
-
-echo 'PTB - Bajando Programa Concurrente XXARPETRXP'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_ptb_xx_ar_trx_pe_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARPETRXP"
-
-export NLS_LANG="AMERICAN_AMERICA.US7ASCII"
-
 echo 'US - Bajando Programa Concurrente XXARPETRXP'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct pc_us_xx_ar_trx_pe_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARPETRXP"
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct cp_us_xx_ar_trx_pe_gen_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARPETRXP"
+
+echo 'US - Bajando objeto XXARPETRXP'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $XDO_TOP/patch/115/import/xdotmpl.lct cp_us_xx_ar_trx_pe_gen_xdo_db_v1.ldt XDO_DS_DEFINITIONS APPLICATION_SHORT_NAME="XBOL" DATA_SOURCE_CODE="XXARPETRXP"
+
+echo 'US - Bajando Programa Concurrente XXARPETRXV'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpprog.lct cp_us_xx_ar_trx_pe_val_db_v1.ldt PROGRAM APPLICATION_SHORT_NAME="XBOL" CONCURRENT_PROGRAM_NAME="XXARPETRXV"
+
+echo 'US - Bajando Juego de solicitudes XXARPETRXPSET'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcprset.lct rs_us_xx_ar_trx_pe_db_v1.ldt REQ_SET APPLICATION_SHORT_NAME="XBOL" REQUEST_SET_NAME="XXARPETRXPSET"
+
+echo 'US - Bajando Links de Juego de solicitudes XXARPETRXPSET'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcprset.lct rsl_us_xx_ar_trx_pe_db_v1.ldt REQ_SET_LINKS APPLICATION_SHORT_NAME="XBOL" REQUEST_SET_NAME="XXARPETRXPSET"
 
 echo 'US - Bajando Grupo de Solicitudes XX_AR_GERENTE para la unidad XXARPETRXP'
-FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpreqg.lct rgu_us_xx_ar_trx_pe_db_v1.ldt REQUEST_GROUP REQUEST_GROUP_NAME="XX_PE_AR_GERENTE" APPLICATION_SHORT_NAME="XBOL" REQUEST_GROUP_UNIT UNIT_APP="XBOL" UNIT_NAME="XXARPETRXP"
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpreqg.lct rgu_us_xx_ar_trx_pe_gen_db_v1.ldt REQUEST_GROUP REQUEST_GROUP_NAME="XX_PE_AR_GERENTE" APPLICATION_SHORT_NAME="XBOL" REQUEST_GROUP_UNIT UNIT_APP="XBOL" UNIT_NAME="XXARPETRXP"
+
+echo 'US - Bajando Grupo de Solicitudes XX_AR_GERENTE para la unidad XXARPETRXPSET'
+FNDLOAD $APPS_USER/$APPS_PWD@$BASE 0 Y DOWNLOAD $FND_TOP/patch/115/import/afcpreqg.lct rgu_us_xx_ar_trx_pe_rs_db_v1.ldt REQUEST_GROUP REQUEST_GROUP_NAME="XX_PE_AR_GERENTE" APPLICATION_SHORT_NAME="XBOL" REQUEST_GROUP_UNIT UNIT_APP="XBOL" UNIT_NAME="XXARPETRXPSET"
 
 echo '====================================================================='
 echo 'End Objects Download.'
