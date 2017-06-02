@@ -432,7 +432,7 @@ END VALUE_SET
 
 BEGIN VALUE_SET "XX_PE_TRX_AR_BATCH_SOURCES"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/29 13:54:38"
+  LAST_UPDATE_DATE = "2017/05/29 00:00:00"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -447,7 +447,7 @@ BEGIN VALUE_SET "XX_PE_TRX_AR_BATCH_SOURCES"
 
   BEGIN VSET_TABLE
     OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/05/29 13:54:38"
+    LAST_UPDATE_DATE = "2017/06/01 09:41:05"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME = "RA_BATCH_SOURCES"
     SUMMARY_ALLOWED_FLAG = "N"
@@ -466,6 +466,7 @@ BEGIN VALUE_SET "XX_PE_TRX_AR_BATCH_SOURCES"
     START_DATE_COLUMN_NAME = "to_date(null)"
     END_DATE_COLUMN_NAME = "to_date(null)"
     SUMMARY_COLUMN_NAME = "'N'"
+    ADDITIONAL_WHERE_CLAUSE = "where nvl(attribute15,'N') = 'Y'"
   END VSET_TABLE
   
 
@@ -477,7 +478,7 @@ END VALUE_SET
 
 BEGIN VALUE_SET "XX_PE_TRX_AR_CUST_TRX_TYPES"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/29 13:58:45"
+  LAST_UPDATE_DATE = "2017/05/29 00:00:00"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -492,7 +493,7 @@ BEGIN VALUE_SET "XX_PE_TRX_AR_CUST_TRX_TYPES"
 
   BEGIN VSET_TABLE
     OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/05/29 14:00:28"
+    LAST_UPDATE_DATE = "2017/05/29 00:00:00"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME = "RA_CUST_TRX_TYPES"
     SUMMARY_ALLOWED_FLAG = "N"
@@ -526,7 +527,7 @@ END VALUE_SET
 
 BEGIN VALUE_SET "XX_PE_TRX_AR_NUMBERS"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/29 14:14:04"
+  LAST_UPDATE_DATE = "2017/05/29 00:00:00"
   VALIDATION_TYPE = "F"
   PROTECTED_FLAG = "N"
   SECURITY_ENABLED_FLAG = "N"
@@ -541,7 +542,7 @@ BEGIN VALUE_SET "XX_PE_TRX_AR_NUMBERS"
 
   BEGIN VSET_TABLE
     OWNER = "AMALATESTA"
-    LAST_UPDATE_DATE = "2017/05/29 14:14:04"
+    LAST_UPDATE_DATE = "2017/06/01 10:08:01"
     TABLE_APPLICATION_SHORT_NAME = "AR"
     APPLICATION_TABLE_NAME =
  "xx_ar_reg_invoice_request xarir, ra_cust_trx_types rctt, ra_batch_sources rbs, ra_customer_trx rct"
@@ -565,12 +566,15 @@ and   rct.complete_flag          = 'Y' /*--Transaccion completa--*/\n\
 and   nvl(rbs.attribute3,'N')    = 'N' /*--Origen electronico--*/\n\
 and   nvl(rct.attribute9,'N')    = 'N' /*--Transaccion no procesada--*/\n\
 and   nvl(rctt.attribute12,'N')  = 'N' /*--Tipo electronico--*/\n\
+and   nvl(rbs.attribute15,'N')    = 'Y' /*--Origen e-ticket--*/\n\
 and   nvl(rctt.attribute13,'N')  = 'Y' /*--Tipo e-ticket--*/\n\
 and   nvl(xarir.status,'X') not in ('NEW'              /*--Valor para fact elect--*/\n\
                                    ,'PROCESSING_OAS'   /*--Valor para fact elect--*/\n\
                                    ,'SUCCESS_OAS'      /*--Valor para fact elect--*/\n\
                                    ,'PICKED_OK_ORACLE' /*--Valor esperado por OAS--*/\n\
                                    ,'SEND_OK_OAS')     /*--Ya procesado por OAS--*/\n\
+and rbs.batch_source_id = nvl(:$FLEX$.P_NUMBER1,rbs.batch_source_id)\n\
+and rct.cust_trx_type_id = nvl(:$FLEX$.P_NUMBER2,rct.cust_trx_type_id)\n\
 order by rct.trx_number"
   END VSET_TABLE
   
@@ -694,7 +698,7 @@ END VALUE_SET
 
 BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
   OWNER = "AMALATESTA"
-  LAST_UPDATE_DATE = "2017/05/31 12:10:29"
+  LAST_UPDATE_DATE = "2017/05/31 00:00:00"
   TABLE_APPLICATION_SHORT_NAME = "FND"
   APPLICATION_TABLE_NAME = "FND_SRS_MASTER"
   CONTEXT_COLUMN_NAME = "STRUCTURE_COLUMN"
@@ -719,7 +723,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
   
     BEGIN DFF_SEGMENT "P_DRAFT_MODE" "ATTRIBUTE1"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/31 13:56:25"
+      LAST_UPDATE_DATE = "2017/05/31 00:00:00"
       COLUMN_SEQ_NUM = "10"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -739,7 +743,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_DEBUG_FLAG" "ATTRIBUTE2"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/31 13:54:37"
+      LAST_UPDATE_DATE = "2017/05/31 00:00:00"
       COLUMN_SEQ_NUM = "20"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"
@@ -759,16 +763,19 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_NUMBER1" "ATTRIBUTE3"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/29 14:18:28"
+      LAST_UPDATE_DATE = "2017/06/01 10:16:55"
       COLUMN_SEQ_NUM = "30"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
       REQUIRED_FLAG = "N"
       SECURITY_ENABLED_FLAG = "N"
       FLEX_VALUE_SET_NAME = "XX_PE_TRX_AR_BATCH_SOURCES"
-      DISPLAY_SIZE = "50"
+      DISPLAY_SIZE = "20"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select min(name) from ra_batch_sources rbs where nvl(rbs.attribute3,'N') = 'N' and nvl(rbs.attribute15,'N') = 'Y'"
       FORM_LEFT_PROMPT = "Origen de Lote"
       FORM_ABOVE_PROMPT = "Origen de Lote"
       DESCRIPTION = "Origen de Lote"
@@ -776,7 +783,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_NUMBER2" "ATTRIBUTE4"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
+      LAST_UPDATE_DATE = "2017/06/01 10:01:57"
       COLUMN_SEQ_NUM = "40"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -786,6 +793,9 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
       DISPLAY_SIZE = "20"
       MAXIMUM_DESCRIPTION_LEN = "50"
       CONCATENATION_DESCRIPTION_LEN = "25"
+      DEFAULT_TYPE = "S"
+      DEFAULT_VALUE =
+ "select min(name) from ra_cust_trx_types rctt where nvl(rctt.attribute12,'N') = 'N' and nvl(rctt.attribute13,'N') = 'Y'"
       FORM_LEFT_PROMPT = "Tipo Transacción"
       FORM_ABOVE_PROMPT = "Tipo Transacción"
       DESCRIPTION = "Tipo Transacción"
@@ -793,7 +803,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_CHAR1" "ATTRIBUTE5"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
+      LAST_UPDATE_DATE = "2017/05/29 00:00:00"
       COLUMN_SEQ_NUM = "50"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -811,7 +821,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_CHAR2" "ATTRIBUTE6"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/29 14:19:15"
+      LAST_UPDATE_DATE = "2017/05/29 00:00:00"
       COLUMN_SEQ_NUM = "60"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "Y"
@@ -901,7 +911,7 @@ BEGIN DESC_FLEX "XBOL" "$SRS$.XXARPETRXP"
     
     BEGIN DFF_SEGMENT "P_PROCESS_ERRORS" "ATTRIBUTE11"
       OWNER = "AMALATESTA"
-      LAST_UPDATE_DATE = "2017/05/31 13:56:25"
+      LAST_UPDATE_DATE = "2017/05/31 00:00:00"
       COLUMN_SEQ_NUM = "110"
       ENABLED_FLAG = "Y"
       DISPLAY_FLAG = "N"

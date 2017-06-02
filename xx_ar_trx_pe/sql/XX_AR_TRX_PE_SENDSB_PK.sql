@@ -3045,6 +3045,42 @@ begin
                  ,'1'
                  );
             commit;
+          -- Luego de inserta dispara el bursting
+          if v_success_qty > 0 then
+                  fnd_file.put_line(fnd_file.log, 'dispara bursting');
+                  l_request_id := fnd_request.submit_request(application => 'XDO'
+                                                            ,program     => 'XDOBURSTREP'
+                                                            ,description =>  null
+                                                            ,start_time  =>  null
+                                                            ,sub_request =>  false
+                                                            ,argument1   =>  null
+                                                            ,argument2   =>  v_request_id
+                                                            ,argument3   =>  'Y');
+                  commit;
+              if l_request_id != 0 then
+                  l_result := true;
+                  fnd_file.put_line(fnd_file.log, 'id bursting:'||l_request_id);
+                  /*
+                  lb_complete := fnd_concurrent.wait_for_request (request_id   => l_request_id,
+                                                  INTERVAL     => 10,
+                                                  max_wait     => 3000,
+                                                  phase        => lc_phase,
+                                                  status       => lc_status,
+                                                  dev_phase    => lc_dev_phase,
+                                                  dev_status   => lc_dev_status,
+                                                  MESSAGE      => lc_message);
+                   */
+              else
+               -- Put message in log
+               fnd_file.put_line(fnd_file.log, 'Failed to launch bursting request');
+               update xx_ar_reg_invoice_request
+                 set  status = 'PROCESSING_ERROR_ORACLE',
+                      error_code = '040_FILE_GENERATION_PROBLEM',
+                      error_messages = 'Error al disparar la solicitud de generacion de archivo'
+                where request_id = fnd_global.conc_request_id 
+                 and  status = 'WORK_IN_PROGRESS';
+              end if;
+          end if;
         else
             debug(g_indent                ||
                   v_calling_sequence      ||
@@ -3053,42 +3089,6 @@ begin
                  );
             rollback;
         end if;
-        -- Luego de inserta dispara el bursting
-        if v_success_qty > 0 then
-                fnd_file.put_line(fnd_file.log, 'dispara bursting');
-                l_request_id := fnd_request.submit_request(application => 'XDO'
-                                                          ,program     => 'XDOBURSTREP'
-                                                          ,description =>  null
-                                                          ,start_time  =>  null
-                                                          ,sub_request =>  false
-                                                          ,argument1   =>  null
-                                                          ,argument2   =>  v_request_id
-                                                          ,argument3   =>  'Y');
-                commit;
-            if l_request_id != 0 then
-                l_result := true;
-                fnd_file.put_line(fnd_file.log, 'id bursting:'||l_request_id);
-                /*
-                lb_complete := fnd_concurrent.wait_for_request (request_id   => l_request_id,
-                                                INTERVAL     => 10,
-                                                max_wait     => 3000,
-                                                phase        => lc_phase,
-                                                status       => lc_status,
-                                                dev_phase    => lc_dev_phase,
-                                                dev_status   => lc_dev_status,
-                                                MESSAGE      => lc_message);
-                 */
-            else
-             -- Put message in log
-             fnd_file.put_line(fnd_file.log, 'Failed to launch bursting request');
-             update xx_ar_reg_invoice_request
-               set  status = 'PROCESSING_ERROR_ORACLE',
-                    error_code = '040_FILE_GENERATION_PROBLEM',
-                    error_messages = 'Error al disparar la solicitud de generacion de archivo'
-              where request_id = fnd_global.conc_request_id 
-               and  status = 'WORK_IN_PROGRESS';
-            end if;
-      end if;
     end if;
     -- ---------------------------------------------------------------------------
     -- Verifico si se produjo un error.

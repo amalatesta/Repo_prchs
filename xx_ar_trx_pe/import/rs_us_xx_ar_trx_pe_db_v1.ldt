@@ -116,13 +116,13 @@ BEGIN REQ_SET "XBOL" "XXARPETRXPSET"
       BEGIN PROG_ARGS "XBOL" "$SRS$.XXARPETRXP" "ATTRIBUTE1"
         OWNER = "AMALATESTA"
         DISPLAY_FLAG = "Y"
-        INSERT_FLAG = "Y"
-        UPDATE_FLAG = "Y"
+        INSERT_FLAG = "N"
+        UPDATE_FLAG = "N"
         DEFAULT_TYPE = "S"
         DEFAULT_VALUE =
  "SELECT meaning FROM fnd_lookups WHERE lookup_type = 'YES_NO' AND lookup_code = 'N'"
         SHARED_PARAMETER_NAME = "p_modo_draft"
-        LAST_UPDATE_DATE = "2017/05/31"
+        LAST_UPDATE_DATE = "2017/06/01"
       END PROG_ARGS
       
     END STAGE_PROG
