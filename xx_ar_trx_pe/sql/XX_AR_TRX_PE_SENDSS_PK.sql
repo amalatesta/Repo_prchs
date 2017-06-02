@@ -26,23 +26,25 @@ rem +=======================================================================+
 
 spool xx_ar_trx_pe_sendss_pk.log
 
-PROMPT =====================================================================
-PROMPT Script XX_AR_TRX_PE_SENDSS_PK.sql
-PROMPT =====================================================================
+prompt =====================================================================
+prompt Script XX_AR_TRX_PE_SENDSS_PK.sql
+prompt =====================================================================
 
-PROMPT Creando paquete XX_AR_FE_PE_SENDS_PK
+prompt Creando paquete xx_ar_trx_pe_sends_pk
 
 create or replace package xx_ar_trx_pe_sends_pk authid current_user as
 /* $Id: XX_AR_TRX_PE_SENDSS_PK.sql 1 2017-05-21 20:46:37 amalatesta@despegar.com $ */
+
 -- -----------------------------------------------------------------------------
 -- Variables Globales.
 -- -----------------------------------------------------------------------------
   -- Debug.
-  g_debug_flag     varchar2(1);
-  g_debug_mode     varchar2(30);
-  g_message_length number(15);
+  g_debug_flag     VARCHAR2(1);
+  g_debug_mode     VARCHAR2(30);
+  g_message_length NUMBER(15);
   -- Indentacion.
-  g_indent      varchar2(2000) := '';
+  g_indent      VARCHAR2(2000) := '';
+
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -61,14 +63,15 @@ create or replace package xx_ar_trx_pe_sends_pk authid current_user as
 |    p_line_description  IN VARCHAR2 Descripcion cargada en la linea.      |
 |                                                                          |
 +=========================================================================*/
-function get_inventory_item_desc(p_organization_id   in  number
-                                ,p_inventory_item_id in  number
-                                ,p_cust_trx_concept  in  varchar2
-                                ,p_taxpayer_id       in  varchar2
-                                ,p_taxpayer_doc_type in  varchar2
-                                ,p_print_item_line   in  varchar2
-                                ,p_line_description  in  varchar2)
-return varchar2;
+FUNCTION Get_Inventory_Item_Desc(p_organization_id   IN  NUMBER
+                                ,p_inventory_item_id IN  NUMBER
+                                ,p_cust_trx_concept  IN  VARCHAR2
+                                ,p_taxpayer_id       IN  VARCHAR2
+                                ,p_taxpayer_doc_type IN  VARCHAR2
+                                ,p_print_item_line   IN  VARCHAR2
+                                ,p_line_description  IN  VARCHAR2
+                                ) RETURN VARCHAR2;
+
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -82,9 +85,10 @@ return varchar2;
 |    p_inventory_item_id IN NUMBER   Id de Articulo de Inventario.         |
 |                                                                          |
 +=========================================================================*/
-function item_imprime_prestador(p_organization_id   in  number
-                               ,p_inventory_item_id in  number)
-return varchar2;
+FUNCTION Item_Imprime_Prestador(p_organization_id   IN  NUMBER
+                      ,p_inventory_item_id IN  NUMBER
+                       ) RETURN VARCHAR2;
+
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -100,11 +104,12 @@ return varchar2;
 |    p_transaction_type         IN VARCHAR2 Tipo de Transaccion: PP, PD.   |
 |                                                                          |
 +=========================================================================*/
-function get_receipt_method(p_receipt_method_id        in  number
-                           ,p_cust_trx_type            in  varchar2
-                           ,p_previous_customer_trx_id in  number
-                           ,p_transaction_type         in  varchar2)
-return varchar2;
+FUNCTION Get_Receipt_Method(p_receipt_method_id        IN  NUMBER
+                           ,p_cust_trx_type            IN  VARCHAR2
+                           ,p_previous_customer_trx_id IN  NUMBER
+                           ,p_transaction_type         IN  VARCHAR2
+                           ) RETURN VARCHAR2;
+
 /*=========================================================================+
 |                                                                          |
 | Private Function                                                         |
@@ -118,10 +123,11 @@ return varchar2;
 |    p_org_id       IN  NUMBER                                             |
 |                                                                          |
 +=========================================================================*/
-function get_supplier_name(p_taxpayer_id       in varchar2
-                          ,p_taxpayer_doc_type in varchar2
-                          ,p_org_id            in number)
-return varchar2;
+FUNCTION Get_supplier_name(p_taxpayer_id       IN VARCHAR2
+                         , p_taxpayer_doc_type IN VARCHAR2
+                         , p_org_id            IN NUMBER
+                         ) RETURN VARCHAR2;
+
 /*=========================================================================+
 |                                                                          |
 | Public Function                                                          |
@@ -139,13 +145,14 @@ return varchar2;
 |    p_prestador          IN VARCHAR2 Nombre del Prestador                 |
 |                                                                          |
 +=========================================================================*/
-function get_desc_tercero(p_organization_id    in number
-                         ,p_inventory_item_id  in number
-                         ,p_taxpayer_id        in varchar2
-                         ,p_taxpayer_doc_type  in varchar2
-                         ,p_org_id             in number
-                         ,p_prestador          in varchar2)
-return varchar2;
+FUNCTION Get_Desc_Tercero(p_organization_id    IN NUMBER
+                         ,p_inventory_item_id  IN NUMBER
+                         ,p_taxpayer_id        IN VARCHAR2
+                         ,p_taxpayer_doc_type  IN VARCHAR2
+                         ,p_org_id             IN NUMBER
+                         ,p_prestador          IN VARCHAR2) RETURN VARCHAR2;
+
+
 /*====================================================================================+
 |                                                                                     |
 | Public Procedure                                                                    |
@@ -163,11 +170,12 @@ return varchar2;
 |    x_procesado_fc_electronica   OUT VARCHAR2  Marca de procesado por Fc Electronica |
 |                                                                                     |
 +====================================================================================*/
-procedure  get_datos_trx (p_customer_trx_id             in number
-                         ,x_trx_number                 out varchar2
-                         ,x_trx_date                   out date
-                         ,x_electr_doc_type            out varchar2
-                         ,x_procesado_fc_electronica   out varchar2);
+PROCEDURE  Get_Datos_Trx (p_customer_trx_id             IN NUMBER
+                         ,x_trx_number                 OUT VARCHAR2
+                         ,x_trx_date                   OUT DATE
+                         ,x_electr_doc_type            OUT VARCHAR2
+                         ,x_procesado_fc_electronica   OUT VARCHAR2);
+
 /*=========================================================================+
 |                                                                          |
 | Public Procedure                                                         |
@@ -188,22 +196,23 @@ procedure  get_datos_trx (p_customer_trx_id             in number
 |    p_date_from       IN  DATE     Fecha desde.                           |
 |    p_date_to         IN  DATE     Fecha hasta.                           |
 |    p_customer_id     IN  NUMBER   Cliente.                               |
-|    p_territory_code  IN  VARCHAR2 Pais.                                  |
+|    p_territory_code  IN  VARCHAR2 País.                                  |
 |                                                                          |
 +=========================================================================*/
-procedure generate_files(errbuf            out varchar2
-                        ,retcode           out number
-                        ,p_draft_mode      in  varchar2
-                        ,p_debug_flag      in  varchar2
-                        ,p_batch_source    in  varchar2
-                        ,p_cust_trx_type   in  number
-                        ,p_trx_number_from in  varchar2
-                        ,p_trx_number_to   in  varchar2
-                        ,p_date_from       in  varchar2
-                        ,p_date_to         in  varchar2
-                        ,p_customer_id     in  number
-                        ,p_territory_code  in  varchar2
-                        ,p_process_errors  in  varchar2);
+PROCEDURE generate_files(errbuf            OUT VARCHAR2
+				   ,retcode           OUT NUMBER
+                        ,p_draft_mode      IN  VARCHAR2
+                        ,p_debug_flag      IN  VARCHAR2
+                        ,p_batch_source    IN  VARCHAR2
+                        ,p_cust_trx_type   IN  NUMBER
+                        ,p_trx_number_from IN  VARCHAR2
+                        ,p_trx_number_to   IN  VARCHAR2
+                        ,p_date_from       IN  VARCHAR2
+                        ,p_date_to         IN  VARCHAR2
+                        ,p_customer_id     IN  NUMBER
+                        ,p_territory_code  IN  VARCHAR2
+                        ,p_process_errors  IN  VARCHAR2
+                        );
 /*=========================================================================+
 |                                                                          |
 | Public Procedure                                                         |
