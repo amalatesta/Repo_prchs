@@ -28,6 +28,7 @@
 -- date        author                            description 
 -- ----------- --------------------------------- -------------------------------
 -- 17-MAY-2017 AMALATESTA [Despegar]              Created - 
+-- 26-JUN-2017 AMALATESTA [Despegar]              Modified - Adding gateway and logical by hotel for Flag Not Reimbursement
 -- *****************************************************************************
 set serveroutput on size 1000000
 whenever sqlerror exit failure
@@ -42,12 +43,18 @@ declare
     select rct.purchase_order
           ,rctl.attribute9
           ,rctl.attribute8
-          ,(select max(pl.attribute12)
-            from   po.po_headers_all ph
-                  ,po.po_lines_all   pl
-            where  ph.po_header_id  = pl.po_header_id
-            and    ph.reference_num = rct.purchase_order
-            and    ph.org_id        = rct.org_id) attribute12
+          ,nvl((select max(pl.attribute12)
+                from   po.po_headers_all ph
+                      ,po.po_lines_all   pl
+                where  ph.po_header_id       = pl.po_header_id
+                and    ph.reference_num      = rct.purchase_order
+                and    pl.attribute_category = '0002'),
+               (select max(pl.attribute12)
+                from   po.po_headers_all ph
+                      ,po.po_lines_all   pl
+                where  ph.po_header_id       = pl.po_header_id
+                and    ph.reference_num      = rct.purchase_order)) attribute12
+          ,rctl.attribute11
           ,rct.invoice_currency_code
           ,sum(rctl.extended_amount) extended_amount
           ,rct.attribute7
@@ -93,6 +100,7 @@ declare
     and    rctl.attribute8            > cp_attribute8
     group by rct.org_id
             ,rct.purchase_order
+            ,rctl.attribute11
             ,rct.invoice_currency_code
             ,rct.attribute7
             ,rctl.attribute9
@@ -114,12 +122,18 @@ declare
     select rct.purchase_order
           ,rctl.attribute9
           ,rctl.attribute8
-          ,(select max(pl.attribute12)
-            from   po.po_headers_all ph
-                  ,po.po_lines_all   pl
-            where  ph.po_header_id  = pl.po_header_id
-            and    ph.reference_num = rct.purchase_order
-            and    ph.org_id        = rct.org_id) attribute12
+          ,nvl((select max(pl.attribute12)
+                from   po.po_headers_all ph
+                      ,po.po_lines_all   pl
+                where  ph.po_header_id       = pl.po_header_id
+                and    ph.reference_num      = rct.purchase_order
+                and    pl.attribute_category = '0002'),
+               (select max(pl.attribute12)
+                from   po.po_headers_all ph
+                      ,po.po_lines_all   pl
+                where  ph.po_header_id       = pl.po_header_id
+                and    ph.reference_num      = rct.purchase_order)) attribute12
+          ,rctl.attribute11
           ,rct.invoice_currency_code
           ,sum(rctl.extended_amount) extended_amount
           ,rct.attribute7
@@ -164,6 +178,7 @@ declare
     and    rctl.attribute8            > cp_attribute8
     group by rct.org_id
             ,rct.purchase_order
+            ,rctl.attribute11
             ,rct.invoice_currency_code
             ,rct.attribute7
             ,rctl.attribute9
@@ -226,6 +241,7 @@ declare
                 ||p_chardelim||'Fecha Emision'
                 ||p_chardelim||'Fecha Checkout'
                 ||p_chardelim||'Reembolsable'
+                ||p_chardelim||'Gateway'
                 ||p_chardelim||'Moneda'
                 ||p_chardelim||'Total'
                 ||p_chardelim||'Tasa a Dolar'
