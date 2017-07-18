@@ -20,6 +20,6 @@ git fetch <remote> -p      # Shorter
 
 Ejemplo:
 Branch Remoto
-git branch -d -r origin/FS-507
+git push origin --delete FS-507
 Branch local
 git branch -D FS-507
