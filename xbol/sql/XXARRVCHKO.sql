@@ -29,6 +29,7 @@
 -- ----------- --------------------------------- -------------------------------
 -- 17-MAY-2017 AMALATESTA [Despegar]              Created - 
 -- 26-JUN-2017 AMALATESTA [Despegar]              Modified - Adding gateway and logical by hotel for Flag Not Reimbursement
+-- 21-JUL-2017 AMALATESTA [Despegar]              Modified - Adding logical conditions for segments accounts
 -- *****************************************************************************
 set serveroutput on size 1000000
 whenever sqlerror exit failure
@@ -96,7 +97,15 @@ declare
                                         and    nvl(fdfc.global_flag,'N')          = 'N'
                                         and    fdfc.descriptive_flex_context_code != cp_prod_excl_code
                                         and    fdfc.descriptive_flex_context_code = rctl.attribute_category)
-    and    gcc.segment2               in ('41100','44010','44090','41500')
+    and    gcc.segment2               in ('41100'
+                                         ,'44010'
+                                         ,'44090'
+                                         ,'41500'
+                                         ,'41103'
+                                         ,'44011')
+    and    gcc.segment9               in ('20','30')
+    and    gcc.segment5               != '101'
+    and    gcc.segment5               != '102'
     and    rctl.attribute8            > cp_attribute8
     group by rct.org_id
             ,rct.purchase_order
@@ -174,7 +183,15 @@ declare
                                         and    nvl(fdfc.global_flag,'N')          = 'N'
                                         and    fdfc.descriptive_flex_context_code != '0001'
                                         and    fdfc.descriptive_flex_context_code = rctl.attribute_category)
-    and    gcc.segment2               in ('41100','44010','44090','41500')
+    and    gcc.segment2               in ('41100'
+                                         ,'44010'
+                                         ,'44090'
+                                         ,'41500'
+                                         ,'41103'
+                                         ,'44011')
+    and    gcc.segment9               in ('20','30')
+    and    gcc.segment5               != '101'
+    and    gcc.segment5               != '102'
     and    rctl.attribute8            > cp_attribute8
     group by rct.org_id
             ,rct.purchase_order
