@@ -111,7 +111,7 @@ declare
     and    gcc.segment5               != '102'
     and    rctl.attribute8            > nvl(cp_attribute8,rctl.attribute8)
     and    rct.creation_date          > nvl(cp_creation_date_from,(rct.creation_date-(1/86400)))
-    and    rct.creation_date          < nvl(cp_creation_date_to,(rct.creation_date+(1/86400)))
+    and    rct.creation_date          < nvl(cp_creation_date_to,(rct.creation_date+1))
     group by rct.org_id
             ,rct.purchase_order
             ,rctl.attribute11
@@ -215,7 +215,7 @@ begin
   print_trace(p_debug=>p_debug_flag,p_str=>'--  Loop_OU_PRT (+)');
   for c_data in c_data_print(cp_org_id             => p_op_unit
                             ,cp_creation_date_from => (p_date_from-(1/86400))
-                            ,cp_creation_date_to   => (p_date_to+(1/86400))
+                            ,cp_creation_date_to   => (p_date_to+1)
                             ,cp_attribute8         => p_date_chk_out
                             ,cp_prod_excl_code     => p_prod_excl_code)
   loop
