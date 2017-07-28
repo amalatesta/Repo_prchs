@@ -1,0 +1,56 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_ar_rev_chkout_db_v4.drv                                         |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script drivers para reporte SQL                                    |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    28-JUL-2017 - 1.0 - AMalatesta - DSP - Created                     |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_ar_rev_chkout_db_v4
+
+  begin patch_info 
+  release  4
+  server   DB
+  language US
+  end patch_info 
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/driver xx_ar_rev_chkout_db_v4.drv
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/driver buildpatch_db_v4.sh
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/import xxdownload_db_v4.sh
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_us_xx_ar_rev_chkout_db_v4.ldt
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_esa_xx_ar_rev_chkout_db_v4.ldt
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/import pc_ptb_xx_ar_rev_chkout_db_v4.ldt
+
+  copy xbol /admin/AR/xx_ar_rev_chkout/import rgu_us_xx_ar_rev_chkout_db_v4.ldt
+
+  copy xbol /sql XXARRVCHKO.sql
+
+  begin connection apps
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_us_xx_ar_rev_chkout_db_v4.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_ptb_xx_ar_rev_chkout_db_v4.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpprog.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/pc_esa_xx_ar_rev_chkout_db_v4.ldt - CUSTOM_MODE=FORCE
+
+    exec fnd bin FNDLOAD apps/&appspwd 0 Y UPLOAD $FND_TOP/patch/115/import/afcpreqg.lct $XBOL_TOP/admin/AR/xx_ar_rev_chkout/import/rgu_us_xx_ar_rev_chkout_db_v4.ldt - CUSTOM_MODE=FORCE
+
+  end connection apps
+
+end patch xx_ar_rev_chkout_db_v4
