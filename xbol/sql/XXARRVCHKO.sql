@@ -38,9 +38,9 @@ whenever oserror exit failure rollback
 set verify off
 
 declare
-  cursor c_data_print (cp_org_id             ar.ra_customer_trx_lines_all.org_id%type
-                      ,cp_creation_date_from ar.ra_customer_trx_lines_all.creation_date%type
-                      ,cp_creation_date_to   ar.ra_customer_trx_lines_all.creation_date%type
+  cursor c_data_print (cp_org_id             ar.ra_customer_trx_all.org_id%type
+                      ,cp_creation_date_from ar.ra_customer_trx_all.creation_date%type
+                      ,cp_creation_date_to   ar.ra_customer_trx_all.creation_date%type
                       ,cp_attribute8         ar.ra_customer_trx_lines_all.attribute8%type
                       ,cp_prod_excl_code     applsys.fnd_descr_flex_contexts.descriptive_flex_context_code%type)
   is
@@ -110,8 +110,8 @@ declare
     and    gcc.segment5               != '101'
     and    gcc.segment5               != '102'
     and    rctl.attribute8            > nvl(cp_attribute8,rctl.attribute8)
-    and    rctl.creation_date         > nvl(cp_creation_date_from,(rctl.creation_date-(1/86400)))
-    and    rctl.creation_date         < nvl(cp_creation_date_to,(rctl.creation_date+(1/86400)))
+    and    rct.creation_date          > nvl(cp_creation_date_from,(rct.creation_date-(1/86400)))
+    and    rct.creation_date          < nvl(cp_creation_date_to,(rct.creation_date+(1/86400)))
     group by rct.org_id
             ,rct.purchase_order
             ,rctl.attribute11
