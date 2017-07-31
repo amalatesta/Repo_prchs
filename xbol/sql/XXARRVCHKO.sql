@@ -109,7 +109,7 @@ declare
     and    gcc.segment9               in ('20','30')
     and    gcc.segment5               != '101'
     and    gcc.segment5               != '102'
-    and    rctl.attribute8            > nvl(cp_attribute8,rctl.attribute8)
+    and    nvl(rctl.attribute8,'X')   >= nvl(cp_attribute8,nvl(rctl.attribute8,'X'))
     and    rct.creation_date          > nvl(cp_creation_date_from,(rct.creation_date-(1/86400)))
     and    rct.creation_date          < nvl(cp_creation_date_to,(rct.creation_date+1))
     group by rct.org_id
