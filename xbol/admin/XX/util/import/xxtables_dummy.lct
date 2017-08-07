@@ -1,0 +1,921 @@
+#
+#
+#  CUSTOMIZACIONES
+#
+#    IMPORTANTE
+#
+#    SE DEBEG COPIAR EL ARCHIVO LCT afdict.lct  DE $FND_TOP/patch/115/import
+#
+#    Y COMENTAR EN EL DOWNLOAD LAS REFERENCIAS A LAS TABLAS FND_BUILDING_BL%
+#
+#    COMO EJEMPLO SE PUEDE BUSCAR LA LEYENDA "CUSTOMIZACIONES_ARGENTINA" EN ESTE
+#
+#    DOCUMENTO
+#
+
+#
+# $Header: afdict.lct 115.16 2004/12/08 16:50:30 fskinner noship $
+#
+# afdict.lct - FND Dictionary Loader Configuration
+#
+# Entities
+#    FND_TABLES  
+#        FND_COLUMNS
+#        FND_HISTOGRAM_COLS
+#        FND_INDEXES
+#            FND_INDEX_COLUMNS
+#        FND_PRIMARY_KEYS
+#            FND_PRIMARY_KEY_COLUMNS
+#        FND_FOREIGN_KEYS
+#            FND_FOREIGN_KEY_COLUMNS
+#    FND_VIEWS
+#        FND_VIEW_COLUMNS
+#    FND_SEQUENCES
+#
+# Download Notice
+# ===============
+# This is for INTERNAL USE ONLY.  
+# The columns required for proper download are likely only to be 
+# populated in the Oracle Seed database.  An empty ldt file is the 
+# anticipated result when these columns are not populated.
+#
+#
+# Upload Logic 
+# ============
+# Table:        New -> insert FND_TABLES and FND_COLUMNS.
+#               Old -> update FND_TABLES except TABLE_ID. 
+#                      insert/update FND_COLUMNS(except COLUMN_ID).
+#                      do not delete from FND_COLUMNS.
+#
+# Index:        New -> insert into FND_INDEXES and FND_INDEX_COLUMNS.
+#               Old -> update FND_INDEXES except INDEX_ID.
+#                      delete everything from FND_INDEX_COLUMNS.
+#                      re-insert into FND_INDEX_COLUMNS.
+#
+# Primary Key : New -> insert FND_PRIMARY_KEYS and FND_PRIMARY_KEY_COLUMNS.
+#               Old -> update FND_PRIMARY_KEYS except PRIMARY_KEY_ID.
+#                      delete everything from FND_PRIMARY_KEY_COLUMNS.
+#                      re-insert into FND_PRIMARY_KEY_COLUMNS.
+#                          
+# Foreign Key : New -> insert FND_FOREIGN_KEYS and FND_FOREIGN_KEY_COLUMNS.
+#                      (joint to find out primary key info)
+#               Old -> update FND_FOREIGN_KEYS except FOREIGN_KEY_ID.
+#                      delete everything from FND_FOREIGN_KEY_COLUMNS.
+#                      re-insert into FND_FOREIGN_KEY_COLUMNS.
+#                      (joint to find out primary key info)
+# Sequence:     New -> insert FND_SEQUENCES.
+#               Old -> update FND_SEQUENCES.
+#
+# View:         New -> insert FND_VIEWS and FND_VIEW_COLUMNS.
+#               Old -> update FND_VIEWS except VIEW_ID.
+#                      delete everything from FND_VIEW_COLUMNS.
+#                      re-insert into FND_VIEW_COLUMNS.
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+52 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afdict.lct @~PROD:~PATH/~FILE"
+
+DEFINE FND_TABLE
+  KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  KEY   BUILDING_BLOCK_NAME             VARCHAR2(80)
+  KEY   TABLE_NAME                      VARCHAR2(30)
+  BASE  USER_TABLE_NAME                 VARCHAR2(80)
+  BASE  TABLE_TYPE                      VARCHAR2(1)
+  BASE  DESCRIPTION                     VARCHAR2(240)
+  BASE  AUTO_SIZE                       VARCHAR2(1)
+  BASE  INITIAL_EXTENT                  VARCHAR2(50)
+  BASE  NEXT_EXTENT                     VARCHAR2(50)
+  BASE  MIN_EXTENTS                     VARCHAR2(50)
+  BASE  MAX_EXTENTS                     VARCHAR2(50)
+  BASE  INI_TRANS                       VARCHAR2(50)
+  BASE  MAX_TRANS                       VARCHAR2(50)
+  BASE  PCT_FREE                        VARCHAR2(50)
+  BASE  PCT_INCREASE                    VARCHAR2(50)
+  BASE  PCT_USED                        VARCHAR2(50)
+  BASE  HOSTED_SUPPORT_STYLE            VARCHAR2(30)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  DEFINE FND_COLUMN
+    KEY   COLUMN_NAME                     VARCHAR2(30)
+    BASE  USER_COLUMN_NAME                VARCHAR2(80)
+    BASE  COLUMN_SEQUENCE                 VARCHAR2(50)
+    BASE  COLUMN_TYPE                     VARCHAR2(1)
+    BASE  WIDTH                           VARCHAR2(50)
+    BASE  NULL_ALLOWED_FLAG               VARCHAR2(1)
+    BASE  DESCRIPTION                     VARCHAR2(300)
+    BASE  DEFAULT_VALUE			  	VARCHAR2(2000)
+    BASE  TRANSLATE_FLAG                  VARCHAR2(1)
+    BASE  PRECISION                       VARCHAR2(50)
+    BASE  SCALE                           VARCHAR2(50)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  FLEXFIELD_USAGE_CODE	      VARCHAR2(1)
+    BASE  FLEXFIELD_APPLICATION_ID	  	VARCHAR2(50)
+    BASE  FLEXFIELD_NAME 		  	VARCHAR2(30)
+    BASE  FLEX_VALUE_SET_APPLICATION_ID	VARCHAR2(50)
+    BASE  FLEX_VALUE_SET_ID		  	VARCHAR2(50)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  END FND_COLUMN
+  DEFINE FND_HISTOGRAM_COL
+    KEY   COLUMN_NAME                     VARCHAR2(30)
+    BASE  PARTITION                       VARCHAR2(30)
+    BASE  HSIZE                           VARCHAR2(50)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+  END FND_HISTOGRAM_COL
+  DEFINE FND_INDEX
+    KEY   INDEX_NAME                      VARCHAR2(30)
+    BASE  UNIQUENESS                      VARCHAR2(1)
+    BASE  AUTO_SIZE                       VARCHAR2(1)
+    BASE  DESCRIPTION                     VARCHAR2(240)
+    BASE  INITIAL_EXTENT                  VARCHAR2(50)
+    BASE  NEXT_EXTENT                     VARCHAR2(50)
+    BASE  MIN_EXTENTS                     VARCHAR2(50)
+    BASE  MAX_EXTENTS                     VARCHAR2(50)
+    BASE  INI_TRANS                       VARCHAR2(50)
+    BASE  MAX_TRANS                       VARCHAR2(50)
+    BASE  PCT_FREE                        VARCHAR2(50)
+    BASE  PCT_INCREASE                    VARCHAR2(50)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    DEFINE FND_INDEX_COLUMN
+      KEY   INDEX_COLUMN_NAME               VARCHAR2(30)
+      BASE  INDEX_COLUMN_SEQUENCE           VARCHAR2(50)
+      CTX   OWNER                           VARCHAR2(4000)
+      BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    END FND_INDEX_COLUMN
+  END FND_INDEX
+  DEFINE FND_PRIMARY_KEY
+    KEY   PRIMARY_KEY_NAME                VARCHAR2(30)
+    BASE  PRIMARY_KEY_TYPE                VARCHAR2(1)
+    BASE  AUDIT_KEY_FLAG                  VARCHAR2(1)
+    BASE  ENABLED_FLAG                    VARCHAR2(1)
+    BASE  DESCRIPTION                     VARCHAR2(240)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    DEFINE FND_PRIMARY_KEY_COLUMN
+      KEY   PRIMARY_KEY_COLUMN_NAME       VARCHAR2(30)
+      BASE  PRIMARY_KEY_COLUMN_SEQUENCE   VARCHAR2(50)
+      CTX   OWNER                         VARCHAR2(4000)
+      BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    END FND_PRIMARY_KEY_COLUMN
+  END FND_PRIMARY_KEY
+  DEFINE FND_FOREIGN_KEY
+    KEY   FOREIGN_KEY_NAME                VARCHAR2(30)
+    BASE  PRIMARY_KEY_APPLICATION_NAME    VARCHAR2(50)
+    BASE  PRIMARY_KEY_TABLE_NAME          VARCHAR2(30)
+    BASE  PRIMARY_KEY_NAME                VARCHAR2(30)
+    BASE  DESCRIPTION                     VARCHAR2(240)
+    BASE  CASCADE_BEHAVIOR                VARCHAR2(1)
+    BASE  FOREIGN_KEY_RELATION            VARCHAR2(1)
+    BASE  CONDITION                       VARCHAR2(2000)
+    BASE  ENABLED_FLAG                    VARCHAR2(1)
+    CTX   OWNER                           VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    DEFINE FND_FOREIGN_KEY_COLUMN
+      KEY   FOREIGN_KEY_COLUMN_NAME       VARCHAR2(30)
+      BASE  FOREIGN_KEY_COLUMN_SEQUENCE   VARCHAR2(50)
+      BASE  CASCADE_VALUE                 VARCHAR2(80)
+      CTX   OWNER                         VARCHAR2(4000)
+      BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    END FND_FOREIGN_KEY_COLUMN
+  END FND_FOREIGN_KEY
+END FND_TABLE
+
+DEFINE FND_SEQUENCE
+  KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  KEY   BUILDING_BLOCK_NAME             VARCHAR2(80)
+  KEY   SEQUENCE_NAME                   VARCHAR2(30)
+  BASE  START_VALUE                     VARCHAR2(50)
+  BASE  DESCRIPTION                     VARCHAR2(240)
+  BASE  INCREMENT_BY                    VARCHAR2(50)
+  BASE  MIN_VALUE                       VARCHAR2(50)
+  BASE  MAX_VALUE                       VARCHAR2(50)
+  BASE  CACHE_SIZE                      VARCHAR2(50)
+  BASE  CYCLE_FLAG                      VARCHAR2(1)
+  BASE  ORDER_FLAG                      VARCHAR2(1)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+END FND_SEQUENCE
+
+DEFINE FND_VIEW
+  KEY   APPLICATION_SHORT_NAME          VARCHAR2(50)
+  KEY   BUILDING_BLOCK_NAME             VARCHAR2(80)
+  KEY   VIEW_NAME                       VARCHAR2(30)
+  BASE  TEXT                            VARCHAR2(64000)
+  BASE  DESCRIPTION                     VARCHAR2(240)
+  CTX   OWNER                           VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+    DEFINE FND_VIEW_COLUMN
+      KEY   VIEW_COLUMN_NAME              VARCHAR2(30)
+      BASE  VIEW_COLUMN_SEQUENCE          VARCHAR2(50)
+      CTX   OWNER                         VARCHAR2(4000)
+      BASE  LAST_UPDATE_DATE              VARCHAR2(10)
+    END FND_VIEW_COLUMN
+END FND_VIEW
+
+
+DOWNLOAD FND_TABLE
+  "select A.APPLICATION_SHORT_NAME,
+/* CUSTOMIZACIONES_ARGENTINA */
+          NULL BUILDING_BLOCK_NAME,
+          T.TABLE_NAME,  
+          T.USER_TABLE_NAME,
+          T.TABLE_TYPE,
+          T.DESCRIPTION,
+          T.AUTO_SIZE,
+          T.INITIAL_EXTENT,
+          T.NEXT_EXTENT,
+          T.MIN_EXTENTS,
+          T.MAX_EXTENTS,
+          T.INI_TRANS,
+          T.MAX_TRANS,
+          T.PCT_FREE,
+          T.PCT_INCREASE,
+          T.PCT_USED,
+          T.HOSTED_SUPPORT_STYLE,
+          fnd_load_util.owner_name(T.LAST_UPDATED_BY) OWNER,
+          to_char(T.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_TABLES T,  
+          FND_APPLICATION A
+/* CUSTOMIZACIONES_ARGENTINA 
+          FND_BUILDING_BLOCKS B,
+          FND_BUILDING_BLOCK_OBJECTS BO
+*/
+   where A.APPLICATION_ID = T.APPLICATION_ID  
+   and  (:APPLICATION_SHORT_NAME is null or
+            (:APPLICATION_SHORT_NAME is not null 
+                 and A.APPLICATION_SHORT_NAME like upper(:APPLICATION_SHORT_NAME)))
+/* CUSTOMIZACIONES_ARGENTINA 
+   and    A.APPLICATION_ID = B.APPLICATION_ID  
+   and    (:BUILDING_BLOCK_NAME is null or
+            (:BUILDING_BLOCK_NAME is not null 
+                 and upper(B.BUILDING_BLOCK_NAME) like upper(:BUILDING_BLOCK_NAME)))
+   and    BO.APPLICATION_ID = B.APPLICATION_ID
+   and    BO.BUILDING_BLOCK_ID = B.BUILDING_BLOCK_ID
+   and    BO.OBJECT_TYPE= 'T'
+   and    BO.OBJECT_APPLICATION_ID = T.APPLICATION_ID
+   and    BO.OBJECT_ID = T.TABLE_ID
+*/
+   and    (:TABLE_NAME is null or 
+             (:TABLE_NAME is not null and T.TABLE_NAME like upper(:TABLE_NAME)))
+   order by 1, 2 "
+
+DOWNLOAD FND_COLUMN
+  "select C.COLUMN_NAME,  
+          C.USER_COLUMN_NAME,
+          C.COLUMN_SEQUENCE,
+          C.COLUMN_TYPE,
+          C.WIDTH,
+          C.NULL_ALLOWED_FLAG,
+          C.DESCRIPTION,
+          C.DEFAULT_VALUE,
+          C.TRANSLATE_FLAG,
+          C.PRECISION,
+          C.SCALE,
+           fnd_load_util.owner_name(C.LAST_UPDATED_BY) OWNER,
+          C.FLEXFIELD_USAGE_CODE,
+          C.FLEXFIELD_APPLICATION_ID,
+          C.FLEXFIELD_NAME,
+          C.FLEX_VALUE_SET_APPLICATION_ID,
+          C.FLEX_VALUE_SET_ID,
+          to_char(C.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_COLUMNS C,   
+          FND_TABLES T,
+          FND_APPLICATION A
+   where  A.APPLICATION_ID = T.APPLICATION_ID  
+   and    A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.TABLE_ID = C.TABLE_ID
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    C.APPLICATION_ID = T.APPLICATION_ID
+   order by 1 "
+
+DOWNLOAD FND_HISTOGRAM_COL
+  "select C.COLUMN_NAME,  
+          C.PARTITION,
+          C.HSIZE,
+           fnd_load_util.owner_name(C.LAST_UPDATED_BY) OWNER, 
+          to_char(C.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_HISTOGRAM_COLS C,   
+          FND_TABLES T,
+          FND_APPLICATION A
+   where  A.APPLICATION_ID = T.APPLICATION_ID  
+   and    A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.TABLE_NAME = C.TABLE_NAME
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    C.APPLICATION_ID = T.APPLICATION_ID
+   order by 1 "
+
+DOWNLOAD FND_INDEX
+  "select I.INDEX_NAME,     
+          I.UNIQUENESS,
+          I.AUTO_SIZE,
+          I.DESCRIPTION,
+          I.INITIAL_EXTENT,
+          I.NEXT_EXTENT,
+          I.MIN_EXTENTS,
+          I.MAX_EXTENTS,
+          I.INI_TRANS,
+          I.MAX_TRANS,
+          I.PCT_FREE,
+          I.PCT_INCREASE,
+           fnd_load_util.owner_name(I.LAST_UPDATED_BY) OWNER, 
+          to_char(I.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_TABLES T,  
+          FND_APPLICATION A,
+          FND_INDEXES I
+   where  A.APPLICATION_ID = T.APPLICATION_ID  
+   and    A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    I.TABLE_ID = T.TABLE_ID
+   and    I.APPLICATION_ID = T.APPLICATION_ID
+   order by 1 "
+
+DOWNLOAD FND_INDEX_COLUMN
+  "select C.COLUMN_NAME INDEX_COLUMN_NAME,  
+          IC.COLUMN_SEQUENCE INDEX_COLUMN_SEQUENCE,
+           fnd_load_util.owner_name(IC.LAST_UPDATED_BY) OWNER, 
+          to_char(IC.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_COLUMNS C,   
+          FND_INDEXES I,
+          FND_INDEX_COLUMNS IC,
+          FND_TABLES T,
+          FND_APPLICATION A
+   where  A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.APPLICATION_ID = A.APPLICATION_ID
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    I.TABLE_ID = T.TABLE_ID
+   and    I.APPLICATION_ID = T.APPLICATION_ID
+   and    I.INDEX_NAME = :INDEX_NAME
+   and    IC.APPLICATION_ID = I.APPLICATION_ID
+   and    IC.TABLE_ID = I.TABLE_ID
+   and    IC.INDEX_ID = I.INDEX_ID
+   and    C.APPLICATION_ID = IC.APPLICATION_ID
+   and    C.TABLE_ID = IC.TABLE_ID
+   and    C.COLUMN_ID = IC.COLUMN_ID
+   order by 1 "
+
+DOWNLOAD FND_PRIMARY_KEY
+  "select P.PRIMARY_KEY_NAME,     
+          P.PRIMARY_KEY_TYPE,
+          P.AUDIT_KEY_FLAG,
+          P.ENABLED_FLAG,
+          P.DESCRIPTION,
+           fnd_load_util.owner_name(P.LAST_UPDATED_BY) OWNER, 
+          to_char(P.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_TABLES T,  
+          FND_APPLICATION A,
+          FND_PRIMARY_KEYS P
+   where  A.APPLICATION_ID = T.APPLICATION_ID  
+   and    A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    P.TABLE_ID = T.TABLE_ID
+   and    P.APPLICATION_ID = T.APPLICATION_ID
+   order by 1 "
+
+DOWNLOAD FND_PRIMARY_KEY_COLUMN
+  "select C.COLUMN_NAME PRIMARY_KEY_COLUMN_NAME,  
+          PC.PRIMARY_KEY_SEQUENCE PRIMARY_KEY_COLUMN_SEQUENCE,
+           fnd_load_util.owner_name(PC.LAST_UPDATED_BY) OWNER, 
+          to_char(PC.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_COLUMNS C,   
+          FND_PRIMARY_KEYS P,
+          FND_PRIMARY_KEY_COLUMNS PC,
+          FND_TABLES T,
+          FND_APPLICATION A
+   where  A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.APPLICATION_ID = A.APPLICATION_ID
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    P.TABLE_ID = T.TABLE_ID
+   and    P.APPLICATION_ID = T.APPLICATION_ID
+   and    P.PRIMARY_KEY_NAME = :PRIMARY_KEY_NAME
+   and    PC.APPLICATION_ID = P.APPLICATION_ID
+   and    PC.TABLE_ID = P.TABLE_ID
+   and    PC.PRIMARY_KEY_ID = P.PRIMARY_KEY_ID
+   and    C.APPLICATION_ID = PC.APPLICATION_ID
+   and    C.TABLE_ID = PC.TABLE_ID
+   and    C.COLUMN_ID = PC.COLUMN_ID
+   order by 1 "
+
+DOWNLOAD FND_FOREIGN_KEY
+  "select F.FOREIGN_KEY_NAME,     
+          PA.APPLICATION_SHORT_NAME,
+          PT.TABLE_NAME,
+          P.PRIMARY_KEY_NAME,
+          F.DESCRIPTION,
+          F.CASCADE_BEHAVIOR,
+          F.FOREIGN_KEY_RELATION,
+          F.CONDITION,
+          F.ENABLED_FLAG,
+           fnd_load_util.owner_name(F.LAST_UPDATED_BY) OWNER, 
+          to_char(F.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_TABLES T,  
+          FND_APPLICATION A,
+          FND_FOREIGN_KEYS F,
+          FND_APPLICATION PA,
+          FND_TABLES PT,
+          FND_PRIMARY_KEYS P
+   where  A.APPLICATION_ID = T.APPLICATION_ID  
+   and    A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    F.TABLE_ID = T.TABLE_ID
+   and    F.APPLICATION_ID = T.APPLICATION_ID
+   and    F.PRIMARY_KEY_APPLICATION_ID = PA.APPLICATION_ID
+   and    F.PRIMARY_KEY_TABLE_ID = PT.TABLE_ID
+   and    F.PRIMARY_KEY_APPLICATION_ID = PT.APPLICATION_ID
+   and    F.PRIMARY_KEY_TABLE_ID = P.TABLE_ID
+   and    F.PRIMARY_KEY_APPLICATION_ID = P.APPLICATION_ID
+   and    F.PRIMARY_KEY_ID = P.PRIMARY_KEY_ID
+   order by 1 "
+
+DOWNLOAD FND_FOREIGN_KEY_COLUMN
+  "select C.COLUMN_NAME FOREIGN_KEY_COLUMN_NAME,  
+          FC.FOREIGN_KEY_SEQUENCE FOREIGN_KEY_COLUMN_SEQUENCE,
+          FC.CASCADE_VALUE,
+           fnd_load_util.owner_name(FC.LAST_UPDATED_BY) OWNER, 
+          to_char(FC.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_COLUMNS C,   
+          FND_FOREIGN_KEYS F,
+          FND_FOREIGN_KEY_COLUMNS FC,
+          FND_TABLES T,
+          FND_APPLICATION A
+   where  A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    T.APPLICATION_ID = A.APPLICATION_ID
+   and    T.TABLE_NAME = :TABLE_NAME
+   and    F.TABLE_ID = T.TABLE_ID
+   and    F.APPLICATION_ID = T.APPLICATION_ID
+   and    F.FOREIGN_KEY_NAME = :FOREIGN_KEY_NAME
+   and    FC.APPLICATION_ID = F.APPLICATION_ID
+   and    FC.TABLE_ID = F.TABLE_ID
+   and    FC.FOREIGN_KEY_ID = F.FOREIGN_KEY_ID
+   and    C.APPLICATION_ID = FC.APPLICATION_ID
+   and    C.TABLE_ID = FC.TABLE_ID
+   and    C.COLUMN_ID = FC.COLUMN_ID
+   order by 1 "
+
+DOWNLOAD FND_SEQUENCE
+  "select A.APPLICATION_SHORT_NAME,
+/* CUSTOMIZACIONES_ARGENTINA */
+          NULL BUILDING_BLOCK_NAME,
+          S.SEQUENCE_NAME,
+          S.START_VALUE,
+          S.DESCRIPTION,
+          S.INCREMENT_BY,
+          S.MIN_VALUE,
+          S.MAX_VALUE,
+          S.CACHE_SIZE,
+          S.CYCLE_FLAG,
+          S.ORDER_FLAG,
+           fnd_load_util.owner_name(S.LAST_UPDATED_BY) OWNER, 
+          to_char(S.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_SEQUENCES S,
+/* CUSTOMIZACIONES_ARGENTINA 
+          FND_BUILDING_BLOCKS B,
+          FND_BUILDING_BLOCK_OBJECTS BO,
+*/
+          FND_APPLICATION A  
+   where  S.APPLICATION_ID = A.APPLICATION_ID
+   and    (:APPLICATION_SHORT_NAME is null or
+            (:APPLICATION_SHORT_NAME is not null 
+                 and A.APPLICATION_SHORT_NAME like upper(:APPLICATION_SHORT_NAME)))
+/* CUSTOMIZACIONES_ARGENTINA 
+   and    A.APPLICATION_ID = B.APPLICATION_ID  
+   and    (:BUILDING_BLOCK_NAME is null or
+            (:BUILDING_BLOCK_NAME is not null 
+                 and upper(B.BUILDING_BLOCK_NAME) like upper(:BUILDING_BLOCK_NAME)))
+   and    BO.APPLICATION_ID = B.APPLICATION_ID
+   and    BO.BUILDING_BLOCK_ID = B.BUILDING_BLOCK_ID
+   and    BO.OBJECT_TYPE= 'S'
+   and    BO.OBJECT_APPLICATION_ID = S.APPLICATION_ID
+   and    BO.OBJECT_ID = S.SEQUENCE_ID
+*/
+   and    (:SEQUENCE_NAME is null or 
+          (:SEQUENCE_NAME is not null and S.SEQUENCE_NAME like upper(:SEQUENCE_NAME)))
+   order by 1, 2 "
+
+DOWNLOAD FND_VIEW
+  "select A.APPLICATION_SHORT_NAME,
+/* CUSTOMIZACIONES_ARGENTINA */
+          NULL BUILDING_BLOCK_NAME,
+          V.VIEW_NAME,
+          V.TEXT,
+          V.DESCRIPTION,
+           fnd_load_util.owner_name(V.LAST_UPDATED_BY) OWNER, 
+          to_char(V.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_VIEWS V,  
+/* CUSTOMIZACIONES_ARGENTINA
+          FND_BUILDING_BLOCKS B,
+          FND_BUILDING_BLOCK_OBJECTS BO,
+*/
+          FND_APPLICATION A  
+   where  V.APPLICATION_ID = A.APPLICATION_ID 
+   and    (:APPLICATION_SHORT_NAME is null or
+            (:APPLICATION_SHORT_NAME is not null 
+                 and A.APPLICATION_SHORT_NAME like upper(:APPLICATION_SHORT_NAME)))
+/* CUSTOMIZACIONES_ARGENTINA
+   and    A.APPLICATION_ID = B.APPLICATION_ID  
+   and    (:BUILDING_BLOCK_NAME is null or
+            (:BUILDING_BLOCK_NAME is not null 
+                 and upper(B.BUILDING_BLOCK_NAME) like upper(:BUILDING_BLOCK_NAME)))
+   and    BO.APPLICATION_ID = B.APPLICATION_ID
+   and    BO.BUILDING_BLOCK_ID = B.BUILDING_BLOCK_ID
+   and    BO.OBJECT_TYPE= 'V'
+   and    BO.OBJECT_APPLICATION_ID = V.APPLICATION_ID
+   and    BO.OBJECT_ID = V.VIEW_ID
+*/
+   and    (:VIEW_NAME is null or 
+          (:VIEW_NAME is not null and V.VIEW_NAME like upper(:VIEW_NAME)))
+   and    Fnd_Dictionary_Pkg.ViewTextLength(A.APPLICATION_ID, V.VIEW_NAME) < 32000
+   order by 1, 2 "
+
+DOWNLOAD FND_VIEW_COLUMN
+  "select VC.COLUMN_NAME VIEW_COLUMN_NAME,  
+          VC.COLUMN_SEQUENCE VIEW_COLUMN_SEQUENCE,
+           fnd_load_util.owner_name(VC.LAST_UPDATED_BY) OWNER, 
+          to_char(VC.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   from   FND_VIEWS V,   
+          FND_VIEW_COLUMNS VC,
+          FND_APPLICATION A
+   where  A.APPLICATION_SHORT_NAME = upper(:APPLICATION_SHORT_NAME)
+   and    V.APPLICATION_ID = A.APPLICATION_ID
+   and    V.VIEW_NAME = :VIEW_NAME
+   and    VC.APPLICATION_ID = V.APPLICATION_ID
+   and    VC.VIEW_ID = V.VIEW_ID
+   order by 1 "
+
+
+UPLOAD FND_TABLE
+  BEGIN 
+   "
+    begin    
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadTable(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_user_table_name => :USER_TABLE_NAME,
+            x_table_type => :TABLE_TYPE,
+            x_description => :DESCRIPTION,
+            x_auto_size => :AUTO_SIZE,
+            x_initial_extent => :INITIAL_EXTENT,
+            x_next_extent => :NEXT_EXTENT,
+            x_min_extents => :MIN_EXTENTS,
+            x_max_extents => :MAX_EXTENTS,
+            x_ini_trans => :INI_TRANS,
+            x_max_trans => :MAX_TRANS,
+            x_pct_free => :PCT_FREE,  
+            x_pct_increase => :PCT_INCREASE,
+            x_pct_used => :PCT_USED,
+            x_hosted_support_style => nvl(:HOSTED_SUPPORT_STYLE, 'LOCAL'),
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+    
+UPLOAD FND_COLUMN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_column_name => :COLUMN_NAME,  
+            x_user_column_name => :USER_COLUMN_NAME,
+            x_column_sequence => :COLUMN_SEQUENCE,  
+            x_column_type => :COLUMN_TYPE,  
+            x_width => :WIDTH,  
+            x_null_allowed_flag => :NULL_ALLOWED_FLAG,  
+            x_description => :DESCRIPTION,
+            x_default_value => :DEFAULT_VALUE,
+            x_translate_flag => :TRANSLATE_FLAG,  
+            x_precision => :PRECISION,  
+            x_scale => :SCALE,
+            x_flexfield_usage_code => :FLEXFIELD_USAGE_CODE,
+            x_flexfield_application_id => :FLEXFIELD_APPLICATION_ID,
+            x_flexfield_name => :FLEXFIELD_NAME,
+            x_flex_value_set_app_id => :FLEX_VALUE_SET_APPLICATION_ID,
+            x_flex_value_set_id => :FLEX_VALUE_SET_ID,
+            x_user_id  => :OWNER,
+            x_custom_mode => :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+UPLOAD FND_HISTOGRAM_COL
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadHistColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_column_name => :COLUMN_NAME,  
+            x_partition => :PARTITION,  
+            x_hsize => :HSIZE,  
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+UPLOAD FND_INDEX
+BEGIN   
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadIndex(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_index_name => :INDEX_NAME,  
+            x_uniqueness => :UNIQUENESS,
+            x_auto_size => :AUTO_SIZE,  
+            x_description => :DESCRIPTION,
+            x_initial_extent => :INITIAL_EXTENT,
+            x_next_extent => :NEXT_EXTENT,
+            x_min_extents => :MIN_EXTENTS,
+            x_max_extents => :MAX_EXTENTS,
+            x_ini_trans => :INI_TRANS,
+            x_max_trans => :MAX_TRANS,
+            x_pct_free => :PCT_FREE,  
+            x_pct_increase => :PCT_INCREASE,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE, 
+            x_phase_mode => 'BEGIN');
+    end; "
+END
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadIndex(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_index_name => :INDEX_NAME,  
+            x_uniqueness => :UNIQUENESS,
+            x_auto_size => :AUTO_SIZE,  
+            x_description => :DESCRIPTION,
+            x_initial_extent => :INITIAL_EXTENT,
+            x_next_extent => :NEXT_EXTENT,
+            x_min_extents => :MIN_EXTENTS,
+            x_max_extents => :MAX_EXTENTS,
+            x_ini_trans => :INI_TRANS,
+            x_max_trans => :MAX_TRANS,
+            x_pct_free => :PCT_FREE,  
+            x_pct_increase => :PCT_INCREASE,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'END');
+    end; "
+
+
+UPLOAD FND_INDEX_COLUMN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadIndexColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_index_name => :INDEX_NAME,  
+            x_index_column_name => :INDEX_COLUMN_NAME,
+            x_index_column_sequence => :INDEX_COLUMN_SEQUENCE,  
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+UPLOAD FND_PRIMARY_KEY
+BEGIN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadPrimaryKey(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_primary_key_name => :PRIMARY_KEY_NAME,  
+            x_primary_key_type => :PRIMARY_KEY_TYPE,
+            x_audit_key_flag => :AUDIT_KEY_FLAG,
+            x_enabled_flag => :ENABLED_FLAG,
+            x_description => :DESCRIPTION,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'BEGIN');
+    end; "
+END
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadPrimaryKey(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_primary_key_name => :PRIMARY_KEY_NAME,  
+            x_primary_key_type => :PRIMARY_KEY_TYPE,
+            x_audit_key_flag => :AUDIT_KEY_FLAG,
+            x_enabled_flag => :ENABLED_FLAG,
+            x_description => :DESCRIPTION,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'END');
+    end; "
+
+
+UPLOAD FND_PRIMARY_KEY_COLUMN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadPrimaryKeyColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_primary_key_name => :PRIMARY_KEY_NAME,  
+            x_primary_key_column_name => :PRIMARY_KEY_COLUMN_NAME,
+            x_primary_key_column_sequence => :PRIMARY_KEY_COLUMN_SEQUENCE,  
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+UPLOAD FND_FOREIGN_KEY
+BEGIN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadForeignKey(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_foreign_key_name => :FOREIGN_KEY_NAME,  
+            x_primary_key_application_name => :PRIMARY_KEY_APPLICATION_NAME,
+            x_primary_key_table_name => :PRIMARY_KEY_TABLE_NAME,
+            x_primary_key_name => :PRIMARY_KEY_NAME,
+            x_description => :DESCRIPTION,
+            x_cascade_behavior => :CASCADE_BEHAVIOR,
+            x_foreign_key_relation => :FOREIGN_KEY_RELATION,
+            x_condition => :CONDITION,
+            x_enabled_flag => :ENABLED_FLAG,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'BEGIN');
+    end; "
+END
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadForeignKey(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_foreign_key_name => :FOREIGN_KEY_NAME,  
+            x_primary_key_application_name => :PRIMARY_KEY_APPLICATION_NAME,
+            x_primary_key_table_name => :PRIMARY_KEY_TABLE_NAME,
+            x_primary_key_name => :PRIMARY_KEY_NAME,
+            x_description => :DESCRIPTION,
+            x_cascade_behavior => :CASCADE_BEHAVIOR,
+            x_foreign_key_relation => :FOREIGN_KEY_RELATION,
+            x_condition => :CONDITION,
+            x_enabled_flag => :ENABLED_FLAG,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'END');
+    end; "
+
+UPLOAD FND_FOREIGN_KEY_COLUMN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadForeignKeyColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_table_name => :TABLE_NAME,  
+            x_foreign_key_name => :FOREIGN_KEY_NAME,  
+            x_foreign_key_column_name => :FOREIGN_KEY_COLUMN_NAME,
+            x_foreign_key_column_sequence => :FOREIGN_KEY_COLUMN_SEQUENCE,  
+            x_cascade_value => :CASCADE_VALUE,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+UPLOAD FND_SEQUENCE
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadSequence(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_sequence_name => :SEQUENCE_NAME,  
+            x_start_value => :START_VALUE,
+            x_description => :DESCRIPTION,
+            x_increment_by => :INCREMENT_BY,
+            x_min_value => :MIN_VALUE,
+            x_max_value => :MAX_VALUE,
+            x_cache_size => :CACHE_SIZE,
+            x_cycle_flag => :CYCLE_FLAG,
+            x_order_flag => :ORDER_FLAG,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+    
+UPLOAD FND_VIEW
+BEGIN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadView(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_view_name => :VIEW_NAME,  
+            x_text => :TEXT,
+            x_description => :DESCRIPTION,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'BEGIN');
+    end; "
+END
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadView(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_view_name => :VIEW_NAME,  
+            x_text => :TEXT,
+            x_description => :DESCRIPTION,
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE,
+            x_phase_mode => 'END');
+    end; "
+
+    
+UPLOAD FND_VIEW_COLUMN
+   "
+    begin  
+
+     if (:UPLOAD_MODE = 'NLS') then
+       return;
+     end if;
+
+      Fnd_Dictionary_Pkg.UploadViewColumn(  
+            x_application_short_name => :APPLICATION_SHORT_NAME,
+            x_view_name => :VIEW_NAME,  
+            x_view_column_name => :VIEW_COLUMN_NAME,
+            x_view_column_sequence => :VIEW_COLUMN_SEQUENCE,  
+            x_user_id => :OWNER,
+            x_custom_mode=> :CUSTOM_MODE,
+            x_last_update_date => :LAST_UPDATE_DATE);
+    end; "
+
+

@@ -1,0 +1,293 @@
+#
+# $Header: xxcustom.lct 115.1 2006/03/03 10:25:32 pkm ship      $
+#
+# xxcustom.lct - Standard Lookups Loader Configuration
+#
+# Entities
+#    XX_CUSTOM_HEADERS  - Customs
+#        XX_CUSTOM_DETAILS - Custom Details
+#        XX_CUSTOM_PREREQS - Custom Details
+#        XX_CUSTOM_DRIVERS - Custom Details
+#        XX_CUSTOM_EXEC    - Custom Details
+#
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+51 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @XBOL:admin/XX/Util/import/xxcustom.lct @~PROD:~PATH/~FILE"
+
+DEFINE XX_CUSTOM_HEADERS
+  KEY   CUSTOM_CODE                     VARCHAR2(30)
+  BASE  DESCRIPTION                     VARCHAR2(500)
+  BASE  CUSTOM_PATH                     VARCHAR2(100)
+  BASE  USER_REFERENCE                  VARCHAR2(100)
+  BASE  EXEC_DEFAULT_TYPE               VARCHAR2(30)
+  BASE  EXEC_DEFAULT_VALUE              VARCHAR2(2000)
+  CTX   LAST_UPDATED_BY                 VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE                VARCHAR2(10)
+
+  DEFINE XX_CUSTOM_DETAILS
+    BASE   SEQUENCE                     VARCHAR2(30)
+    BASE   CUSTOM_CODE                  VARCHAR2(30)
+    BASE   OBJECT_TYPE                  VARCHAR2(30)
+    BASE   OBJECT_LEVEL1                VARCHAR2(50)
+    BASE   OBJECT_LEVEL2                VARCHAR2(50)
+    BASE   OBJECT_LEVEL3                VARCHAR2(50)
+    BASE   OBJECT_LEVEL4                VARCHAR2(50)
+    BASE   CUSTOMIZE_FROM               VARCHAR2(100)
+    CTX    LAST_UPDATED_BY              VARCHAR2(4000)
+    BASE   LAST_UPDATE_DATE             VARCHAR2(10)
+  END XX_CUSTOM_DETAILS
+
+  DEFINE XX_CUSTOM_DRIVERS
+    BASE   NAME                         VARCHAR2(30)
+    BASE   CUSTOM_CODE                  VARCHAR2(30)
+    BASE   DESCRIPTION                  VARCHAR2(100)
+    CTX    LAST_UPDATED_BY              VARCHAR2(4000)
+    BASE   LAST_UPDATE_DATE             VARCHAR2(10)
+  END XX_CUSTOM_DRIVERS
+
+  DEFINE XX_CUSTOM_EXECS
+    BASE   EXEC_VALUE                   VARCHAR2(100)
+    BASE   CUSTOM_CODE                  VARCHAR2(30)
+    CTX    LAST_UPDATED_BY              VARCHAR2(4000)
+    BASE   LAST_UPDATE_DATE             VARCHAR2(10)
+  END XX_CUSTOM_EXECS
+
+  DEFINE XX_CUSTOM_PREREQS
+    BASE   PREREQ_CUSTOM_CODE           VARCHAR2(30)
+    BASE   CUSTOM_CODE                  VARCHAR2(30)
+    CTX    LAST_UPDATED_BY              VARCHAR2(4000)
+    BASE   LAST_UPDATE_DATE             VARCHAR2(10)
+  END XX_CUSTOM_PREREQS
+
+END XX_CUSTOM_HEADERS
+
+DOWNLOAD XX_CUSTOM_HEADERS
+  "SELECT   ch.custom_code
+          , ch.description
+          , ch.path custom_path
+          , ch.user_reference
+          , exec_default_type
+          , exec_default_value
+          , fnd_load_util.owner_name(ch.LAST_UPDATED_BY) last_updated_by
+          , to_char(ch.last_update_date, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   FROM XX_CUSTOM_HEADERS  ch
+   WHERE  (:CUSTOM_CODE IS NULL
+        OR (:CUSTOM_CODE IS NOT NULL 
+           AND ch.custom_code    = :CUSTOM_CODE
+           )
+        )
+   ORDER BY ch.custom_code"
+
+DOWNLOAD XX_CUSTOM_DETAILS
+  "SELECT cd.SEQUENCE 
+        , ch.CUSTOM_CODE
+        , cd.OBJECT_TYPE
+        , cd.OBJECT_LEVEL1
+        , cd.OBJECT_LEVEL2
+        , cd.OBJECT_LEVEL3
+        , cd.OBJECT_LEVEL4
+        , cd.CUSTOMIZE_FROM
+        , fnd_load_util.owner_name(cd.LAST_UPDATED_BY) last_updated_by
+        , to_char(cd.last_update_date, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   FROM  XX_CUSTOM_DETAILS  cd
+       , XX_CUSTOM_HEADERS  ch
+   WHERE ch.custom_id    = cd.custom_id
+   AND   ch.custom_code    = :CUSTOM_CODE "
+
+DOWNLOAD XX_CUSTOM_DRIVERS
+  "SELECT cd.NAME 
+        , ch.CUSTOM_CODE
+        , cd.DESCRIPTION
+        , fnd_load_util.owner_name(cd.LAST_UPDATED_BY) last_updated_by
+        , to_char(cd.last_update_date, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   FROM  XX_CUSTOM_DRIVERS cd
+       , XX_CUSTOM_HEADERS  ch
+   WHERE ch.custom_id    = cd.custom_id
+   AND   ch.custom_code    = :CUSTOM_CODE "
+
+DOWNLOAD XX_CUSTOM_EXECS
+  "SELECT ce.EXEC_VALUE 
+        , ch.CUSTOM_CODE
+        , fnd_load_util.owner_name(ce.LAST_UPDATED_BY) last_updated_by
+        , to_char(ce.last_update_date, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   FROM  XX_CUSTOM_EXECS    ce
+       , XX_CUSTOM_HEADERS  ch
+   WHERE ch.custom_id    = ce.custom_id
+   AND   ch.custom_code    = :CUSTOM_CODE "
+
+DOWNLOAD XX_CUSTOM_PREREQS
+  "SELECT chp.CUSTOM_CODE 
+        , ch.CUSTOM_CODE
+        , fnd_load_util.owner_name(cp.LAST_UPDATED_BY) last_updated_by
+        , to_char(cp.last_update_date, 'YYYY/MM/DD') LAST_UPDATE_DATE
+   FROM  XX_CUSTOM_PREREQS    cp
+       , XX_CUSTOM_HEADERS    ch
+       , XX_CUSTOM_HEADERS    chp
+   WHERE ch.custom_id    = cp.custom_id
+   AND   chp.custom_id   = cp.prereq_custom_id
+   AND   ch.custom_code  = :CUSTOM_CODE "
+
+
+UPLOAD XX_CUSTOM_HEADERS
+  BEGIN
+   " DECLARE
+        v_ret_val        BOOLEAN;
+        v_errmsg         VARCHAR2(2000);
+        v_custom_id      NUMBER;
+        v_pr_custom_id   NUMBER;
+     BEGIN
+        v_ret_val := xx_customs_pk.Delete_Custom (
+			p_custom_code 		=> :CUSTOM_CODE,
+			p_mesg_error		=> v_errmsg);
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+
+        v_ret_val := xx_customs_pk.Insert_Custom_Headers (
+			p_custom_code 		=> :CUSTOM_CODE,
+			p_description 		=> :DESCRIPTION,
+			p_path			=> :CUSTOM_PATH,
+			p_user_reference	=> :USER_REFERENCE,
+			p_exec_default_type	=> :EXEC_DEFAULT_TYPE,
+			p_exec_default_value	=> :EXEC_DEFAULT_VALUE,
+			p_custom_id		=> v_custom_id,
+			p_mesg_error		=> v_errmsg);
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+
+     END; "
+
+UPLOAD XX_CUSTOM_DETAILS
+   " DECLARE
+        v_ret_val        BOOLEAN;
+        v_errmsg         VARCHAR2(2000);
+        v_custom_id      NUMBER;
+        v_pr_custom_id   NUMBER;
+     BEGIN
+        BEGIN 
+           SELECT custom_id
+           INTO   v_custom_id
+           FROM   xx_custom_headers
+           WHERE  custom_code   = :CUSTOM_CODE;
+        EXCEPTION
+           WHEN others THEN
+              raise_application_error(-20001, 'Error buscando custom_id');
+        END; 
+
+        v_ret_val := xx_customs_pk.Insert_Custom_Details (
+                       p_custom_id             => v_custom_id,
+                       p_sequence              => :SEQUENCE,
+                       p_object_type           => :OBJECT_TYPE,
+                       p_object_level1         => :OBJECT_LEVEL1,
+                       p_object_level2         => :OBJECT_LEVEL2,
+                       p_object_level3         => :OBJECT_LEVEL3,
+                       p_object_level4         => :OBJECT_LEVEL4,
+                       p_customize_from        => :CUSTOMIZE_FROM,
+                       p_mesg_error            => v_errmsg);
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+
+
+     END; "
+
+UPLOAD XX_CUSTOM_DRIVERS
+   " DECLARE
+        v_ret_val        BOOLEAN;
+        v_errmsg         VARCHAR2(2000);
+        v_custom_id      NUMBER;
+        v_pr_custom_id   NUMBER;
+     BEGIN
+        BEGIN 
+           SELECT custom_id
+           INTO   v_custom_id
+           FROM   xx_custom_headers
+           WHERE  custom_code   = :CUSTOM_CODE;
+        EXCEPTION
+           WHEN others THEN
+              raise_application_error(-20001, 'Error buscando custom_id');
+        END; 
+
+        v_ret_val := xx_customs_pk.Insert_Custom_Drivers (
+                       p_custom_id        => v_custom_id,
+                       p_name             => :NAME,
+                       p_description      => :DESCRIPTION,
+                       p_mesg_error       => v_errmsg);
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+     END; "
+
+
+UPLOAD XX_CUSTOM_EXECS
+   " DECLARE
+        v_ret_val        BOOLEAN;
+        v_errmsg         VARCHAR2(2000);
+        v_custom_id      NUMBER;
+        v_pr_custom_id   NUMBER;
+     BEGIN
+        BEGIN 
+           SELECT custom_id
+           INTO   v_custom_id
+           FROM   xx_custom_headers
+           WHERE  custom_code   = :CUSTOM_CODE;
+        EXCEPTION
+           WHEN others THEN
+              raise_application_error(-20001, 'Error buscando custom_id');
+        END; 
+        v_ret_val := xx_customs_pk.Insert_Custom_Execs (
+                       p_custom_id             => v_custom_id,
+                       p_exec_value            => :EXEC_VALUE,
+                       p_mesg_error            => v_errmsg);
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+
+
+     END; "
+
+UPLOAD XX_CUSTOM_PREREQS
+   " DECLARE
+        v_ret_val        BOOLEAN;
+        v_errmsg         VARCHAR2(2000);
+        v_custom_id      NUMBER;
+        v_pr_custom_id   NUMBER;
+     BEGIN
+
+        BEGIN 
+           SELECT custom_id
+           INTO   v_custom_id
+           FROM   xx_custom_headers
+           WHERE  custom_code   = :CUSTOM_CODE;
+        EXCEPTION
+           WHEN others THEN
+              raise_application_error(-20001, 'Error buscando custom_id');
+        END; 
+
+
+        BEGIN 
+           SELECT custom_id
+           INTO   v_pr_custom_id
+           FROM   xx_custom_headers
+           WHERE  custom_code   = :PREREQ_CUSTOM_CODE;
+        EXCEPTION
+           WHEN others THEN
+              raise_application_error(-20001, 'Error buscando pre_custom_id');
+        END; 
+
+
+        v_ret_val :=  xx_customs_pk.Insert_Custom_Prereqs (
+                         p_custom_id     => v_custom_id,
+                         p_prereq_custom_id => v_pr_custom_id,
+                         p_mesg_error    => v_errmsg); 
+
+        IF NOT v_ret_val THEN
+           raise_application_error(-20001, v_errmsg);
+        END IF;
+
+     END; "
+
