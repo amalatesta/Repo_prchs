@@ -1,0 +1,3731 @@
+#
+#
+#  CUSTOMIZACIONES
+#
+#    IMPORTANTE
+#
+#    SE DEBEG COPIAR EL ARCHIVO LCT afffload.lct  DE $FND_TOP/patch/115/import
+#
+#    Y MODIFICAR EL DOWNLOAD DE VALUE_SETS agregando 1 = 2 en la clausula WHERE
+#
+#    COMO EJEMPLO SE PUEDE BUSCAR LA LEYENDA "CUSTOMIZACIONES_ARGENTINA" EN ESTE
+#
+#    DOCUMENTO
+#
+#
+#
+#
+#
+# $Header: afffload.lct 120.13.12010000.1 2008/07/25 13:39:57 appldev ship $
+#
+# afffload.lct - Flexfields Loader Configuration File.
+#
+# History:
+#   DD-MON-RR Global UID Comment
+#   --------- ---------- --------
+#   19-AUG-99 golgun     Created.
+#   28-SEP-99 golgun     All entities are tested.
+#   06-MAR-00 golgun     Added P_EXCLUDE_SRS to DESC_FLEX entity.
+#   29-MAR-00 golgun     Don't download the not-used 'N' columns.
+#   14-FEB-01 golgun     Context defaulting, context override, runtime
+#                        property data model changes. bug1608648.
+#   12-MAR-01 tbarnes    VALUE_SET_VALUE corrected spelling of ATTRIBUTE
+#                        from ATTRBIUTE1-50 (bug 1671535)
+#   18-MAY-01 golgun     SEED/CUSTOM/LAST_UPDATE_DATE Changes.
+#   07-AUG-01 tbarnes    $SRS$ downloads all parameters for a report
+#   09-AUG-01 tbarnes    decode on LAST_UPDATED_BY for SEED/CUSTOM replaced
+#                        with fnd_load_util.owner_name calls. Change entity
+#                        defns to OWNER varchar2(4000).
+#   04-DEC-01 golgun     VALUE_SET and it's subentities are redesigned.
+#   07-JUN-02 golgun     Added Flexbuilder Entities (Only Download).
+#   03-MAR-04 golgun     bug2822770. concatenated_segs_view_name,
+#                        additional_where_clause data model changes.
+#   27-APR-04 golgun     bug3589064: download NULL values aliased to
+#                        fnd_load_util.null_value().
+#   21-JUN-04 golgun     bug3711041: attribute_sort_order data model change.
+#   09-DEC-05 golgun     No $SRS$ downloads using this file.
+#                        P_LEVEL concept is removed from DFF entities.
+#   12-DEC-05 golgun     P_LEVEL concept is removed from KFF entities.
+#   13-DEC-05 golgun     Untabified the file.
+#   10-JAN-06 raghosh    ER4353825. Added CONTEXT_SYNCHRONIZATION_FLAG
+#                        to DESC_FLEX entity. Updated the download and
+#                        upload logic.
+#   23-JAN-06 golgun     Removed NVL from ctx_sync_flag. Untabified.
+#   02-MAY-06 golgun     Made APPLICATION_SHORT_NAME a required argument.
+#                        No more cross product downloads.
+#   12-SEP-06 golgun     bug 5501776: APPLICATION_SHORT_NAME accepts % as input.
+#   17-OCT-06 svedi      Bug 5589335: Fixed the query to download Global Data
+#                        elements of DFF during single context download mode.
+#
+#  Entities -
+#                                          -- Entity Description
+#  ENTITY_NAME                                - FND_ Table Name
+#  --------------------------------------- -- - -------------------------------
+#
+#  VALUE_SET (non-MLS)                     -- Value sets
+#   |                                         - FND_FLEX_VALUE_SETS
+#   +--VSET_DEPENDS_ON (internal)          -- Ind/Dep Relationship
+#   |                                         - FND_FLEX_VALUE_SETS
+#   +--VSET_TABLE (no-TL)                  -- Table for 'F' value sets
+#   |                                         - FND_FLEX_VALIDATION_TABLES
+#   +--VSET_EVENT (no-TL)                  -- User exit for 'U/P' value sets
+#   |                                         - FND_FLEX_VALIDATION_EVENTS
+#   +--VSET_SECURITY_RULE (MLS)            -- Value Security Rules
+#   |   |                                     - FND_FLEX_VALUE_RULES
+#   |   |                                     - FND_FLEX_VALUE_RULES_TL
+#   |   +--VSET_SECURITY_LINE (no-TL)      -- Value Security Rule Lines
+#   |   |                                     - FND_FLEX_VALUE_RULE_LINES
+#   |   +--VSET_SECURITY_USAGE (no-TL)     -- Security Rule Assignments to
+#   |                                         Responsibilities
+#   |                                         - FND_FLEX_VALUE_RULE_USAGES
+#   +--VSET_ROLLUP_GROUP (MLS)             -- Value Set Rollup Groups
+#   |                                         - FND_FLEX_HIERARCHIES
+#   |                                         - FND_FLEX_HIERARCHIES_TL
+#   +--VSET_QUALIFIER (internal)           -- Value Set Dynamic Attributes
+#   |                                         - FND_FLEX_VALIDATION_QUALIFIERS
+#   +--VSET_VALUE (MLS)                    -- Values
+#       |                                     - FND_FLEX_VALUES
+#       |                                     - FND_FLEX_VALUES_TL
+#       +--VSET_VALUE_HIERARCHY (no-TL)    -- Value Normalized Hierarchies
+#       |                                     (Denormalized by FNDFFCHY)
+#       |                                     - FND_FLEX_VALUE_NORM_HIERARCHY
+#       |                                     - FND_FLEX_VALUE_HIERARCHIES
+#       |                                     - FND_FLEX_VALUE_HIER_ALL
+#       +--VSET_VALUE_QUAL_VALUE (no-TL)   -- Compiled Value Attributes
+#                                             (Dynamic Attributes)
+#                                             - FND_FLEX_VALUES
+#
+#  DESC_FLEX (MLS)                         -- Descriptive Flexfields
+#   |                                         - FND_DESCRIPTIVE_FLEXS
+#   |                                         - FND_DESCRIPTIVE_FLEXS_TL
+#   +--DFF_COLUMN (no-TL)                  -- Registered DFF Columns
+#   |                                         - FND_COLUMNS
+#   +--DFF_REF_FIELD (non-MLS)             -- Context Reference Fields
+#   |                                         - FND_DEFAULT_CONTEXT_FIELDS
+#   +--DFF_CONTEXT (MLS)                   -- DFF Contexts
+#       |                                     - FND_DESCR_FLEX_CONTEXS
+#       |                                     - FND_DESCR_FLEX_CONTEXS_TL
+#       +--DFF_SEGMENT (MLS)               -- DFF Segments
+#                                             - FND_DESCR_FLEX_COLUMN_USAGES
+#                                             - FND_DESCR_FLEX_COL_USAGE_TL
+#
+#  KEY_FLEX (non-MLS)                      -- Key Flexfields
+#   |                                         - FND_ID_FLEXS
+#   +--KFF_COLUMN (no-TL)                  -- Registered KFF Columns
+#   |                                         - FND_COLUMNS
+#   +--KFF_FLEX_QUAL (non-MLS)             -- Flexfield Qualifiers
+#   |   |                                     - FND_SEGMENT_ATTRIBUTE_TYPES
+#   |   +--KFF_SEGMENT_QUAL (MLS)          -- Segment Qualfiers
+#   |                                         - FND_VALUE_ATTRIBUTE_TYPES
+#   |                                         - FND_VAL_ATTRIBUTE_TYPES_TL
+#   +--KFF_STRUCTURE (MLS)                 -- KFF Structures
+#   |   |                                     - FND_ID_FLEX_STRUCTURES
+#   |   |                                     - FND_ID_FLEX_STRUCTURES_TL
+#   |   +--KFF_WF_PROCESS (no-TL)          -- Account Generator Processes
+#   |   |                                     - FND_FLEX_WORKFLOW_PROCESSES
+#   |   +--KFF_SH_ALIAS (non-MLS)          -- Shorthand Aliases
+#   |   |                                     - FND_SHORTHAND_FLEX_ALIASES
+#   |   +--KFF_CVR_RULE (MLS)              -- Cross Validation Rules
+#   |   |   |                                 - FND_FLEX_VALIDATION_RULES
+#   |   |   |                                 - FND_FLEX_VDATION_RULES_TL
+#   |   |   |                                 - FND_FLEX_VALIDATION_RULE_STATS
+#   |   |   +--KFF_CVR_LINE (non-MLS)      -- Cross Validation Rule Lines
+#   |   |                                     - FND_FLEX_VALIDATION_RULE_LINES
+#   |   |                                     - FND_FLEX_INCLUDE_RULE_LINES
+#   |   |                                     - FND_FLEX_EXCLUDE_RULE_LINES
+#   |   |                                     - FND_FLEX_VALIDATION_RULE_STATS
+#   |   +--KFF_SEGMENT (MLS)               -- KFF Segments
+#   |       |                                 - FND_ID_FLEX_SEGMENTS
+#   |       |                                 - FND_ID_FLEX_SEGMENTS_TL
+#   |       +--KFF_FLEXQ_ASSIGN (no-TL)    -- Flexfield Qualifier Assignments
+#   |           |                             - FND_SEGMENT_ATTRIBUTE_VALUES
+#   |           |                             - FND_FLEX_VALIDATION_QUALIFIERS
+#   |           +--KFF_SEGQ_ASSIGN (no-TL) -- Segment Qualifier Assignments
+#   |                                         (Value set dynamic attributes)
+#   |                                         - FND_FLEX_VALIDATION_QUALIFIERS
+#   +--KFF_QUALIFIER (internal)            -- Value Set Dynamic Attributes
+#       |                                     - FND_FLEX_VALIDATION_QUALIFIERS
+#       +--KFF_QUALIFIER_VALUE (no-TL)     -- Compiled Value Attributes
+#                                             (Dynamic Attributes)
+#                                             - FND_FLEX_VALUES
+#
+#  FB_FUNCTION (non-MLS)                   -- Flexbuilder Function
+#   |                                         - FND_FLEXBUILDER_FUNCTIONS
+#   +--FB_PARAMETER (MLS)                  -- Flexbuilder Parameter
+#   |                                         - FND_FLEXBUILDER_PARAMETERS
+#   |                                         - FND_FLEXBUILDER_PARAMETERS_TL
+#   +--FB_ASSIGNMENT (non-MLS)             -- Flexbuilder Assignment
+#                                             - FND_FLEXBUILDER_ASSIGNMENTS
+#
+#
+# Legend:
+# ---------------------------------------------------------------
+# MLS     : Multi-Lingual Support. Entity is translated, and base
+#           values are stored in _B table and translated values
+#           are stored in _TL table.
+#           FND does not use _B convention for base tables.
+#
+# non-MLS : Entity is translated but not as MLS. There is no _TL
+#           table, and some specific columns in the base table are
+#           translated.
+#
+# no-TL   : Entity is not translated.
+#
+# internal: Entity is for internal use only. It is either provided
+#           to resolve dependencies or to debug complicated data.
+#
+# Translated Columns:
+# ------------------------------------------------------------------------------
+# Entity Name:       Table Name:                   Column Name:
+# ------------------ ----------------------------- -----------------------------
+# VALUE_SET          FND_FLEX_VALUE_SETS           DESCRIPTION
+#
+# VSET_SECURITY_RULE FND_FLEX_VALUE_RULES_TL       ERROR_MESSAGE
+#                    FND_FLEX_VALUE_RULES_TL       DESCRIPTION
+#
+# VSET_ROLLUP_GROUP  FND_FLEX_HIERARCHIES_TL       HIERARCHY_NAME
+#                    FND_FLEX_HIERARCHIES_TL       DESCRIPTION
+#
+# VSET_VALUE         FND_FLEX_VALUES_TL            FLEX_VALUE_MEANING
+#                    FND_FLEX_VALUES_TL            DESCRIPTION
+#
+# DESC_FLEX          FND_DESCRIPTIVE_FLEXS_TL      TITLE
+#                    FND_DESCRIPTIVE_FLEXS_TL      FORM_CONTEXT_PROMPT
+#                    FND_DESCRIPTIVE_FLEXS_TL      DESCRIPTION
+#
+# DFF_REF_FIELD      FND_DEFAULT_CONTEXT_FIELDS    DESCRIPTION
+#
+# DFF_CONTEXT        FND_DESCR_FLEX_CONTEXTS_TL    DESCRIPTIVE_FLEX_CONTEXT_NAME
+#                    FND_DESCR_FLEX_CONTEXTS_TL    DESCRIPTION
+#
+# DFF_SEGMENT        FND_DESCR_FLEX_COL_USAGE_TL   FORM_LEFT_PROMPT
+#                    FND_DESCR_FLEX_COL_USAGE_TL   FORM_ABOVE_PROMPT
+#                    FND_DESCR_FLEX_COL_USAGE_TL   DESCRIPTION
+#
+# KEY_FLEX           FND_ID_FLEXS                  ID_FLEX_NAME
+#                    FND_ID_FLEXS                  DESCRIPTION
+#
+# KFF_FLEX_QUAL      FND_SEGMENT_ATTRIBUTE_TYPES   SEGMENT_PROMPT
+#                    FND_SEGMENT_ATTRIBUTE_TYPES   DESCRIPTION
+#
+# KFF_SEGMENT_QUAL   FND_VAL_ATTRIBUTE_TYPES_TL    PROMPT
+#                    FND_VAL_ATTRIBUTE_TYPES_TL    DESCRIPTION
+#
+# KFF_STRUCTURE      FND_ID_FLEX_STRUCTURES_TL     ID_FLEX_STRUCTURE_NAME
+#                    FND_ID_FLEX_STRUCTURES_TL     SHORTHAND_PROMPT
+#                    FND_ID_FLEX_STRUCTURES_TL     DESCRIPTION
+#
+# KFF_SH_ALIAS       FND_SHORTHAND_FLEX_ALIASES    DESCRIPTION
+#
+# KFF_CVR_RULE       FND_FLEX_VDATION_RULES_TL     ERROR_MESSAGE_TEXT
+#                    FND_FLEX_VDATION_RULES_TL     DESCRIPTION
+#
+# KFF_CVR_LINE       FND_FLEX_VALIDATION_RULE_LINES DESCRIPTION
+#
+# KFF_SEGMENT        FND_ID_FLEX_SEGMENTS_TL       FORM_LEFT_PROMPT
+#                    FND_ID_FLEX_SEGMENTS_TL       FORM_ABOVE_PROMPT
+#                    FND_ID_FLEX_SEGMENTS_TL       DESCRIPTION
+#
+# FB_FUNCTION        FND_FLEXBUILDER_FUNCTIONS     FUNCTION_NAME
+#                    FND_FLEXBUILDER_FUNCTIONS     DESCRIPTION
+#
+# FB_PARAMETER       FND_FLEXBUILDER_PARAMS_TL     USER_PARAMETER_NAME
+#                    FND_FLEXBUILDER_PARAMS_TL     DESCRIPTION
+#
+# FB_ASSIGNMENT      FND_FLEXBUILDER_ASSIGNMENTS   DESCRIPTION
+#
+#
+# Notes:
+# --------------------------------------------------
+# Upload debugger:
+#    Upload API will dump debug information to L<pid>.log file
+#    if FLEX_DEBUG_FLAG is set to 'Y'.
+#
+#    FNDLOAD apps/apps 0 Y UPLOAD afffload.lct ldtfile.ldt - FLEX_DEBUG_FLAG=Y
+# 
+# Controlling the download of sub-entities:
+#    By default all sub-entities are downloaded. Pass a non-existing value
+#    for the parameter (primary key) of the sub-entity if you don't want to 
+#    download a specific sub-entity. 
+#
+#    For example, if you don't want to download the values of a value set,
+#    then use following input to FNDLOAD command;
+#
+#    FLEX_VALUE='THIS_IS_A_NON_EXISTING_VALUE_I_DONT_WANT_TO_DOWNLOAD_VALUES'
+#
+# Submitting post-upload concurrent requests:
+#    Upload API automatically submits post-upload flexfield related concurrent
+#    program requests. These requests are DFF, and KFF compilers, DFV, KFV, 
+#    and structure view generators, value set hierarchy compiler. 
+#
+#    Upload API will not submit a request if the same request with the same
+#    parameters is already waiting in concurrent program queue.
+#
+#
+# VALUE_SET
+# --------------------------------------------------
+# Notes:
+# - To download '$FLEX$.%' value sets pass '$FLEX$.%' argument.
+# - Upload API automatically submits the hierarchy compiler request
+#   FNDFFCHY apps/apps 0 Y <FLEX_VALUE_SET_NAME>
+#
+# Parameters:
+# VALUE_SET
+# | FLEX_VALUE_SET_NAME     : Value set name.
+# |
+# +-VSET_SECURITY_RULE
+# |   FLEX_VALUE_RULE_NAME  : Value set security rule name.
+# |   PARENT_FLEX_VALUE_LOW : Independent value for the dependent value sets.
+# |
+# +-VSET_ROLLUP_GROUP
+# |   HIERARCHY_CODE        : Hierarchy (rollup group) code.
+# |
+# +-VSET_VALUE
+#     PARENT_FLEX_VALUE_LOW : Independent value for the dependent value sets.
+#     FLEX_VALUE            : Flexfield segment value.
+#
+#
+# DESC_FLEX
+# --------------------------------------------------
+# Notes:
+# - Upload API automatically submits the flexfield compiler request
+#   fdfcmp apps/apps 0 Y D <APPLICATION_SHORT_NAME> <DESCRIPTIVE_FLEXFIELD_NAME>
+# - Upload API automatically submits the DFV view generator request
+#   FNDFFVGN apps/apps 0 Y 3 <APPLICATION_ID> <DESCRIPTIVE_FLEXFIELD_NAME>
+# - APPLICATION_SHORT_NAME is a required argument for download.
+#
+# Parameters:
+# DESC_FLEX
+# | APPLICATION_SHORT_NAME          : Application Short Name.
+# | DESCRIPTIVE_FLEXFIELD_NAME      : Descriptive Flexfield Name.
+# |
+# +-DFF_REF_FIELD
+# |   DEFAULT_CONTEXT_FIELD_NAME    : BLOCK.FIELD reference field name.
+# |
+# +-DFF_CONTEXT
+#   | DESCRIPTIVE_FLEX_CONTEXT_CODE : Context Code
+#   |
+#   +-DFF_SEGMENT
+#       END_USER_COLUMN_NAME        : Segment Name
+#       APPLICATION_COLUMN_NAME     : Column Name
+#
+#
+# KEY_FLEX
+# --------------------------------------------------
+# Notes:
+# - Upload API automatically submits the flexfield compiler request
+#   fdfcmp apps/apps 0 Y K <APPLICATION_SHORT_NAME> <ID_FLEX_CODE> <ID_FLEX_NUM>
+# - Upload API automatically submits the KFV view generator request
+#   FNDFFVGN apps/apps 0 Y 2 <APPLICATION_ID> <ID_FLEX_CODE>
+# - Upload API automatically submits the structure view generator request
+#   FNDFFVGN apps/apps 0 Y 1 <APPLICATION_ID> <ID_FLEX_CODE> <ID_FLEX_NUM>
+# - APPLICATION_SHORT_NAME is a required argument for download.
+#
+# Parameters:
+# KEY_FLEX
+# | APPLICATION_SHORT_NAME        : Application Short Name.
+# | ID_FLEX_CODE                  : Key Flexfield Code.
+# |
+# +-KFF_FLEX_QUAL
+# | | SEGMENT_ATTRIBUTE_TYPE      : Flexfield Qualifier Name
+# | |
+# | +-KFF_SEGMENT_QUAL
+# |     VALUE_ATTRIBUTE_TYPE      : Segment Qualifier Name
+# |
+# +-KFF_STRUCTURE
+#   | ID_FLEX_STRUCTURE_CODE      : Structure Code
+#   |
+#   +-KFF_WF_PROCESS
+#   |   WF_ITEM_TYPE              : Workflow Item Type
+#   |
+#   +-KFF_SH_ALIAS
+#   |   ALIAS_NAME                : Shorthand Alias Name
+#   |
+#   +-KFF_CVR_RULE
+#   |   FLEX_VALIDATION_RULE_NAME : Cross Val. Rule Name.
+#   |
+#   +-KFF_SEGMENT
+#       SEGMENT_NAME              : Segment Name
+#       APPLICATION_COLUMN_NAME   : Column Name
+#
+#
+# FB_FUNCTION
+# --------------------------------------------------
+# Notes:
+# - Only download is supported for Flexbuilder Entitites. This is for 
+#   debugging only.
+# - APPLICATION_SHORT_NAME is a required argument for download.
+#
+# Parameters:
+#   APPLICATION_SHORT_NAME   : Application Short Name.
+#   FUNCTION_CODE            : Flexbuilder Function Code
+# 
+#
+
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+56 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afffload.lct @~PROD:~PATH/~FILE"
+
+# ==================================================
+# Value Set.
+# ==================================================
+DEFINE VALUE_SET
+   KEY   FLEX_VALUE_SET_NAME            VARCHAR2(60)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  VALIDATION_TYPE                VARCHAR2(1)
+   BASE  PROTECTED_FLAG                 VARCHAR2(1)
+   BASE  SECURITY_ENABLED_FLAG          VARCHAR2(1)
+   BASE  LONGLIST_FLAG                  VARCHAR2(1)
+   BASE  FORMAT_TYPE                    VARCHAR2(1)
+   BASE  MAXIMUM_SIZE                   VARCHAR2(50)
+   BASE  NUMBER_PRECISION               VARCHAR2(50)
+   BASE  ALPHANUMERIC_ALLOWED_FLAG      VARCHAR2(1)
+   BASE  UPPERCASE_ONLY_FLAG            VARCHAR2(1)
+   BASE  NUMERIC_MODE_ENABLED_FLAG      VARCHAR2(1)
+   BASE  MINIMUM_VALUE                  VARCHAR2(150)
+   BASE  MAXIMUM_VALUE                  VARCHAR2(150)
+   BASE  PARENT_FLEX_VALUE_SET_NAME     VARCHAR2(60)
+   BASE  DEPENDANT_DEFAULT_VALUE        VARCHAR2(60)
+   BASE  DEPENDANT_DEFAULT_MEANING      VARCHAR2(240)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   # ==================================================
+   # Pointer to independent vset (I, X) from dependent vset (D, Y).
+   # ==================================================
+   DEFINE VSET_DEPENDS_ON
+      KEY   IND_FLEX_VALUE_SET_NAME        REFERENCES VALUE_SET AS IND_FLEX_VALUE_SET_NAME
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  IND_VALIDATION_TYPE            VARCHAR2(1)
+      BASE  DEP_VALIDATION_TYPE            VARCHAR2(1)
+   END VSET_DEPENDS_ON
+
+   # ==================================================
+   # Value Set Table for table validated vset (F).
+   # ==================================================
+   DEFINE VSET_TABLE
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  TABLE_APPLICATION_SHORT_NAME   VARCHAR2(50)
+      BASE  APPLICATION_TABLE_NAME         VARCHAR2(240)
+      BASE  SUMMARY_ALLOWED_FLAG           VARCHAR2(1)
+      BASE  VALUE_COLUMN_NAME              VARCHAR2(240)
+      BASE  VALUE_COLUMN_TYPE              VARCHAR2(1)
+      BASE  VALUE_COLUMN_SIZE              VARCHAR2(50)
+      BASE  ID_COLUMN_NAME                 VARCHAR2(240)
+      BASE  ID_COLUMN_TYPE                 VARCHAR2(1)
+      BASE  ID_COLUMN_SIZE                 VARCHAR2(50)
+      BASE  MEANING_COLUMN_NAME            VARCHAR2(240)
+      BASE  MEANING_COLUMN_TYPE            VARCHAR2(1)
+      BASE  MEANING_COLUMN_SIZE            VARCHAR2(50)
+      BASE  ENABLED_COLUMN_NAME            VARCHAR2(240)
+      BASE  COMPILED_ATTRIBUTE_COLUMN_NAME VARCHAR2(240)
+      BASE  HIERARCHY_LEVEL_COLUMN_NAME    VARCHAR2(240)
+      BASE  START_DATE_COLUMN_NAME         VARCHAR2(240)
+      BASE  END_DATE_COLUMN_NAME           VARCHAR2(240)
+      BASE  SUMMARY_COLUMN_NAME            VARCHAR2(240)
+      BASE  ADDITIONAL_WHERE_CLAUSE        VARCHAR2(32000)
+      BASE  ADDITIONAL_QUICKPICK_COLUMNS   VARCHAR2(240)
+   END VSET_TABLE
+
+   # ==================================================
+   # Value Set Event for user-exit validated vset (U, P).
+   # ==================================================
+   DEFINE VSET_EVENT
+      KEY   EVENT_CODE                     VARCHAR2(1)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  USER_EXIT                      VARCHAR2(32000)
+   END VSET_EVENT
+
+   # ==================================================
+   # Value Set Security Rule.
+   # ==================================================
+   DEFINE VSET_SECURITY_RULE
+      KEY   FLEX_VALUE_RULE_NAME           VARCHAR2(30)
+      KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      TRANS ERROR_MESSAGE                  VARCHAR2(240)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Value Set Security Rule Line.
+      # ==================================================
+      DEFINE VSET_SECURITY_LINE
+         KEY   INCLUDE_EXCLUDE_INDICATOR      VARCHAR2(1)
+         KEY   FLEX_VALUE_LOW                 VARCHAR2(60)
+         KEY   FLEX_VALUE_HIGH                VARCHAR2(60)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      END VSET_SECURITY_LINE
+
+      # ==================================================
+      # Value Set Security Rule Usage.
+      # ==================================================
+      DEFINE VSET_SECURITY_USAGE
+         KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+         KEY   RESPONSIBILITY_KEY             VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      END VSET_SECURITY_USAGE
+   END VSET_SECURITY_RULE
+
+   # ==================================================
+   # Value Set Rollup Group.
+   # ==================================================
+   DEFINE VSET_ROLLUP_GROUP
+      KEY   HIERARCHY_CODE                 VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      TRANS HIERARCHY_NAME                 VARCHAR2(30)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+   END VSET_ROLLUP_GROUP
+
+   # ==================================================
+   # Value Set Qualifier.
+   # ==================================================
+   DEFINE VSET_QUALIFIER
+      KEY   ID_FLEX_APPLICATION_SHORT_NAME VARCHAR2(50)
+      KEY   ID_FLEX_CODE                   VARCHAR2(4)
+      KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ASSIGNMENT_ORDER               VARCHAR2(50)
+      BASE  ASSIGNMENT_DATE                VARCHAR2(50)
+   END VSET_QUALIFIER
+
+   # ==================================================
+   # Value.
+   # ==================================================
+   DEFINE VSET_VALUE
+      KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+      KEY   FLEX_VALUE                     VARCHAR2(150)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ENABLED_FLAG                   VARCHAR2(1)
+      BASE  SUMMARY_FLAG                   VARCHAR2(1)
+      BASE  START_DATE_ACTIVE              VARCHAR2(50)
+      BASE  END_DATE_ACTIVE                VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      BASE  ROLLUP_HIERARCHY_CODE          VARCHAR2(30)
+      BASE  HIERARCHY_LEVEL                VARCHAR2(50)
+      BASE  COMPILED_VALUE_ATTRIBUTES      VARCHAR2(2000)
+      BASE  VALUE_CATEGORY                 VARCHAR2(30)
+      BASE  ATTRIBUTE1                     VARCHAR2(240)
+      BASE  ATTRIBUTE2                     VARCHAR2(240)
+      BASE  ATTRIBUTE3                     VARCHAR2(240)
+      BASE  ATTRIBUTE4                     VARCHAR2(240)
+      BASE  ATTRIBUTE5                     VARCHAR2(240)
+      BASE  ATTRIBUTE6                     VARCHAR2(240)
+      BASE  ATTRIBUTE7                     VARCHAR2(240)
+      BASE  ATTRIBUTE8                     VARCHAR2(240)
+      BASE  ATTRIBUTE9                     VARCHAR2(240)
+      BASE  ATTRIBUTE10                    VARCHAR2(240)
+      BASE  ATTRIBUTE11                    VARCHAR2(240)
+      BASE  ATTRIBUTE12                    VARCHAR2(240)
+      BASE  ATTRIBUTE13                    VARCHAR2(240)
+      BASE  ATTRIBUTE14                    VARCHAR2(240)
+      BASE  ATTRIBUTE15                    VARCHAR2(240)
+      BASE  ATTRIBUTE16                    VARCHAR2(240)
+      BASE  ATTRIBUTE17                    VARCHAR2(240)
+      BASE  ATTRIBUTE18                    VARCHAR2(240)
+      BASE  ATTRIBUTE19                    VARCHAR2(240)
+      BASE  ATTRIBUTE20                    VARCHAR2(240)
+      BASE  ATTRIBUTE21                    VARCHAR2(240)
+      BASE  ATTRIBUTE22                    VARCHAR2(240)
+      BASE  ATTRIBUTE23                    VARCHAR2(240)
+      BASE  ATTRIBUTE24                    VARCHAR2(240)
+      BASE  ATTRIBUTE25                    VARCHAR2(240)
+      BASE  ATTRIBUTE26                    VARCHAR2(240)
+      BASE  ATTRIBUTE27                    VARCHAR2(240)
+      BASE  ATTRIBUTE28                    VARCHAR2(240)
+      BASE  ATTRIBUTE29                    VARCHAR2(240)
+      BASE  ATTRIBUTE30                    VARCHAR2(240)
+      BASE  ATTRIBUTE31                    VARCHAR2(240)
+      BASE  ATTRIBUTE32                    VARCHAR2(240)
+      BASE  ATTRIBUTE33                    VARCHAR2(240)
+      BASE  ATTRIBUTE34                    VARCHAR2(240)
+      BASE  ATTRIBUTE35                    VARCHAR2(240)
+      BASE  ATTRIBUTE36                    VARCHAR2(240)
+      BASE  ATTRIBUTE37                    VARCHAR2(240)
+      BASE  ATTRIBUTE38                    VARCHAR2(240)
+      BASE  ATTRIBUTE39                    VARCHAR2(240)
+      BASE  ATTRIBUTE40                    VARCHAR2(240)
+      BASE  ATTRIBUTE41                    VARCHAR2(240)
+      BASE  ATTRIBUTE42                    VARCHAR2(240)
+      BASE  ATTRIBUTE43                    VARCHAR2(240)
+      BASE  ATTRIBUTE44                    VARCHAR2(240)
+      BASE  ATTRIBUTE45                    VARCHAR2(240)
+      BASE  ATTRIBUTE46                    VARCHAR2(240)
+      BASE  ATTRIBUTE47                    VARCHAR2(240)
+      BASE  ATTRIBUTE48                    VARCHAR2(240)
+      BASE  ATTRIBUTE49                    VARCHAR2(240)
+      BASE  ATTRIBUTE50                    VARCHAR2(240)
+      BASE  ATTRIBUTE_SORT_ORDER           VARCHAR2(50)
+      TRANS FLEX_VALUE_MEANING             VARCHAR2(150)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Value Hierarchy.
+      # ==================================================
+      DEFINE VSET_VALUE_HIERARCHY
+         KEY   RANGE_ATTRIBUTE                VARCHAR2(1)
+         KEY   CHILD_FLEX_VALUE_LOW           VARCHAR2(60)
+         KEY   CHILD_FLEX_VALUE_HIGH          VARCHAR2(60)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  START_DATE_ACTIVE              VARCHAR2(50)
+         BASE  END_DATE_ACTIVE                VARCHAR2(50)
+      END VSET_VALUE_HIERARCHY
+
+      # ==================================================
+      # Value Qualifier Value.
+      # ==================================================
+      DEFINE VSET_VALUE_QUAL_VALUE
+         KEY   ID_FLEX_APPLICATION_SHORT_NAME VARCHAR2(50)
+         KEY   ID_FLEX_CODE                   VARCHAR2(4)
+         KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+         KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  COMPILED_VALUE_ATTRIBUTE_VALUE VARCHAR2(2000)
+      END VSET_VALUE_QUAL_VALUE
+   END VSET_VALUE
+END VALUE_SET
+
+
+# ==================================================
+# Descriptive Flexfield.
+# ==================================================
+DEFINE DESC_FLEX
+   KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+   KEY   DESCRIPTIVE_FLEXFIELD_NAME     VARCHAR2(40)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  TABLE_APPLICATION_SHORT_NAME   VARCHAR2(50)
+   BASE  APPLICATION_TABLE_NAME         VARCHAR2(30)
+   BASE  CONCATENATED_SEGS_VIEW_NAME    VARCHAR2(30)
+   BASE  CONTEXT_COLUMN_NAME            VARCHAR2(30)
+   BASE  CONTEXT_REQUIRED_FLAG          VARCHAR2(1)
+   BASE  CONTEXT_USER_OVERRIDE_FLAG     VARCHAR2(1)
+   BASE  CONCATENATED_SEGMENT_DELIMITER VARCHAR2(1)
+   BASE  FREEZE_FLEX_DEFINITION_FLAG    VARCHAR2(1)
+   BASE  PROTECTED_FLAG                 VARCHAR2(1)
+   BASE  DEFAULT_CONTEXT_FIELD_NAME     VARCHAR2(200)
+   BASE  DEFAULT_CONTEXT_VALUE          VARCHAR2(30)
+   BASE  CONTEXT_DEFAULT_TYPE           VARCHAR2(1)
+   BASE  CONTEXT_DEFAULT_VALUE          VARCHAR2(2000)
+   BASE  CONTEXT_OVERRIDE_VALUE_SET_NAM REFERENCES VALUE_SET AS CONTEXT_OVERRIDE_VALUE_SET_NAM
+   BASE  CONTEXT_RUNTIME_PROPERTY_FUNCT VARCHAR2(2000)
+   BASE  CONTEXT_SYNCHRONIZATION_FLAG   VARCHAR2(1)
+   TRANS TITLE                          VARCHAR2(60)
+   TRANS FORM_CONTEXT_PROMPT            VARCHAR2(45)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   # ==================================================
+   # Descriptive Flexfield Column.
+   # ==================================================
+   DEFINE DFF_COLUMN
+      KEY   COLUMN_NAME                    VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  FLEXFIELD_USAGE_CODE           VARCHAR2(1)
+   END DFF_COLUMN
+
+   # ==================================================
+   # Descriptive Flexfield Reference Field.
+   # ==================================================
+   DEFINE DFF_REF_FIELD
+      KEY   DEFAULT_CONTEXT_FIELD_NAME     VARCHAR2(200)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+   END DFF_REF_FIELD
+
+   # ==================================================
+   # Descriptive Flexfield Context.
+   # ==================================================
+   DEFINE DFF_CONTEXT
+      KEY   DESCRIPTIVE_FLEX_CONTEXT_CODE  VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ENABLED_FLAG                   VARCHAR2(1)
+      BASE  GLOBAL_FLAG                    VARCHAR2(1)
+      TRANS DESCRIPTIVE_FLEX_CONTEXT_NAME  VARCHAR2(80)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Descriptive Flexfield Segment.
+      # ==================================================
+      DEFINE DFF_SEGMENT
+         KEY   END_USER_COLUMN_NAME           VARCHAR2(30)
+         KEY   APPLICATION_COLUMN_NAME        VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  COLUMN_SEQ_NUM                 VARCHAR2(50)
+         BASE  ENABLED_FLAG                   VARCHAR2(1)
+         BASE  DISPLAY_FLAG                   VARCHAR2(1)
+         BASE  REQUIRED_FLAG                  VARCHAR2(1)
+         BASE  SECURITY_ENABLED_FLAG          VARCHAR2(1)
+         BASE  FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+         BASE  DISPLAY_SIZE                   VARCHAR2(50)
+         BASE  MAXIMUM_DESCRIPTION_LEN        VARCHAR2(50)
+         BASE  CONCATENATION_DESCRIPTION_LEN  VARCHAR2(50)
+         BASE  RANGE_CODE                     VARCHAR2(1)
+         BASE  DEFAULT_TYPE                   VARCHAR2(1)
+         BASE  DEFAULT_VALUE                  VARCHAR2(2000)
+         BASE  RUNTIME_PROPERTY_FUNCTION      VARCHAR2(2000)
+         BASE  SRW_PARAM                      VARCHAR2(30)
+         TRANS FORM_LEFT_PROMPT               VARCHAR2(80)
+         TRANS FORM_ABOVE_PROMPT              VARCHAR2(80)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+      END DFF_SEGMENT
+   END DFF_CONTEXT
+END DESC_FLEX
+
+
+# ==================================================
+# Key Flexfield.
+# ==================================================
+DEFINE KEY_FLEX
+   KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+   KEY   ID_FLEX_CODE                   VARCHAR2(4)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  TABLE_APPLICATION_SHORT_NAME   VARCHAR2(50)
+   BASE  APPLICATION_TABLE_NAME         VARCHAR2(30)
+   BASE  CONCATENATED_SEGS_VIEW_NAME    VARCHAR2(30)
+   BASE  ALLOW_ID_VALUESETS             VARCHAR2(1)
+   BASE  DYNAMIC_INSERTS_FEASIBLE_FLAG  VARCHAR2(1)
+   BASE  INDEX_FLAG                     VARCHAR2(1)
+   BASE  UNIQUE_ID_COLUMN_NAME          VARCHAR2(30)
+   BASE  APPLICATION_TABLE_TYPE         VARCHAR2(1)
+   BASE  SET_DEFINING_COLUMN_NAME       VARCHAR2(30)
+   BASE  MAXIMUM_CONCATENATION_LEN      VARCHAR2(50)
+   BASE  CONCATENATION_LEN_WARNING      VARCHAR2(240)
+   TRANS ID_FLEX_NAME                   VARCHAR2(30)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   # ==================================================
+   # Key Flexfield Column.
+   # ==================================================
+   DEFINE KFF_COLUMN
+      KEY   COLUMN_NAME                    VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  FLEXFIELD_USAGE_CODE           VARCHAR2(1)
+   END KFF_COLUMN
+
+   # ==================================================
+   # Key Flexfield Flexfield Qualifier.
+   # ==================================================
+   DEFINE KFF_FLEX_QUAL
+      KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  GLOBAL_FLAG                    VARCHAR2(1)
+      BASE  REQUIRED_FLAG                  VARCHAR2(1)
+      BASE  UNIQUE_FLAG                    VARCHAR2(1)
+      TRANS SEGMENT_PROMPT                 VARCHAR2(50)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Key Flexfield Segment Qualifier.
+      # ==================================================
+      DEFINE KFF_SEGMENT_QUAL
+         KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  REQUIRED_FLAG                  VARCHAR2(1)
+         BASE  APPLICATION_COLUMN_NAME        VARCHAR2(30)
+         BASE  DEFAULT_VALUE                  VARCHAR2(30)
+         BASE  LOOKUP_TYPE                    VARCHAR2(30)
+         BASE  DERIVATION_RULE_CODE           VARCHAR2(30)
+         BASE  DERIVATION_RULE_VALUE1         VARCHAR2(30)
+         BASE  DERIVATION_RULE_VALUE2         VARCHAR2(30)
+         TRANS PROMPT                         VARCHAR2(50)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+      END KFF_SEGMENT_QUAL
+   END KFF_FLEX_QUAL
+
+   # ==================================================
+   # Key Flexfield Structure.
+   # ==================================================
+   DEFINE KFF_STRUCTURE
+      KEY   ID_FLEX_STRUCTURE_CODE         VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  CONCATENATED_SEGMENT_DELIMITER VARCHAR2(1)
+      BASE  CROSS_SEGMENT_VALIDATION_FLAG  VARCHAR2(1)
+      BASE  DYNAMIC_INSERTS_ALLOWED_FLAG   VARCHAR2(1)
+      BASE  ENABLED_FLAG                   VARCHAR2(1)
+      BASE  FREEZE_FLEX_DEFINITION_FLAG    VARCHAR2(1)
+      BASE  FREEZE_STRUCTURED_HIER_FLAG    VARCHAR2(1)
+      BASE  SHORTHAND_ENABLED_FLAG         VARCHAR2(1)
+      BASE  SHORTHAND_LENGTH               VARCHAR2(50)
+      BASE  STRUCTURE_VIEW_NAME            VARCHAR2(30)
+      TRANS ID_FLEX_STRUCTURE_NAME         VARCHAR2(30)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+      TRANS SHORTHAND_PROMPT               VARCHAR2(80)
+
+      # ==================================================
+      # Key Flexfield Account Generator Process.
+      # ==================================================
+      DEFINE KFF_WF_PROCESS
+         KEY   WF_ITEM_TYPE                   VARCHAR2(8)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  WF_PROCESS_NAME                VARCHAR2(30)
+      END KFF_WF_PROCESS
+
+      # ==================================================
+      # Key Flexfield Short Hand Alias.
+      # ==================================================
+      DEFINE KFF_SH_ALIAS
+         KEY   ALIAS_NAME                     VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  CONCATENATED_SEGMENTS          VARCHAR2(2000)
+         BASE  ENABLED_FLAG                   VARCHAR2(1)
+         BASE  START_DATE_ACTIVE              VARCHAR2(50)
+         BASE  END_DATE_ACTIVE                VARCHAR2(50)
+         BASE  ATTRIBUTE_CATEGORY             VARCHAR2(30)
+         BASE  ATTRIBUTE1                     VARCHAR2(150)
+         BASE  ATTRIBUTE2                     VARCHAR2(150)
+         BASE  ATTRIBUTE3                     VARCHAR2(150)
+         BASE  ATTRIBUTE4                     VARCHAR2(150)
+         BASE  ATTRIBUTE5                     VARCHAR2(150)
+         BASE  ATTRIBUTE6                     VARCHAR2(150)
+         BASE  ATTRIBUTE7                     VARCHAR2(150)
+         BASE  ATTRIBUTE8                     VARCHAR2(150)
+         BASE  ATTRIBUTE9                     VARCHAR2(150)
+         BASE  ATTRIBUTE10                    VARCHAR2(150)
+         BASE  ATTRIBUTE11                    VARCHAR2(150)
+         BASE  ATTRIBUTE12                    VARCHAR2(150)
+         BASE  ATTRIBUTE13                    VARCHAR2(150)
+         BASE  ATTRIBUTE14                    VARCHAR2(150)
+         BASE  ATTRIBUTE15                    VARCHAR2(150)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+      END KFF_SH_ALIAS
+
+      # ==================================================
+      # Key Flexfield Cross Validation Rule.
+      # ==================================================
+      DEFINE KFF_CVR_RULE
+         KEY   FLEX_VALIDATION_RULE_NAME      VARCHAR2(15)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  ENABLED_FLAG                   VARCHAR2(1)
+         BASE  ERROR_SEGMENT_COLUMN_NAME      VARCHAR2(30)
+         BASE  START_DATE_ACTIVE              VARCHAR2(50)
+         BASE  END_DATE_ACTIVE                VARCHAR2(50)
+         TRANS ERROR_MESSAGE_TEXT             VARCHAR2(240)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+
+         # ==================================================
+         # Key Flexfield Cross Validation Rule Line.
+         # ==================================================
+         DEFINE KFF_CVR_LINE
+            KEY   INCLUDE_EXCLUDE_INDICATOR      VARCHAR2(1)
+            KEY   CONCATENATED_SEGMENTS_LOW      VARCHAR2(2000)
+            KEY   CONCATENATED_SEGMENTS_HIGH     VARCHAR2(2000)
+            CTX   OWNER                          VARCHAR2(4000)
+            CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+            BASE  ENABLED_FLAG                   VARCHAR2(1)
+            TRANS DESCRIPTION                    VARCHAR2(240)
+         END KFF_CVR_LINE
+      END KFF_CVR_RULE
+
+      # ==================================================
+      # Key Flexfield Segment.
+      # ==================================================
+      DEFINE KFF_SEGMENT
+         KEY   SEGMENT_NAME                   VARCHAR2(30)
+         KEY   APPLICATION_COLUMN_NAME        VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  SEGMENT_NUM                    VARCHAR2(50)
+         BASE  APPLICATION_COLUMN_INDEX_FLAG  VARCHAR2(1)
+         BASE  ENABLED_FLAG                   VARCHAR2(1)
+         BASE  REQUIRED_FLAG                  VARCHAR2(1)
+         BASE  DISPLAY_FLAG                   VARCHAR2(1)
+         BASE  DISPLAY_SIZE                   VARCHAR2(50)
+         BASE  SECURITY_ENABLED_FLAG          VARCHAR2(1)
+         BASE  MAXIMUM_DESCRIPTION_LEN        VARCHAR2(50)
+         BASE  CONCATENATION_DESCRIPTION_LEN  VARCHAR2(50)
+         BASE  FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+         BASE  RANGE_CODE                     VARCHAR2(1)
+         BASE  DEFAULT_TYPE                   VARCHAR2(1)
+         BASE  DEFAULT_VALUE                  VARCHAR2(2000)
+         BASE  RUNTIME_PROPERTY_FUNCTION      VARCHAR2(2000)
+         BASE  ADDITIONAL_WHERE_CLAUSE        VARCHAR2(4000)
+         TRANS FORM_LEFT_PROMPT               VARCHAR2(80)
+         TRANS FORM_ABOVE_PROMPT              VARCHAR2(80)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+
+         # ==================================================
+         # Key Flexfield Segment and Flexfield Qualifier Assignment.
+         # ==================================================
+         DEFINE KFF_FLEXQ_ASSIGN
+            KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+            CTX   OWNER                          VARCHAR2(4000)
+            CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+            BASE  ATTRIBUTE_VALUE                VARCHAR2(1)
+
+            # ==================================================
+            # Key Flexfield Segment and Segment Qualifier Assignment.
+            # ==================================================
+            DEFINE KFF_SEGQ_ASSIGN
+               KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+               CTX   OWNER                          VARCHAR2(4000)
+               CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+               BASE  ASSIGNMENT_ORDER               VARCHAR2(50)
+               BASE  ASSIGNMENT_DATE                VARCHAR2(50)
+            END KFF_SEGQ_ASSIGN
+         END KFF_FLEXQ_ASSIGN
+      END KFF_SEGMENT
+   END KFF_STRUCTURE
+   
+   DEFINE KFF_QUALIFIER
+      KEY   FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+      KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ASSIGNMENT_ORDER               VARCHAR2(50)
+      BASE  ASSIGNMENT_DATE                VARCHAR2(50)
+
+      DEFINE KFF_QUALIFIER_VALUE
+         KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+         KEY   FLEX_VALUE                     VARCHAR2(150)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  COMPILED_VALUE_ATTRIBUTE_VALUE VARCHAR2(2000)
+      END KFF_QUALIFIER_VALUE
+   END KFF_QUALIFIER
+END KEY_FLEX
+
+
+# ==================================================
+# Value Security (Only Upload is Allowed)
+# ==================================================
+DEFINE VALUE_SECURITY_RULE
+   KEY   FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+   KEY   FLEX_VALUE_RULE_NAME           VARCHAR2(30)
+   KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+   TRANS ERROR_MESSAGE                  VARCHAR2(240)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   DEFINE VSEC_LINE
+      KEY   INCLUDE_EXCLUDE_INDICATOR      VARCHAR2(1)
+      KEY   FLEX_VALUE_LOW                 VARCHAR2(60)
+      KEY   FLEX_VALUE_HIGH                VARCHAR2(60)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+   END VSEC_LINE
+
+   DEFINE VSEC_USAGE
+      KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+      KEY   RESPONSIBILITY_KEY             VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+   END VSEC_USAGE
+END VALUE_SECURITY_RULE
+
+
+# ==================================================
+# Value Hierarchy (Rollup Group) (Only Upload is Allowed)
+# ==================================================
+DEFINE VALUE_ROLLUP_GROUP
+   KEY   FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+   KEY   HIERARCHY_CODE                 VARCHAR2(30)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   TRANS HIERARCHY_NAME                 VARCHAR2(30)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+END VALUE_ROLLUP_GROUP
+
+
+# ==================================================
+# Flex Values (Only Upload is Allowed)
+# ==================================================
+DEFINE VALUE_SET_VALUE
+   KEY   FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+   KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+   KEY   FLEX_VALUE                     VARCHAR2(150)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  ENABLED_FLAG                   VARCHAR2(1)
+   BASE  SUMMARY_FLAG                   VARCHAR2(1)
+   BASE  START_DATE_ACTIVE              VARCHAR2(50)
+   BASE  END_DATE_ACTIVE                VARCHAR2(50)
+   BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+   BASE  ROLLUP                         REFERENCES VALUE_ROLLUP_GROUP
+   BASE  HIERARCHY_LEVEL                VARCHAR2(50)
+   BASE  COMPILED_VALUE_ATTRIBUTES      VARCHAR2(2000)
+   BASE  VALUE_CATEGORY                 VARCHAR2(30)
+   BASE  ATTRIBUTE1                     VARCHAR2(240)
+   BASE  ATTRIBUTE2                     VARCHAR2(240)
+   BASE  ATTRIBUTE3                     VARCHAR2(240)
+   BASE  ATTRIBUTE4                     VARCHAR2(240)
+   BASE  ATTRIBUTE5                     VARCHAR2(240)
+   BASE  ATTRIBUTE6                     VARCHAR2(240)
+   BASE  ATTRIBUTE7                     VARCHAR2(240)
+   BASE  ATTRIBUTE8                     VARCHAR2(240)
+   BASE  ATTRIBUTE9                     VARCHAR2(240)
+   BASE  ATTRIBUTE10                    VARCHAR2(240)
+   BASE  ATTRIBUTE11                    VARCHAR2(240)
+   BASE  ATTRIBUTE12                    VARCHAR2(240)
+   BASE  ATTRIBUTE13                    VARCHAR2(240)
+   BASE  ATTRIBUTE14                    VARCHAR2(240)
+   BASE  ATTRIBUTE15                    VARCHAR2(240)
+   BASE  ATTRIBUTE16                    VARCHAR2(240)
+   BASE  ATTRIBUTE17                    VARCHAR2(240)
+   BASE  ATTRIBUTE18                    VARCHAR2(240)
+   BASE  ATTRIBUTE19                    VARCHAR2(240)
+   BASE  ATTRIBUTE20                    VARCHAR2(240)
+   BASE  ATTRIBUTE21                    VARCHAR2(240)
+   BASE  ATTRIBUTE22                    VARCHAR2(240)
+   BASE  ATTRIBUTE23                    VARCHAR2(240)
+   BASE  ATTRIBUTE24                    VARCHAR2(240)
+   BASE  ATTRIBUTE25                    VARCHAR2(240)
+   BASE  ATTRIBUTE26                    VARCHAR2(240)
+   BASE  ATTRIBUTE27                    VARCHAR2(240)
+   BASE  ATTRIBUTE28                    VARCHAR2(240)
+   BASE  ATTRIBUTE29                    VARCHAR2(240)
+   BASE  ATTRIBUTE30                    VARCHAR2(240)
+   BASE  ATTRIBUTE31                    VARCHAR2(240)
+   BASE  ATTRIBUTE32                    VARCHAR2(240)
+   BASE  ATTRIBUTE33                    VARCHAR2(240)
+   BASE  ATTRIBUTE34                    VARCHAR2(240)
+   BASE  ATTRIBUTE35                    VARCHAR2(240)
+   BASE  ATTRIBUTE36                    VARCHAR2(240)
+   BASE  ATTRIBUTE37                    VARCHAR2(240)
+   BASE  ATTRIBUTE38                    VARCHAR2(240)
+   BASE  ATTRIBUTE39                    VARCHAR2(240)
+   BASE  ATTRIBUTE40                    VARCHAR2(240)
+   BASE  ATTRIBUTE41                    VARCHAR2(240)
+   BASE  ATTRIBUTE42                    VARCHAR2(240)
+   BASE  ATTRIBUTE43                    VARCHAR2(240)
+   BASE  ATTRIBUTE44                    VARCHAR2(240)
+   BASE  ATTRIBUTE45                    VARCHAR2(240)
+   BASE  ATTRIBUTE46                    VARCHAR2(240)
+   BASE  ATTRIBUTE47                    VARCHAR2(240)
+   BASE  ATTRIBUTE48                    VARCHAR2(240)
+   BASE  ATTRIBUTE49                    VARCHAR2(240)
+   BASE  ATTRIBUTE50                    VARCHAR2(240)
+   TRANS FLEX_VALUE_MEANING             VARCHAR2(150)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   DEFINE VAL_NORM_HIERARCHY
+      KEY   RANGE_ATTRIBUTE                VARCHAR2(1)
+      KEY   CHILD_FLEX_VALUE_LOW           VARCHAR2(60)
+      KEY   CHILD_FLEX_VALUE_HIGH          VARCHAR2(60)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  START_DATE_ACTIVE              VARCHAR2(50)
+      BASE  END_DATE_ACTIVE                VARCHAR2(50)
+   END VAL_NORM_HIERARCHY
+
+   DEFINE VAL_QUAL_VALUE
+      KEY   ID_FLEX_APPLICATION_SHORT_NAME VARCHAR2(50)
+      KEY   ID_FLEX_CODE                   VARCHAR2(4)
+      KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ASSIGNMENT_ORDER               VARCHAR2(50)
+      BASE  ASSIGNMENT_DATE                VARCHAR2(50)
+      BASE  COMPILED_VALUE_ATTRIBUTE_VALUE VARCHAR2(2000)
+   END VAL_QUAL_VALUE
+END VALUE_SET_VALUE
+
+
+# ==================================================
+# Flexbuilder Functions. (Only Download is Allowed)
+# ==================================================
+DEFINE FB_FUNCTION
+   KEY   APPLICATION_ID                 VARCHAR2(50)
+   KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+   KEY   FUNCTION_CODE                  VARCHAR2(30)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  KFF_APPLICATION_SHORT_NAME     VARCHAR2(50)
+   BASE  KFF_APPLICATION_ID             VARCHAR2(50)
+   BASE  KFF_ID_FLEX_CODE               VARCHAR2(4)
+   TRANS FUNCTION_NAME                  VARCHAR2(80)
+   TRANS DESCRIPTION                    VARCHAR2(250)
+
+   # ==================================================
+   # Flexbuilder Parameters. (Only Download is Allowed)
+   # ==================================================
+   DEFINE FB_PARAMETER
+      KEY   PARAMETER_NAME                 VARCHAR2(30)
+      KEY   SEQUENCE                       VARCHAR2(50)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  PARAM_ASSIGNMENT_TYPE          VARCHAR2(1)
+      BASE  PARAMETER_TYPE                 VARCHAR2(1)
+      BASE  PROTECTED_FLAG                 VARCHAR2(1)
+      BASE  CONDITIONAL_PARAMETER          VARCHAR2(30)
+      BASE  CONDITIONAL_VALUE              VARCHAR2(250)
+      BASE  CONSTANT_VALUE                 VARCHAR2(250)
+      BASE  FLEX_VALUE_SET_NAME            VARCHAR2(60)
+      BASE  FLEX_VALUE_SET_ID              VARCHAR2(50)
+      BASE  OUTPUT_COLUMN                  VARCHAR2(30)
+      BASE  SOURCE_PARAMETER               VARCHAR2(30)
+      BASE  VALUE_SET_MATCH_REQUIRED_FLAG  VARCHAR2(1)
+      BASE  ASSIGNMENT_VALUE_SET_NAME      VARCHAR2(60)
+      BASE  ASSIGNMNET_VALUE_SET_ID        VARCHAR2(50)
+      BASE  KFF_APPLICATION_SHORT_NAME     VARCHAR2(50)
+      BASE  KFF_APPLICATION_ID             VARCHAR2(50)
+      BASE  KFF_ID_FLEX_CODE               VARCHAR2(4)
+      BASE  KFF_ID_FLEX_STRUCTURE_CODE     VARCHAR2(30)
+      BASE  KFF_ID_FLEX_NUM                VARCHAR2(50)
+      BASE  APPLICATION_COLUMN_NAME        VARCHAR2(30)
+      BASE  SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      BASE  ID_PARAMETER                   VARCHAR2(30)
+      TRANS USER_PARAMETER_NAME            VARCHAR2(80)
+      TRANS DESCRIPTION                    VARCHAR2(250)
+   END FB_PARAMETER
+
+   # ==================================================
+   # Flexbuilder Assignments. (Only Download is Allowed)
+   # ==================================================
+   DEFINE FB_ASSIGNMENT
+      KEY   KFF_ID_FLEX_NUM                VARCHAR2(50)
+      KEY   KFF_ID_FLEX_STRUCTURE_CODE     VARCHAR2(30)
+      KEY   SEQUENCE                       VARCHAR2(50)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ASSIGNMENT_TYPE                VARCHAR2(1)
+      BASE  PROTECTED_FLAG                 VARCHAR2(1)
+      BASE  CONDITIONAL_PARAMETER          VARCHAR2(30)
+      BASE  CONDITIONAL_VALUE              VARCHAR2(250)
+      BASE  ID_PARAMETER                   VARCHAR2(30)
+      BASE  FLEXFIELD_SEGMENT_USAGES       VARCHAR2(250)
+      BASE  SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      BASE  SEGMENT_PARAMETER_PAIRINGS     VARCHAR2(240)
+      BASE  SEGMENT_PARAMETER              VARCHAR2(30)
+      BASE  SEGMENT_CONSTANTS              VARCHAR2(2000)
+      TRANS DESCRIPTION                    VARCHAR2(250)
+   END FB_ASSIGNMENT
+END FB_FUNCTION
+
+# ==================================================
+# Value Set.
+# ==================================================
+DOWNLOAD VALUE_SET
+"SELECT /* VALUE_SET */
+        fvs.flex_value_set_name,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvs.validation_type,
+        fvs.protected_flag,
+        fvs.security_enabled_flag,
+        fvs.longlist_flag,
+        fvs.format_type,
+        fvs.maximum_size,
+        fvs.number_precision,
+        fvs.alphanumeric_allowed_flag,
+        fvs.uppercase_only_flag,
+        fvs.numeric_mode_enabled_flag,
+        fvs.minimum_value,
+        fvs.maximum_value,
+        fvs_parent.flex_value_set_name,
+        fvs.dependant_default_value,
+        fvs.dependant_default_meaning,
+        fvs.description
+   FROM fnd_flex_value_sets fvs,
+        fnd_flex_value_sets fvs_parent
+  WHERE fvs.parent_flex_value_set_id = fvs_parent.flex_value_set_id(+)
+/*
+*    CUSTOMIZACIONES_ARGENTINA
+*    para que no baje VALUE_SETS
+*/
+    AND 1=2
+    AND fvs.flex_value_set_name LIKE Nvl(:FLEX_VALUE_SET_NAME,'%')
+    AND (fvs.flex_value_set_name NOT LIKE '$FLEX$.%' OR
+         Substr(:FLEX_VALUE_SET_NAME,1,7) = '$FLEX$.')
+  ORDER BY decode(fvs.validation_type, 'N',1, 'I',2, 'D',3,
+                                              'X',4, 'Y',5,
+                                       'F',6, 'U',7, 'P',8, 9),
+           fvs.flex_value_set_name "
+
+DOWNLOAD VSET_DEPENDS_ON
+"SELECT /* VSET_DEPENDS_ON */
+        fvs_ind.flex_value_set_name ind_flex_value_set_name,
+        fnd_load_util.owner_name(fvs_dep.last_updated_by) owner,
+        to_char(fvs_dep.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvs_ind.validation_type,
+        fvs_dep.validation_type
+   FROM fnd_flex_value_sets fvs_dep,
+        fnd_flex_value_sets fvs_ind
+  WHERE fvs_dep.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvs_dep.validation_type IN ('D', 'Y')
+    AND fvs_ind.flex_value_set_id = fvs_dep.parent_flex_value_set_id "
+
+DOWNLOAD VSET_TABLE
+"SELECT /* VSET_TABLE */
+        fnd_load_util.owner_name(fvt.last_updated_by) owner,
+        to_char(fvt.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        a.application_short_name table_application_short_name,
+        fvt.application_table_name,
+        fvt.summary_allowed_flag,
+        fvt.value_column_name,
+        fvt.value_column_type,
+        fvt.value_column_size,
+        fvt.id_column_name,
+        fvt.id_column_type,
+        fvt.id_column_size,
+        fvt.meaning_column_name,
+        fvt.meaning_column_type,
+        fvt.meaning_column_size,
+        fvt.enabled_column_name,
+        fvt.compiled_attribute_column_name,
+        fvt.hierarchy_level_column_name,
+        fvt.start_date_column_name,
+        fvt.end_date_column_name,
+        fvt.summary_column_name,
+        fvt.additional_where_clause,
+        fvt.additional_quickpick_columns
+   FROM fnd_flex_validation_tables fvt,
+        fnd_application a
+  WHERE fvt.flex_value_set_id =
+        (SELECT flex_value_set_id
+           FROM fnd_flex_value_sets fvs
+          WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+            AND fvs.validation_type = 'F')
+    AND fvt.table_application_id = a.application_id(+) "
+
+DOWNLOAD VSET_EVENT
+"SELECT /* VSET_EVENT */
+        fve.event_code,
+        fnd_load_util.owner_name(fve.last_updated_by) owner,
+        to_char(fve.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fve.user_exit
+   FROM fnd_flex_validation_events fve
+  WHERE fve.flex_value_set_id =
+        (SELECT flex_value_set_id
+           FROM fnd_flex_value_sets fvs
+          WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+            AND fvs.validation_type in ('U', 'P'))
+  ORDER BY fve.event_code "
+
+DOWNLOAD VSET_SECURITY_RULE
+"SELECT /* VSET_SECURITY_RULE */
+        fvr.flex_value_rule_name,
+        fvr.parent_flex_value_low,
+        fnd_load_util.owner_name(fvr.last_updated_by) owner,
+        to_char(fvr.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvr.parent_flex_value_high,
+        fvr.error_message,
+        fvr.description
+   FROM fnd_flex_value_rules_vl fvr,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name LIKE Nvl(:FLEX_VALUE_RULE_NAME, '%')
+    AND Nvl(fvr.parent_flex_value_low,'%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fvs.validation_type IN ('I', 'D', 'F')
+    AND fvs.security_enabled_flag IN ('Y', 'H')
+    AND ((fvs.validation_type NOT IN ('D')) OR
+         (fvs.validation_type IN ('D') AND
+          fvr.parent_flex_value_low IS NOT NULL))
+  ORDER BY fvr.parent_flex_value_low, fvr.flex_value_rule_name "
+
+DOWNLOAD VSET_SECURITY_LINE
+"SELECT /* VSET_SECURITY_LINE */
+        fvrl.include_exclude_indicator,
+        fvrl.flex_value_low,
+        fvrl.flex_value_high,
+        fnd_load_util.owner_name(fvrl.last_updated_by) owner,
+        to_char(fvrl.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvrl.parent_flex_value_high
+   FROM fnd_flex_value_rule_lines fvrl,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvrl.flex_value_set_id = fvr.flex_value_set_id
+    AND fvrl.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvrl.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+  ORDER BY decode(fvrl.include_exclude_indicator, 'I',1, 'E',2, 3),
+           fvrl.flex_value_low, fvrl.flex_value_high"
+
+DOWNLOAD VSET_SECURITY_USAGE
+"SELECT /* VSET_SECURITY_USAGE */
+        a.application_short_name,
+        r.responsibility_key,
+        fnd_load_util.owner_name(fvru.last_updated_by) owner,
+        to_char(fvru.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvru.parent_flex_value_high
+   FROM fnd_flex_value_rule_usages fvru,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs,
+        fnd_responsibility r,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvru.flex_value_set_id = fvr.flex_value_set_id
+    AND fvru.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvru.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+    AND r.application_id = a.application_id
+    AND fvru.application_id = r.application_id
+    AND fvru.responsibility_id = r.responsibility_id
+  ORDER BY a.application_short_name, r.responsibility_key "
+
+DOWNLOAD VSET_ROLLUP_GROUP
+"SELECT /* VSET_ROLLUP_GROUP */
+        fh.hierarchy_code,
+        fnd_load_util.owner_name(fh.last_updated_by) owner,
+        to_char(fh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fh.hierarchy_name,
+        fh.description
+   FROM fnd_flex_hierarchies_vl fh,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fh.flex_value_set_id = fvs.flex_value_set_id
+    AND fh.hierarchy_code LIKE Nvl(:HIERARCHY_CODE, '%')
+  ORDER BY fh.hierarchy_code "
+
+DOWNLOAD VSET_QUALIFIER
+"SELECT /* VSET_QUALIFIER */
+        a.application_short_name id_flex_application_short_name,
+        fvq.id_flex_code,
+        fvq.segment_attribute_type,
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        assignment_order,
+        to_char(fvq.assignment_date,'YYYY/MM/DD HH24:MI:SS') assignment_date
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND a.application_id = fvq.id_flex_application_id
+  ORDER BY fvq.assignment_order "
+
+DOWNLOAD VSET_VALUE
+"SELECT /* VSET_VALUE */
+        fv.parent_flex_value_low,
+        fv.flex_value,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fv.enabled_flag,
+        fv.summary_flag,
+        to_char(fv.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fv.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active,
+        fv.parent_flex_value_high,
+        fh.hierarchy_code rollup_hierarchy_code,
+        fv.hierarchy_level,
+        fv.compiled_value_attributes,
+        fv.value_category,
+        fv.attribute1,
+        fv.attribute2,
+        fv.attribute3,
+        fv.attribute4,
+        fv.attribute5,
+        fv.attribute6,
+        fv.attribute7,
+        fv.attribute8,
+        fv.attribute9,
+        fv.attribute10,
+        fv.attribute11,
+        fv.attribute12,
+        fv.attribute13,
+        fv.attribute14,
+        fv.attribute15,
+        fv.attribute16,
+        fv.attribute17,
+        fv.attribute18,
+        fv.attribute19,
+        fv.attribute20,
+        fv.attribute21,
+        fv.attribute22,
+        fv.attribute23,
+        fv.attribute24,
+        fv.attribute25,
+        fv.attribute26,
+        fv.attribute27,
+        fv.attribute28,
+        fv.attribute29,
+        fv.attribute30,
+        fv.attribute31,
+        fv.attribute32,
+        fv.attribute33,
+        fv.attribute34,
+        fv.attribute35,
+        fv.attribute36,
+        fv.attribute37,
+        fv.attribute38,
+        fv.attribute39,
+        fv.attribute40,
+        fv.attribute41,
+        fv.attribute42,
+        fv.attribute43,
+        fv.attribute44,
+        fv.attribute45,
+        fv.attribute46,
+        fv.attribute47,
+        fv.attribute48,
+        fv.attribute49,
+        fv.attribute50,
+        fv.attribute_sort_order,
+        Decode(fvs.validation_type, 'X', fv.flex_value_meaning,
+                                    'Y', fv.flex_value_meaning,
+                                    NULL) flex_value_meaning,
+        fv.description
+   FROM fnd_flex_values_vl fv,
+        fnd_flex_value_sets fvs,
+        fnd_flex_validation_tables fvt,
+        fnd_flex_hierarchies fh
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvs.flex_value_set_id = fvt.flex_value_set_id(+)
+    AND fv.flex_value_set_id = fvs.flex_value_set_id
+    AND Nvl(fv.parent_flex_value_low, '%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fv.flex_value LIKE Nvl(:FLEX_VALUE,'%')
+    AND fv.flex_value_set_id = fh.flex_value_set_id(+)
+    AND fv.structured_hierarchy_level = fh.hierarchy_id(+)
+    AND fvs.validation_type IN ('I', 'D', 'X', 'Y', 'F')
+    AND ((fvs.validation_type <> 'F') OR
+         (fvs.validation_type = 'F' AND
+          fvt.summary_allowed_flag = 'Y'))
+    AND ((fvs.validation_type NOT IN ('D', 'Y')) OR
+         (fvs.validation_type IN ('D', 'Y') AND
+          fv.parent_flex_value_low IS NOT NULL))
+  ORDER BY fv.parent_flex_value_low, fv.flex_value "
+
+DOWNLOAD VSET_VALUE_HIERARCHY
+"SELECT /* VSET_VALUE_HIERARCHY */
+        fvnh.range_attribute,
+        fvnh.child_flex_value_low,
+        fvnh.child_flex_value_high,
+        fnd_load_util.owner_name(fvnh.last_updated_by) owner,
+        to_char(fvnh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        to_char(fvnh.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fvnh.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active
+   FROM fnd_flex_value_norm_hierarchy fvnh,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvnh.flex_value_set_id = fvs.flex_value_set_id
+    AND fvnh.parent_flex_value = :FLEX_VALUE
+  ORDER BY fvnh.range_attribute,
+           fvnh.child_flex_value_low, fvnh.child_flex_value_high "
+
+DOWNLOAD VSET_VALUE_QUAL_VALUE
+"SELECT /* VSET_VALUE_QUAL_VALUE */
+        a.application_short_name id_flex_application_short_name,
+        fvq.id_flex_code,
+        fvq.segment_attribute_type,
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        Substrb(fnd_flex_loader_apis.get_qualifier_value(fv.compiled_value_attributes, fvq.assignment_order),1,2000)
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_flex_values fv,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND fv.flex_value_set_id = fvs.flex_value_set_id
+    AND Nvl(fv.parent_flex_value_low, '$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW, '$FLEX$.NULL')
+    AND fv.flex_value = :FLEX_VALUE
+    AND a.application_id = fvq.id_flex_application_id
+  ORDER BY fvq.assignment_order "
+        
+# ==================================================
+# Descriptive Flexfield.
+# ==================================================
+DOWNLOAD DESC_FLEX
+"SELECT /* DESC_FLEX */
+        aa.application_short_name,
+        df.descriptive_flexfield_name,
+        fnd_load_util.owner_name(df.last_updated_by) owner,
+        to_char(df.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        at.application_short_name table_application_short_name,
+        df.application_table_name,
+        Substrb(nvl(df.concatenated_segs_view_name, fnd_load_util.null_value()), 1, 30) concatenated_segs_view_name,
+        df.context_column_name,
+        df.context_required_flag,
+        df.context_user_override_flag,
+        df.concatenated_segment_delimiter,
+        df.freeze_flex_definition_flag,
+        df.protected_flag,
+        df.default_context_field_name,
+        df.default_context_value,
+        df.context_default_type,
+        df.context_default_value,
+        fvs.flex_value_set_name context_override_value_set_nam,
+        df.context_runtime_property_funct,
+        df.context_synchronization_flag,
+        df.title,
+        df.form_context_prompt,
+        df.description
+   FROM fnd_descriptive_flexs_vl df,
+        fnd_application aa,
+        fnd_application at,
+        fnd_flex_value_sets fvs
+  WHERE aa.application_short_name LIKE :APPLICATION_SHORT_NAME
+    AND df.application_id = aa.application_id
+    AND df.descriptive_flexfield_name LIKE Nvl(:DESCRIPTIVE_FLEXFIELD_NAME,'%')
+    AND df.descriptive_flexfield_name NOT LIKE '$SRS$.%'
+    AND at.application_id = df.table_application_id
+    AND df.context_override_value_set_id = fvs.flex_value_set_id(+)
+  ORDER BY aa.application_short_name, df.descriptive_flexfield_name "
+
+DOWNLOAD DFF_COLUMN
+"SELECT /* DFF_COLUMN */
+        c.column_name,
+        fnd_load_util.owner_name(c.last_updated_by) owner,
+        to_char(c.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        c.flexfield_usage_code
+   FROM fnd_columns c,
+        fnd_tables t,
+        fnd_descriptive_flexs df,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND df.application_id = a.application_id
+    AND df.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND df.descriptive_flexfield_name NOT LIKE '$SRS$.%'
+    AND t.application_id = df.table_application_id
+    AND t.table_name = df.application_table_name
+    AND c.application_id = t.application_id
+    AND c.table_id = t.table_id
+    AND c.flexfield_usage_code IN ('C', 'D')
+    AND c.flexfield_application_id = df.application_id
+    AND c.flexfield_name = df.descriptive_flexfield_name
+  ORDER BY decode(c.flexfield_usage_code, 'C',1, 'D',2, 3), c.column_name "
+
+DOWNLOAD DFF_REF_FIELD
+"SELECT /* DFF_REF_FIELD */
+        dcf.default_context_field_name,
+        fnd_load_util.owner_name(dcf.last_updated_by) owner,
+        to_char(dcf.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dcf.description
+   FROM fnd_default_context_fields dcf,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dcf.application_id = a.application_id
+    AND dcf.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND dcf.descriptive_flexfield_name NOT LIKE '$SRS$.%'
+    AND dcf.default_context_field_name LIKE Nvl(:DEFAULT_CONTEXT_FIELD_NAME, '%')
+  ORDER BY dcf.default_context_field_name "
+
+DOWNLOAD DFF_CONTEXT
+"SELECT /* DFF_CONTEXT */
+        dfc.descriptive_flex_context_code,
+        fnd_load_util.owner_name(dfc.last_updated_by) owner,
+        to_char(dfc.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dfc.enabled_flag,
+        dfc.global_flag,
+        dfc.descriptive_flex_context_name,
+        dfc.description
+   FROM fnd_descr_flex_contexts_vl dfc,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dfc.application_id = a.application_id
+    AND dfc.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND (   dfc.descriptive_flex_context_code LIKE Nvl(:DESCRIPTIVE_FLEX_CONTEXT_CODE, '%') 
+         OR dfc.global_flag = 'Y' )
+  ORDER BY decode(dfc.global_flag, 'Y',1, 2),
+           dfc.descriptive_flex_context_code "
+
+DOWNLOAD DFF_SEGMENT
+"SELECT /* DFF_SEGMENT */
+        dfcu.end_user_column_name,
+        dfcu.application_column_name,
+        fnd_load_util.owner_name(dfcu.last_updated_by) owner,
+        to_char(dfcu.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dfcu.column_seq_num,
+        dfcu.enabled_flag,
+        dfcu.display_flag,
+        dfcu.required_flag,
+        dfcu.security_enabled_flag,
+        fvs.flex_value_set_name,
+        dfcu.display_size,
+        dfcu.maximum_description_len,
+        dfcu.concatenation_description_len,
+        dfcu.range_code,
+        dfcu.default_type,
+        dfcu.default_value,
+        dfcu.runtime_property_function,
+        dfcu.srw_param,
+        dfcu.form_left_prompt,
+        dfcu.form_above_prompt,
+        dfcu.description
+   FROM fnd_descr_flex_col_usage_vl dfcu,
+        fnd_application a,
+        fnd_flex_value_sets fvs
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dfcu.application_id = a.application_id
+    AND dfcu.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND dfcu.descriptive_flex_context_code = :DESCRIPTIVE_FLEX_CONTEXT_CODE
+    AND dfcu.flex_value_set_id = fvs.flex_value_set_id(+)
+    AND dfcu.end_user_column_name LIKE Nvl(:END_USER_COLUMN_NAME, '%')
+    AND dfcu.application_column_name LIKE Nvl(:APPLICATION_COLUMN_NAME, '%')
+  ORDER BY dfcu.column_seq_num, dfcu.end_user_column_name "
+
+
+# ==================================================
+# Key Flexfield.
+# ==================================================
+DOWNLOAD KEY_FLEX
+"SELECT /* KEY_FLEX */
+        aa.application_short_name,
+        idf.id_flex_code,
+        fnd_load_util.owner_name(idf.last_updated_by) owner,
+        to_char(idf.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        at.application_short_name table_application_short_name,
+        idf.application_table_name,
+        Substrb(nvl(idf.concatenated_segs_view_name, fnd_load_util.null_value()), 1, 30) concatenated_segs_view_name,
+        idf.allow_id_valuesets,
+        idf.dynamic_inserts_feasible_flag,
+        idf.index_flag,
+        idf.unique_id_column_name,
+        idf.application_table_type,
+        idf.set_defining_column_name,
+        idf.maximum_concatenation_len,
+        idf.concatenation_len_warning,
+        idf.id_flex_name,
+        idf.description
+   FROM fnd_id_flexs idf,
+        fnd_application aa,
+        fnd_application at
+  WHERE aa.application_short_name LIKE :APPLICATION_SHORT_NAME
+    AND idf.application_id = aa.application_id
+    AND idf.id_flex_code LIKE Nvl(:ID_FLEX_CODE, '%')
+    AND at.application_id = idf.table_application_id
+  ORDER BY aa.application_short_name, idf.id_flex_code "
+
+DOWNLOAD KFF_COLUMN
+"SELECT /* KFF_COLUMN */
+        c.column_name,
+        fnd_load_util.owner_name(c.last_updated_by) owner,
+        to_char(c.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        c.flexfield_usage_code
+   FROM fnd_columns c,
+        fnd_tables t,
+        fnd_id_flexs idf,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND idf.application_id = a.application_id
+    AND idf.id_flex_code = :ID_FLEX_CODE
+    AND t.application_id = idf.table_application_id
+    AND t.table_name = idf.application_table_name
+    AND c.application_id = t.application_id
+    AND c.table_id = t.table_id
+    AND c.flexfield_usage_code IN ('I', 'S', 'Q', 'K')
+  ORDER BY decode(c.flexfield_usage_code,'I',1, 'S',2, 'Q',3, 'K',4, 5),
+           c.column_name "
+
+DOWNLOAD KFF_FLEX_QUAL
+"SELECT /* KFF_FLEX_QUAL */
+        sat.segment_attribute_type,
+        fnd_load_util.owner_name(sat.last_updated_by) owner,
+        to_char(sat.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        sat.global_flag,
+        sat.required_flag,
+        sat.unique_flag,
+        sat.segment_prompt,
+        sat.description
+   FROM fnd_segment_attribute_types sat,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND sat.application_id = a.application_id
+    AND sat.id_flex_code = :ID_FLEX_CODE
+    AND sat.segment_attribute_type LIKE Nvl(:SEGMENT_ATTRIBUTE_TYPE, '%')
+  ORDER BY sat.segment_attribute_type "
+
+DOWNLOAD KFF_SEGMENT_QUAL
+"SELECT /* KFF_SEGMENT_QUAL */
+        vat.value_attribute_type,
+        fnd_load_util.owner_name(vat.last_updated_by) owner,
+        to_char(vat.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        vat.required_flag,
+        vat.application_column_name,
+        vat.default_value,
+        vat.lookup_type,
+        vat.derivation_rule_code,
+        vat.derivation_rule_value1,
+        vat.derivation_rule_value2,
+        vat.prompt,
+        vat.description
+   FROM fnd_val_attribute_types_vl vat,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND vat.application_id = a.application_id
+    AND vat.id_flex_code = :ID_FLEX_CODE
+    AND vat.segment_attribute_type = :SEGMENT_ATTRIBUTE_TYPE
+    AND vat.value_attribute_type LIKE Nvl(:VALUE_ATTRIBUTE_TYPE, '%')
+  ORDER BY vat.value_attribute_type "
+
+DOWNLOAD KFF_STRUCTURE
+"SELECT /* KFF_STRUCTURE */
+        ifst.id_flex_structure_code,
+        fnd_load_util.owner_name(ifst.last_updated_by) owner,
+        to_char(ifst.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        ifst.concatenated_segment_delimiter,
+        ifst.cross_segment_validation_flag,
+        ifst.dynamic_inserts_allowed_flag,
+        ifst.enabled_flag,
+        ifst.freeze_flex_definition_flag,
+        ifst.freeze_structured_hier_flag,
+        ifst.shorthand_enabled_flag,
+        ifst.shorthand_length,
+        ifst.structure_view_name,
+        ifst.id_flex_structure_name,
+        ifst.description,
+        ifst.shorthand_prompt
+   FROM fnd_id_flex_structures_vl ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code LIKE Nvl(:ID_FLEX_STRUCTURE_CODE, '%')
+  ORDER BY ifst.id_flex_structure_code "
+
+DOWNLOAD KFF_WF_PROCESS
+"SELECT /* KFF_WF_PROCESS */
+        fwp.wf_item_type,
+        fnd_load_util.owner_name(fwp.last_updated_by) owner,
+        to_char(fwp.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fwp.wf_process_name
+   FROM fnd_flex_workflow_processes fwp,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND fwp.application_id = ifst.application_id
+    AND fwp.id_flex_code = ifst.id_flex_code
+    AND fwp.id_flex_num = ifst.id_flex_num
+    AND fwp.wf_item_type LIKE Nvl(:WF_ITEM_TYPE, '%')
+  ORDER BY fwp.wf_item_type "
+
+DOWNLOAD KFF_SH_ALIAS
+"SELECT /* KFF_SH_ALIAS */
+        sfa.alias_name,
+        fnd_load_util.owner_name(sfa.last_updated_by) owner,
+        to_char(sfa.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        sfa.concatenated_segments,
+        sfa.enabled_flag,
+        to_char(sfa.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(sfa.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active,
+        sfa.attribute_category,
+        sfa.attribute1,
+        sfa.attribute2,
+        sfa.attribute3,
+        sfa.attribute4,
+        sfa.attribute5,
+        sfa.attribute6,
+        sfa.attribute7,
+        sfa.attribute8,
+        sfa.attribute9,
+        sfa.attribute10,
+        sfa.attribute11,
+        sfa.attribute12,
+        sfa.attribute13,
+        sfa.attribute14,
+        sfa.attribute15,
+        sfa.description
+   FROM fnd_shorthand_flex_aliases sfa,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND sfa.application_id = ifst.application_id
+    AND sfa.id_flex_code = ifst.id_flex_code
+    AND sfa.id_flex_num = ifst.id_flex_num
+    AND sfa.alias_name LIKE Nvl(:ALIAS_NAME, '%')
+  ORDER BY sfa.alias_name "
+
+DOWNLOAD KFF_CVR_RULE
+"SELECT /* KFF_CVR_RULE */
+        fvr.flex_validation_rule_name,
+        fnd_load_util.owner_name(fvr.last_updated_by) owner,
+        to_char(fvr.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvr.enabled_flag,
+        fvr.error_segment_column_name,
+        to_char(fvr.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fvr.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active,
+        fvr.error_message_text,
+        fvr.description
+   FROM fnd_flex_vdation_rules_vl fvr,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND fvr.application_id = ifst.application_id
+    AND fvr.id_flex_code = ifst.id_flex_code
+    AND fvr.id_flex_num = ifst.id_flex_num
+    AND fvr.flex_validation_rule_name LIKE Nvl(:FLEX_VALIDATION_RULE_NAME, '%')
+  ORDER BY fvr.flex_validation_rule_name "
+
+DOWNLOAD KFF_CVR_LINE
+"SELECT /* KFF_CVR_LINE */
+        fvrl.include_exclude_indicator,
+        fvrl.concatenated_segments_low,
+        fvrl.concatenated_segments_high,
+        fnd_load_util.owner_name(fvrl.last_updated_by) owner,
+        to_char(fvrl.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvrl.enabled_flag,
+        fvrl.description
+   FROM fnd_flex_validation_rule_lines fvrl,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND fvrl.application_id = ifst.application_id
+    AND fvrl.id_flex_code = ifst.id_flex_code
+    AND fvrl.id_flex_num = ifst.id_flex_num
+    AND fvrl.flex_validation_rule_name = :FLEX_VALIDATION_RULE_NAME
+  ORDER BY decode(fvrl.include_exclude_indicator, 'I',1, 'E',2, 3),
+           fvrl.concatenated_segments_low, fvrl.concatenated_segments_high "
+
+DOWNLOAD KFF_SEGMENT
+"SELECT /* KFF_SEGMENT */
+        ifsg.segment_name,
+        ifsg.application_column_name,
+        fnd_load_util.owner_name(ifsg.last_updated_by) owner,
+        to_char(ifsg.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        ifsg.segment_num,
+        ifsg.application_column_index_flag,
+        ifsg.enabled_flag,
+        ifsg.required_flag,
+        ifsg.display_flag,
+        ifsg.display_size,
+        ifsg.security_enabled_flag,
+        ifsg.maximum_description_len,
+        ifsg.concatenation_description_len,
+        fvs.flex_value_set_name,
+        ifsg.range_code,
+        ifsg.default_type,
+        ifsg.default_value,
+        ifsg.runtime_property_function,
+        ifsg.additional_where_clause,
+        ifsg.form_left_prompt,
+        ifsg.form_above_prompt,
+        ifsg.description
+   FROM fnd_id_flex_segments_vl ifsg,
+        fnd_flex_value_sets fvs,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND ifsg.application_id = ifst.application_id
+    AND ifsg.id_flex_code = ifst.id_flex_code
+    AND ifsg.id_flex_num = ifst.id_flex_num
+    AND ifsg.flex_value_set_id = fvs.flex_value_set_id(+)
+    AND ifsg.segment_name LIKE Nvl(:SEGMENT_NAME, '%')
+    AND ifsg.application_column_name LIKE Nvl(:APPLICATION_COLUMN_NAME, '%')
+  ORDER BY ifsg.segment_num, ifsg.segment_name "
+
+DOWNLOAD KFF_FLEXQ_ASSIGN
+"SELECT /* KFF_FLEXQ_ASSIGN */
+        sav.segment_attribute_type,
+        fnd_load_util.owner_name(sav.last_updated_by) owner,
+        to_char(sav.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        sav.attribute_value
+   FROM fnd_segment_attribute_values sav,
+        fnd_segment_attribute_types sat,
+        fnd_id_flex_segments ifsg,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND ifsg.application_id = ifst.application_id
+    AND ifsg.id_flex_code = ifst.id_flex_code
+    AND ifsg.id_flex_num = ifst.id_flex_num
+    AND ifsg.application_column_name = :APPLICATION_COLUMN_NAME
+    AND sav.application_id = ifsg.application_id
+    AND sav.id_flex_code = ifsg.id_flex_code
+    AND sav.id_flex_num = ifsg.id_flex_num
+    AND sav.application_column_name = ifsg.application_column_name
+    AND sat.application_id = ifsg.application_id
+    AND sat.id_flex_code = ifsg.id_flex_code
+    AND sav.segment_attribute_type = sat.segment_attribute_type
+  ORDER BY sav.segment_attribute_type "
+
+DOWNLOAD KFF_SEGQ_ASSIGN
+"SELECT /* KFF_SEGQ_ASSIGN */
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvq.assignment_order,
+        to_char(fvq.assignment_date,'YYYY/MM/DD HH24:MI:SS') assignment_date
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_value_attribute_types vat,
+        fnd_segment_attribute_types sat,
+        fnd_segment_attribute_values sav,
+        fnd_id_flex_segments ifsg,
+        fnd_id_flex_structures ifst,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND ifst.application_id = a.application_id
+    AND ifst.id_flex_code = :ID_FLEX_CODE
+    AND ifst.id_flex_structure_code = :ID_FLEX_STRUCTURE_CODE
+    AND ifsg.application_id = ifst.application_id
+    AND ifsg.id_flex_code = ifst.id_flex_code
+    AND ifsg.id_flex_num = ifst.id_flex_num
+    AND ifsg.application_column_name = :APPLICATION_COLUMN_NAME
+    AND fvs.flex_value_set_id = ifsg.flex_value_set_id
+    AND sat.application_id = ifst.application_id
+    AND sat.id_flex_code = ifst.id_flex_code
+    AND sat.segment_attribute_type = :SEGMENT_ATTRIBUTE_TYPE
+    AND vat.application_id = sat.application_id
+    AND vat.id_flex_code = sat.id_flex_code
+    AND vat.segment_attribute_type = sat.segment_attribute_type
+    AND fvq.id_flex_application_id = vat.application_id
+    AND fvq.id_flex_code = vat.id_flex_code
+    AND fvq.segment_attribute_type = vat.segment_attribute_type
+    AND fvq.value_attribute_type = vat.value_attribute_type
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND sav.application_id = ifsg.application_id
+    AND sav.id_flex_code = ifsg.id_flex_code
+    AND sav.id_flex_num = ifsg.id_flex_num
+    AND sav.application_column_name = ifsg.application_column_name
+    AND sav.application_id = sat.application_id
+    AND sav.id_flex_code = sat.id_flex_code
+    AND sav.segment_attribute_type = sat.segment_attribute_type
+    AND sav.attribute_value = 'Y'
+    AND fvq.id_flex_application_id = sav.application_id
+    AND fvq.id_flex_code = sav.id_flex_code
+    AND fvq.segment_attribute_type = sav.segment_attribute_type
+  ORDER BY fvq.assignment_order "
+
+DOWNLOAD KFF_QUALIFIER
+"SELECT /* KFF_QUALIFIER */
+        fvs.flex_value_set_name,
+        fvq.segment_attribute_type,
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvq.assignment_order,
+        to_char(fvq.assignment_date,'YYYY/MM/DD HH24:MI:SS') assignment_date
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_application a,
+        fnd_id_flexs idf
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND idf.id_flex_code = :ID_FLEX_CODE
+    AND idf.application_id = a.application_id
+    AND fvq.id_flex_application_id = idf.application_id
+    AND fvq.id_flex_code = idf.id_flex_code
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND fvs.flex_value_set_id IN 
+        (SELECT ifsg.flex_value_set_id
+           FROM fnd_id_flex_structures ifst,
+                fnd_id_flex_segments  ifsg
+          WHERE ifst.application_id = idf.application_id
+            AND ifst.id_flex_code = idf.id_flex_code
+            AND ifst.id_flex_structure_code LIKE Nvl(:ID_FLEX_STRUCTURE_CODE, '%')
+            AND ifsg.application_id = ifst.application_id
+            AND ifsg.id_flex_code = ifst.id_flex_code
+            AND ifsg.id_flex_num = ifst.id_flex_num
+            AND ifsg.segment_name LIKE Nvl(:SEGMENT_NAME, '%')
+            AND ifsg.application_column_name LIKE Nvl(:APPLICATION_COLUMN_NAME, '%'))
+  ORDER BY fvs.flex_value_set_name, fvq.assignment_order "
+
+DOWNLOAD KFF_QUALIFIER_VALUE
+"SELECT /* KFF_QUALIFIER_VALUE */
+        fv.parent_flex_value_low,
+        fv.flex_value,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        Substrb(fnd_flex_loader_apis.get_qualifier_value(fv.compiled_value_attributes, fvq.assignment_order),1,2000)
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_flex_values fv,
+        fnd_application a,
+        fnd_id_flexs idf,
+        fnd_segment_attribute_types sat,
+        fnd_value_attribute_types vat
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND a.application_short_name = :APPLICATION_SHORT_NAME
+    AND idf.application_id = a.application_id
+    AND idf.id_flex_code = :ID_FLEX_CODE
+    AND sat.application_id = idf.application_id
+    AND sat.id_flex_code = idf.id_flex_code
+    AND sat.segment_attribute_type = :SEGMENT_ATTRIBUTE_TYPE
+    AND vat.application_id = sat.application_id
+    AND vat.id_flex_code = sat.id_flex_code
+    AND vat.segment_attribute_type = sat.segment_attribute_type
+    AND vat.value_attribute_type = :VALUE_ATTRIBUTE_TYPE
+    AND fvq.id_flex_application_id = a.application_id
+    AND fvq.id_flex_code = idf.id_flex_code
+    AND fvq.segment_attribute_type = sat.segment_attribute_type
+    AND fvq.value_attribute_type = vat.value_attribute_type
+    AND fv.flex_value_set_id = fvq.flex_value_set_id
+  ORDER BY fv.parent_flex_value_low, fv.flex_value "
+
+# ==================================================
+# Value Security (Only Upload is Allowed)
+# ==================================================
+DOWNLOAD VALUE_SECURITY_RULE
+"SELECT
+        fvs.flex_value_set_name,
+        fvr.flex_value_rule_name,
+        fvr.parent_flex_value_low,
+        fnd_load_util.owner_name(fvr.last_updated_by) owner,
+        to_char(fvr.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvr.parent_flex_value_high,
+        fvr.error_message,
+        fvr.description
+   FROM fnd_flex_value_rules_vl fvr,
+        fnd_flex_value_sets fvs
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name LIKE Nvl(:FLEX_VALUE_SET_NAME,'%')
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name LIKE Nvl(:FLEX_VALUE_RULE_NAME, '%')
+    AND Nvl(fvr.parent_flex_value_low,'%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fvs.validation_type IN ('I', 'D', 'F')
+    AND fvs.security_enabled_flag IN ('Y', 'H')
+    AND ((fvs.validation_type NOT IN ('D')) OR
+         (fvs.validation_type IN ('D') AND
+          fvr.parent_flex_value_low IS NOT NULL))
+  ORDER BY decode(fvs.validation_type, 'N',1, 'I',2, 'X',3,
+                                              'D',4, 'Y',5,
+                                       'F',6, 'U',7, 'P',8, 9),
+           fvs.flex_value_set_name, fvr.flex_value_rule_name,
+           fvr.parent_flex_value_low"
+
+DOWNLOAD VSEC_LINE
+"SELECT
+        fvrl.include_exclude_indicator,
+        fvrl.flex_value_low,
+        fvrl.flex_value_high,
+        fnd_load_util.owner_name(fvrl.last_updated_by) owner,
+        to_char(fvrl.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvrl.parent_flex_value_high
+   FROM fnd_flex_value_rule_lines fvrl,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvrl.flex_value_set_id = fvr.flex_value_set_id
+    AND fvrl.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvrl.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+  ORDER BY decode(fvrl.include_exclude_indicator, 'I',1, 'E',2, 3),
+           fvrl.flex_value_low, fvrl.flex_value_high"
+
+DOWNLOAD VSEC_USAGE
+"SELECT
+        a.application_short_name,
+        r.responsibility_key,
+        fnd_load_util.owner_name(fvru.last_updated_by) owner,
+        to_char(fvru.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvru.parent_flex_value_high
+   FROM fnd_flex_value_rule_usages fvru,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs,
+        fnd_responsibility r,
+        fnd_application a
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvru.flex_value_set_id = fvr.flex_value_set_id
+    AND fvru.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvru.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+    AND r.application_id = a.application_id
+    AND fvru.application_id = r.application_id
+    AND fvru.responsibility_id = r.responsibility_id
+  ORDER BY 1, 2 "
+
+
+# ==================================================
+# Value Hierarchy (Rollup Group) (Only Upload is Allowed)
+# ==================================================
+DOWNLOAD VALUE_ROLLUP_GROUP
+"SELECT
+        fvs.flex_value_set_name,
+        fh.hierarchy_code,
+        fnd_load_util.owner_name(fh.last_updated_by) owner,
+        to_char(fh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fh.hierarchy_name,
+        fh.description
+   FROM fnd_flex_hierarchies_vl fh,
+        fnd_flex_value_sets fvs
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name LIKE Nvl(:FLEX_VALUE_SET_NAME, '%')
+    AND fh.flex_value_set_id = fvs.flex_value_set_id
+    AND fh.hierarchy_code LIKE Nvl(:HIERARCHY_CODE, '%')
+  ORDER BY decode(fvs.validation_type, 'N',1, 'I',2, 'X',3,
+                                              'D',4, 'Y',5,
+                                       'F',6, 'U',7, 'P',8, 9),
+           fvs.flex_value_set_name, fh.hierarchy_code "
+
+
+# ==================================================
+# Flex Values (Only Upload is Allowed)
+# ==================================================
+DOWNLOAD VALUE_SET_VALUE
+"SELECT
+        fvs.flex_value_set_name,
+        fv.parent_flex_value_low,
+        fv.flex_value,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fv.enabled_flag,
+        fv.summary_flag,
+        to_char(fv.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fv.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active,
+        fv.parent_flex_value_high,
+        fh_vs.flex_value_set_name rollup_flex_value_set_name,
+        fh.hierarchy_code rollup_hierarchy_code,
+        fv.hierarchy_level,
+        fv.compiled_value_attributes,
+        fv.value_category,
+        fv.attribute1,
+        fv.attribute2,
+        fv.attribute3,
+        fv.attribute4,
+        fv.attribute5,
+        fv.attribute6,
+        fv.attribute7,
+        fv.attribute8,
+        fv.attribute9,
+        fv.attribute10,
+        fv.attribute11,
+        fv.attribute12,
+        fv.attribute13,
+        fv.attribute14,
+        fv.attribute15,
+        fv.attribute16,
+        fv.attribute17,
+        fv.attribute18,
+        fv.attribute19,
+        fv.attribute20,
+        fv.attribute21,
+        fv.attribute22,
+        fv.attribute23,
+        fv.attribute24,
+        fv.attribute25,
+        fv.attribute26,
+        fv.attribute27,
+        fv.attribute28,
+        fv.attribute29,
+        fv.attribute30,
+        fv.attribute31,
+        fv.attribute32,
+        fv.attribute33,
+        fv.attribute34,
+        fv.attribute35,
+        fv.attribute36,
+        fv.attribute37,
+        fv.attribute38,
+        fv.attribute39,
+        fv.attribute40,
+        fv.attribute41,
+        fv.attribute42,
+        fv.attribute43,
+        fv.attribute44,
+        fv.attribute45,
+        fv.attribute46,
+        fv.attribute47,
+        fv.attribute48,
+        fv.attribute49,
+        fv.attribute50,
+        Decode(fvs.validation_type, 'X', fv.flex_value_meaning,
+                                    'Y', fv.flex_value_meaning,
+                                    NULL) flex_value_meaning,
+        fv.description
+   FROM fnd_flex_values_vl fv,
+        fnd_flex_value_sets fvs,
+        fnd_flex_hierarchies fh,
+        fnd_flex_value_sets fh_vs
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name LIKE Nvl(:FLEX_VALUE_SET_NAME, '%')
+    AND fv.flex_value_set_id = fvs.flex_value_set_id
+    AND Nvl(fv.parent_flex_value_low, '%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fv.flex_value LIKE Nvl(:FLEX_VALUE,'%')
+    AND fv.flex_value_set_id = fh.flex_value_set_id(+)
+    AND fv.structured_hierarchy_level = fh.hierarchy_id(+)
+    AND fh.flex_value_set_id = fh_vs.flex_value_set_id(+)
+    AND fvs.validation_type IN ('I', 'D', 'X', 'Y', 'F')
+    AND ((fvs.validation_type NOT IN ('D', 'Y')) OR
+         (fvs.validation_type IN ('D', 'Y') AND
+          fv.parent_flex_value_low IS NOT NULL))
+  ORDER BY decode(fvs.validation_type, 'N',1, 'I',2, 'X',3,
+                                              'D',4, 'Y',5,
+                                       'F',6, 'U',7, 'P',8, 9),
+           fvs.flex_value_set_name, fv.parent_flex_value_low, fv.flex_value"
+
+DOWNLOAD VAL_NORM_HIERARCHY
+"SELECT
+        fvnh.range_attribute,
+        fvnh.child_flex_value_low,
+        fvnh.child_flex_value_high,
+        fnd_load_util.owner_name(fvnh.last_updated_by) owner,
+        to_char(fvnh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        to_char(fvnh.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fvnh.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active
+   FROM fnd_flex_value_norm_hierarchy fvnh,
+        fnd_flex_value_sets fvs
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+    AND fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvnh.flex_value_set_id = fvs.flex_value_set_id
+    AND fvnh.parent_flex_value = :FLEX_VALUE
+  ORDER BY 1, 2, 3 "
+
+DOWNLOAD VAL_QUAL_VALUE
+"SELECT
+        application_short_name,
+        id_flex_code,
+        segment_attribute_type,
+        value_attribute_type,
+        fnd_load_util.owner_name(last_updated_by) owner,
+        to_char(last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        rownum assignment_order,
+        to_char(assignment_date,'YYYY/MM/DD HH24:MI:SS') assignment_date,
+        Substrb(fnd_flex_loader_apis.get_qualifier_value(compiled_value_attributes, rownum),1,2000)
+   FROM (SELECT a.application_short_name,
+                fvq.id_flex_code,
+                fvq.segment_attribute_type,
+                fvq.value_attribute_type,
+                fv.last_updated_by,
+                fv.last_update_date,
+                fvq.assignment_date,
+                fv.compiled_value_attributes
+           FROM fnd_flex_values fv,
+                fnd_flex_value_sets fvs,
+                fnd_flex_validation_qualifiers fvq,
+                fnd_application a
+          WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+            AND fvq.flex_value_set_id = fvs.flex_value_set_id
+            AND fvq.id_flex_application_id = a.application_id
+            AND fv.flex_value_set_id = fvs.flex_value_set_id
+            AND Nvl(fv.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW, '$FLEX$.NULL')
+            AND fv.flex_value = :FLEX_VALUE
+            AND ((fvq.id_flex_application_id, fvq.id_flex_code,
+                  fvq.segment_attribute_type, fvq.value_attribute_type,
+                  fvq.flex_value_set_id) IN
+                (SELECT vat.application_id,
+                        vat.id_flex_code,
+                        vat.segment_attribute_type,
+                        vat.value_attribute_type,
+                        ifsg.flex_value_set_id
+                   FROM fnd_value_attribute_types vat,
+                        fnd_segment_attribute_types sat,
+                        fnd_segment_attribute_values sav,
+                        fnd_id_flex_segments ifsg,
+                        fnd_id_flex_structures ifst,
+                        fnd_id_flexs idf
+                  WHERE sat.application_id = idf.application_id
+                    AND sat.id_flex_code = idf.id_flex_code
+                    AND vat.application_id = sat.application_id
+                    AND vat.id_flex_code = sat.id_flex_code
+                    AND vat.segment_attribute_type = sat.segment_attribute_type
+                    AND ifst.application_id = idf.application_id
+                    AND ifst.id_flex_code = idf.id_flex_code
+                    AND ifsg.application_id = ifst.application_id
+                    AND ifsg.id_flex_code = ifst.id_flex_code
+                    AND ifsg.id_flex_num  = ifst.id_flex_num
+                    AND sav.application_id = ifsg.application_id
+                    AND sav.id_flex_code = ifsg.id_flex_code
+                    AND sav.id_flex_num = ifsg.id_flex_num
+                    AND sav.application_column_name = ifsg.application_column_name
+                    AND sav.application_id = sat.application_id
+                    AND sav.id_flex_code = sat.id_flex_code
+                    AND sav.segment_attribute_type = sat.segment_attribute_type
+                    AND sav.attribute_value = 'Y'))
+          ORDER BY fvq.assignment_date, fvq.value_attribute_type)
+  WHERE 'ONLY UPLOAD IS ALLOWED' = 'PLEASE USE VALUE_SET ENTITY FOR DOWNLOAD'
+  ORDER BY assignment_date, value_attribute_type "
+
+# ==================================================
+# Flexbuilder Functions. (Only Download is Allowed)
+# ==================================================
+DOWNLOAD FB_FUNCTION
+"SELECT /* FB_FUNCTION */
+        fbfa.application_id,
+        fbfa.application_short_name,
+        fbf.function_code,
+        fnd_load_util.owner_name(fbf.last_updated_by) owner,
+        to_char(fbf.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        kffa.application_short_name,
+        kffa.application_id,
+        fbf.id_flex_code,
+        fbf.function_name,
+        fbf.description
+   FROM fnd_flexbuilder_functions fbf,
+        fnd_application fbfa,
+        fnd_application kffa
+  WHERE fbfa.application_short_name LIKE :APPLICATION_SHORT_NAME
+    AND fbfa.application_id = fbf.application_id
+    AND fbf.function_code LIKE Nvl(:FUNCTION_CODE, '%')
+    AND kffa.application_id = fbf.flexfield_application_id
+  ORDER BY fbf.application_id, fbf.function_code "
+
+# ==================================================
+# Flexbuilder Parameters. (Only Download is Allowed)
+# ==================================================
+DOWNLOAD FB_PARAMETER
+"SELECT /* FB_PARAMETER */
+        fbp.parameter_name,
+        fbp.sequence,
+        fnd_load_util.owner_name(fbp.last_updated_by) owner,
+        to_char(fbp.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fbp.assignment_type,
+        fbp.parameter_type,
+        fbp.protected_flag,
+        fbp.conditional_parameter,
+        fbp.conditional_value,
+        fbp.constant_value,
+        fvs1.flex_value_set_name,
+        fvs1.flex_value_set_id,
+        fbp.output_column,
+        fbp.source_parameter,
+        fbp.value_set_match_required_flag,
+        fvs2.flex_value_set_name,
+        fvs2.flex_value_set_id,
+        kffa.application_short_name,
+        kffa.application_id,
+        fbp.id_flex_code,
+        ifst.id_flex_structure_code,
+        ifst.id_flex_num,
+        fbp.application_column_name,
+        fbp.segment_attribute_type,
+        fbp.id_parameter,
+        fbp.user_parameter_name,
+        fbp.description
+   FROM fnd_flexbuilder_params_vl fbp,
+        fnd_application fbpa,
+        fnd_application kffa,
+        fnd_id_flex_structures ifst,
+        fnd_flex_value_sets fvs1,
+        fnd_flex_value_sets fvs2
+  WHERE fbpa.application_short_name = :APPLICATION_SHORT_NAME
+    AND fbp.application_id = fbpa.application_id
+    AND fbp.function_code = :FUNCTION_CODE
+    AND fbp.flex_value_set_id = fvs1.flex_value_set_id(+)
+    AND fbp.assignment_value_set_id = fvs2.flex_value_set_id(+)
+    AND fbp.flexfield_application_id = kffa.application_id(+)
+    AND fbp.flexfield_application_id = ifst.application_id(+)
+    AND fbp.id_flex_code = ifst.id_flex_code(+)
+    AND fbp.id_flex_num = ifst.id_flex_num(+)
+  ORDER BY decode(fbp.parameter_type, 'R', 1, 2),
+           fbp.parameter_name, fbp.sequence desc "
+
+# ==================================================
+# Flexbuilder Assignments. (Only Download is Allowed)
+# ==================================================
+DOWNLOAD FB_ASSIGNMENT
+"SELECT /* FB_ASSIGNMENT */
+        ifst.id_flex_num,
+        ifst.id_flex_structure_code,
+        fba.sequence,
+        fnd_load_util.owner_name(fba.last_updated_by) owner,
+        to_char(fba.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fba.assignment_type,
+        fba.protected_flag,
+        fba.conditional_parameter,
+        fba.conditional_value,
+        fba.id_parameter,
+        fba.flexfield_segment_usages,
+        fba.segment_attribute_type,
+        fba.segment_parameter_pairings,
+        fba.segment_parameter,
+        fba.segment_constants,
+        fba.description
+   FROM fnd_flexbuilder_assignments fba,
+        fnd_flexbuilder_functions fbf,
+        fnd_application fbfa,
+        fnd_id_flex_structures ifst
+  WHERE fbfa.application_short_name = :APPLICATION_SHORT_NAME
+    AND fbf.application_id = fbfa.application_id
+    AND fbf.function_code = :FUNCTION_CODE
+    AND fba.application_id = fbf.application_id
+    AND fba.function_code = fbf.function_code
+    AND ifst.application_id = fbf.flexfield_application_id
+    AND ifst.id_flex_code = fbf.id_flex_code
+    AND ifst.id_flex_num = fba.id_flex_num
+  ORDER BY ifst.id_flex_num, fba.sequence desc "
+
+# ==================================================
+# Value Set.
+# ==================================================
+UPLOAD VALUE_SET
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_value_set
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_validation_type              => :validation_type,
+        p_protected_flag               => :protected_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_longlist_flag                => :longlist_flag,
+        p_format_type                  => :format_type,
+        p_maximum_size                 => :maximum_size,
+        p_number_precision             => :number_precision,
+        p_alphanumeric_allowed_flag    => :alphanumeric_allowed_flag,
+        p_uppercase_only_flag          => :uppercase_only_flag,
+        p_numeric_mode_enabled_flag    => :numeric_mode_enabled_flag,
+        p_minimum_value                => :minimum_value,
+        p_maximum_value                => :maximum_value,
+        p_parent_flex_value_set_name   => :parent_flex_value_set_name,
+        p_dependant_default_value      => :dependant_default_value,
+        p_dependant_default_meaning    => :dependant_default_meaning,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_value_set
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_validation_type              => :validation_type,
+        p_protected_flag               => :protected_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_longlist_flag                => :longlist_flag,
+        p_format_type                  => :format_type,
+        p_maximum_size                 => :maximum_size,
+        p_number_precision             => :number_precision,
+        p_alphanumeric_allowed_flag    => :alphanumeric_allowed_flag,
+        p_uppercase_only_flag          => :uppercase_only_flag,
+        p_numeric_mode_enabled_flag    => :numeric_mode_enabled_flag,
+        p_minimum_value                => :minimum_value,
+        p_maximum_value                => :maximum_value,
+        p_parent_flex_value_set_name   => :parent_flex_value_set_name,
+        p_dependant_default_value      => :dependant_default_value,
+        p_dependant_default_meaning    => :dependant_default_meaning,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_DEPENDS_ON
+"BEGIN
+    fnd_flex_loader_apis.up_vset_depends_on
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_ind_flex_value_set_name      => :ind_flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_ind_validation_type          => :ind_validation_type,
+        p_dep_validation_type          => :dep_validation_type);
+ END;"
+
+UPLOAD VSET_TABLE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_table
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_summary_allowed_flag         => :summary_allowed_flag,
+        p_value_column_name            => :value_column_name,
+        p_value_column_type            => :value_column_type,
+        p_value_column_size            => :value_column_size,
+        p_id_column_name               => :id_column_name,
+        p_id_column_type               => :id_column_type,
+        p_id_column_size               => :id_column_size,
+        p_meaning_column_name          => :meaning_column_name,
+        p_meaning_column_type          => :meaning_column_type,
+        p_meaning_column_size          => :meaning_column_size,
+        p_enabled_column_name          => :enabled_column_name,
+        p_compiled_attribute_column_na => :compiled_attribute_column_name,
+        p_hierarchy_level_column_name  => :hierarchy_level_column_name,
+        p_start_date_column_name       => :start_date_column_name,
+        p_end_date_column_name         => :end_date_column_name,
+        p_summary_column_name          => :summary_column_name,
+        p_additional_where_clause      => :additional_where_clause,
+        p_additional_quickpick_columns => :additional_quickpick_columns);
+ END; "
+
+UPLOAD VSET_EVENT
+"BEGIN
+    fnd_flex_loader_apis.up_vset_event
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_event_code                   => :event_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_user_exit                    => :user_exit);
+ END; "
+
+UPLOAD VSET_SECURITY_RULE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_SECURITY_LINE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_line
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_include_exclude_indicator    => :include_exclude_indicator,
+        p_flex_value_low               => :flex_value_low,
+        p_flex_value_high              => :flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+UPLOAD VSET_SECURITY_USAGE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_usage
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_application_short_name       => :application_short_name,
+        p_responsibility_key           => :responsibility_key,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+UPLOAD VSET_ROLLUP_GROUP
+"BEGIN
+    fnd_flex_loader_apis.up_vset_rollup_group
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_hierarchy_code               => :hierarchy_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_hierarchy_name               => :hierarchy_name,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_QUALIFIER
+"BEGIN
+    fnd_flex_loader_apis.up_vset_qualifier
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_id_flex_application_short_na => :id_flex_application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_assignment_order             => :assignment_order,
+        p_assignment_date              => :assignment_date);
+ END; "
+
+UPLOAD VSET_VALUE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_attribute_sort_order         => :attribute_sort_order,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_attribute_sort_order         => :attribute_sort_order,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_VALUE_HIERARCHY
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_hierarchy
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value            => :flex_value,
+        p_range_attribute              => :range_attribute,
+        p_child_flex_value_low         => :child_flex_value_low,
+        p_child_flex_value_high        => :child_flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active);
+ END; "
+
+UPLOAD VSET_VALUE_QUAL_VALUE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_qual_value
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_id_flex_application_short_na => :id_flex_application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_compiled_value_attribute_val => :compiled_value_attribute_value);
+ END; "
+
+# ==================================================
+# Descriptive Flexfields.
+# ==================================================
+UPLOAD DESC_FLEX
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_desc_flex
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_concatenated_segs_view_name  => :concatenated_segs_view_name,
+        p_context_column_name          => :context_column_name,
+        p_context_required_flag        => :context_required_flag,
+        p_context_user_override_flag   => :context_user_override_flag,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_protected_flag               => :protected_flag,
+        p_default_context_field_name   => :default_context_field_name,
+        p_default_context_value        => :default_context_value,
+        p_context_default_type         => :context_default_type,
+        p_context_default_value        => :context_default_value,
+        p_context_override_value_set_n => :context_override_value_set_nam,
+        p_context_runtime_property_fun => :context_runtime_property_funct,
+        p_context_synchronization_flag => :context_synchronization_flag,
+        p_title                        => :title,
+        p_form_context_prompt          => :form_context_prompt,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_desc_flex           
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_concatenated_segs_view_name  => :concatenated_segs_view_name,
+        p_context_column_name          => :context_column_name,
+        p_context_required_flag        => :context_required_flag,
+        p_context_user_override_flag   => :context_user_override_flag,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_protected_flag               => :protected_flag,
+        p_default_context_field_name   => :default_context_field_name,
+        p_default_context_value        => :default_context_value,
+        p_context_default_type         => :context_default_type,
+        p_context_default_value        => :context_default_value,
+        p_context_override_value_set_n => :context_override_value_set_nam,
+        p_context_runtime_property_fun => :context_runtime_property_funct,
+        p_context_synchronization_flag => :context_synchronization_flag,
+        p_title                        => :title,
+        p_form_context_prompt          => :form_context_prompt,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_COLUMN
+"BEGIN
+    fnd_flex_loader_apis.up_dff_column
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_column_name                  => :column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_flexfield_usage_code         => :flexfield_usage_code);
+ END; "
+
+UPLOAD DFF_REF_FIELD
+"BEGIN
+    fnd_flex_loader_apis.up_dff_ref_field
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_default_context_field_name   => :default_context_field_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_CONTEXT
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_dff_context
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_global_flag                  => :global_flag,
+        p_descriptive_flex_context_nam => :descriptive_flex_context_name,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_dff_context
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_global_flag                  => :global_flag,
+        p_descriptive_flex_context_nam => :descriptive_flex_context_name,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_SEGMENT
+"BEGIN
+    fnd_flex_loader_apis.up_dff_segment
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_end_user_column_name         => :end_user_column_name,
+        p_application_column_name      => :application_column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_column_seq_num               => :column_seq_num,
+        p_enabled_flag                 => :enabled_flag,
+        p_display_flag                 => :display_flag,
+        p_required_flag                => :required_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_display_size                 => :display_size,
+        p_maximum_description_len      => :maximum_description_len,
+        p_concatenation_description_le => :concatenation_description_len,
+        p_range_code                   => :range_code,
+        p_default_type                 => :default_type,
+        p_default_value                => :default_value,
+        p_runtime_property_function    => :runtime_property_function,
+        p_srw_param                    => :srw_param,
+        p_form_left_prompt             => :form_left_prompt,
+        p_form_above_prompt            => :form_above_prompt,
+        p_description                  => :description);
+ END; "
+
+
+# ==================================================
+# Key Flexfields.
+# ==================================================
+UPLOAD KEY_FLEX
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_key_flex
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_concatenated_segs_view_name  => :concatenated_segs_view_name,
+        p_allow_id_valuesets           => :allow_id_valuesets,
+        p_dynamic_inserts_feasible_fla => :dynamic_inserts_feasible_flag,
+        p_index_flag                   => :index_flag,
+        p_unique_id_column_name        => :unique_id_column_name,
+        p_application_table_type       => :application_table_type,
+        p_set_defining_column_name     => :set_defining_column_name,
+        p_maximum_concatenation_len    => :maximum_concatenation_len,
+        p_concatenation_len_warning    => :concatenation_len_warning,
+        p_id_flex_name                 => :id_flex_name,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_key_flex
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_concatenated_segs_view_name  => :concatenated_segs_view_name,
+        p_allow_id_valuesets           => :allow_id_valuesets,
+        p_dynamic_inserts_feasible_fla => :dynamic_inserts_feasible_flag,
+        p_index_flag                   => :index_flag,
+        p_unique_id_column_name        => :unique_id_column_name,
+        p_application_table_type       => :application_table_type,
+        p_set_defining_column_name     => :set_defining_column_name,
+        p_maximum_concatenation_len    => :maximum_concatenation_len,
+        p_concatenation_len_warning    => :concatenation_len_warning,
+        p_id_flex_name                 => :id_flex_name,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_COLUMN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_column
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_column_name                  => :column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_flexfield_usage_code         => :flexfield_usage_code);
+ END; "
+
+UPLOAD KFF_FLEX_QUAL
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_flex_qual
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_global_flag                  => :global_flag,
+        p_required_flag                => :required_flag,
+        p_unique_flag                  => :unique_flag,
+        p_segment_prompt               => :segment_prompt,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_flex_qual
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_global_flag                  => :global_flag,
+        p_required_flag                => :required_flag,
+        p_unique_flag                  => :unique_flag,
+        p_segment_prompt               => :segment_prompt,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_SEGMENT_QUAL
+"BEGIN
+    fnd_flex_loader_apis.up_kff_segment_qual
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_required_flag                => :required_flag,
+        p_application_column_name      => :application_column_name,
+        p_default_value                => :default_value,
+        p_lookup_type                  => :lookup_type,
+        p_derivation_rule_code         => :derivation_rule_code,
+        p_derivation_rule_value1       => :derivation_rule_value1,
+        p_derivation_rule_value2       => :derivation_rule_value2,
+        p_prompt                       => :prompt,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_STRUCTURE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_structure
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_cross_segment_validation_fla => :cross_segment_validation_flag,
+        p_dynamic_inserts_allowed_flag => :dynamic_inserts_allowed_flag,
+        p_enabled_flag                 => :enabled_flag,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_freeze_structured_hier_flag  => :freeze_structured_hier_flag,
+        p_shorthand_enabled_flag       => :shorthand_enabled_flag,
+        p_shorthand_length             => :shorthand_length,
+        p_structure_view_name          => :structure_view_name,
+        p_id_flex_structure_name       => :id_flex_structure_name,
+        p_description                  => :description,
+        p_shorthand_prompt             => :shorthand_prompt);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_structure
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_cross_segment_validation_fla => :cross_segment_validation_flag,
+        p_dynamic_inserts_allowed_flag => :dynamic_inserts_allowed_flag,
+        p_enabled_flag                 => :enabled_flag,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_freeze_structured_hier_flag  => :freeze_structured_hier_flag,
+        p_shorthand_enabled_flag       => :shorthand_enabled_flag,
+        p_shorthand_length             => :shorthand_length,
+        p_structure_view_name          => :structure_view_name,
+        p_id_flex_structure_name       => :id_flex_structure_name,
+        p_description                  => :description,
+        p_shorthand_prompt             => :shorthand_prompt);
+ END; "
+
+UPLOAD KFF_WF_PROCESS
+"BEGIN
+    fnd_flex_loader_apis.up_kff_wf_process
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_wf_item_type                 => :wf_item_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_wf_process_name              => :wf_process_name);
+ END; "
+
+UPLOAD KFF_SH_ALIAS
+"BEGIN
+    fnd_flex_loader_apis.up_kff_sh_alias
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_alias_name                   => :alias_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_concatenated_segments        => :concatenated_segments,
+        p_enabled_flag                 => :enabled_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_attribute_category           => :attribute_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_CVR_RULE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_cvr_rule
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_flex_validation_rule_name    => :flex_validation_rule_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_error_segment_column_name    => :error_segment_column_name,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_error_message_text           => :error_message_text,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_cvr_rule
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_flex_validation_rule_name    => :flex_validation_rule_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_error_segment_column_name    => :error_segment_column_name,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_error_message_text           => :error_message_text,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_CVR_LINE
+"BEGIN
+    fnd_flex_loader_apis.up_kff_cvr_line
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_flex_validation_rule_name    => :flex_validation_rule_name,
+        p_include_exclude_indicator    => :include_exclude_indicator,
+        p_concatenated_segments_low    => :concatenated_segments_low,
+        p_concatenated_segments_high   => :concatenated_segments_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_SEGMENT
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_segment
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_segment_name                 => :segment_name,
+        p_application_column_name      => :application_column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_segment_num                  => :segment_num,
+        p_application_column_index_fla => :application_column_index_flag,
+        p_enabled_flag                 => :enabled_flag,
+        p_required_flag                => :required_flag,
+        p_display_flag                 => :display_flag,
+        p_display_size                 => :display_size,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_maximum_description_len      => :maximum_description_len,
+        p_concatenation_description_le => :concatenation_description_len,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_range_code                   => :range_code,
+        p_default_type                 => :default_type,
+        p_default_value                => :default_value,
+        p_runtime_property_function    => :runtime_property_function,
+        p_additional_where_clause      => :additional_where_clause,
+        p_form_left_prompt             => :form_left_prompt,
+        p_form_above_prompt            => :form_above_prompt,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_segment
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_segment_name                 => :segment_name,
+        p_application_column_name      => :application_column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_segment_num                  => :segment_num,
+        p_application_column_index_fla => :application_column_index_flag,
+        p_enabled_flag                 => :enabled_flag,
+        p_required_flag                => :required_flag,
+        p_display_flag                 => :display_flag,
+        p_display_size                 => :display_size,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_maximum_description_len      => :maximum_description_len,
+        p_concatenation_description_le => :concatenation_description_len,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_range_code                   => :range_code,
+        p_default_type                 => :default_type,
+        p_default_value                => :default_value,
+        p_runtime_property_function    => :runtime_property_function,
+        p_additional_where_clause      => :additional_where_clause,
+        p_form_left_prompt             => :form_left_prompt,
+        p_form_above_prompt            => :form_above_prompt,
+        p_description                  => :description);
+ END; "
+
+UPLOAD KFF_FLEXQ_ASSIGN
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_flexq_assign
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_application_column_name      => :application_column_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_attribute_value              => :attribute_value);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_flexq_assign
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_application_column_name      => :application_column_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_attribute_value              => :attribute_value);
+ END; "
+
+UPLOAD KFF_SEGQ_ASSIGN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_segq_assign
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_id_flex_structure_code       => :id_flex_structure_code,
+        p_application_column_name      => :application_column_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_assignment_order             => :assignment_order,
+        p_assignment_date              => :assignment_date);
+ END; "
+
+UPLOAD KFF_QUALIFIER
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_kff_qualifier
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_assignment_order             => :assignment_order,
+        p_assignment_date              => :assignment_date);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_kff_qualifier
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_assignment_order             => :assignment_order,
+        p_assignment_date              => :assignment_date);
+ END; "
+
+UPLOAD KFF_QUALIFIER_VALUE
+"BEGIN
+    fnd_flex_loader_apis.up_kff_qualifier_value
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_compiled_value_attribute_val => :compiled_value_attribute_value);
+ END; "
+
+# ==================================================
+# Value Security (Only Upload is Allowed)
+# ==================================================
+UPLOAD VALUE_SECURITY_RULE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSEC_LINE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_line
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_include_exclude_indicator    => :include_exclude_indicator,
+        p_flex_value_low               => :flex_value_low,
+        p_flex_value_high              => :flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+UPLOAD VSEC_USAGE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_usage
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_application_short_name       => :application_short_name,
+        p_responsibility_key           => :responsibility_key,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+
+# ==================================================
+# Value Hierarchy (Rollup Group) (Only Upload is Allowed)
+# ==================================================
+UPLOAD VALUE_ROLLUP_GROUP
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_vset_rollup_group
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_hierarchy_code               => :hierarchy_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_hierarchy_name               => :hierarchy_name,
+        p_description                  => :description);
+ END; "
+
+# ==================================================
+# Flex Values (Only Upload is Allowed)
+# ==================================================
+UPLOAD VALUE_SET_VALUE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VAL_NORM_HIERARCHY
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_hierarchy
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value            => :flex_value,
+        p_range_attribute              => :range_attribute,
+        p_child_flex_value_low         => :child_flex_value_low,
+        p_child_flex_value_high        => :child_flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active);
+ END; "
+
+UPLOAD VAL_QUAL_VALUE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_qual_value
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_id_flex_application_short_na => :id_flex_application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_compiled_value_attribute_val => :compiled_value_attribute_value);
+ END; "
+
+UPLOAD FB_FUNCTION
+BEGIN
+"BEGIN
+    raise_application_error(-20001, 
+                            'Upload is not allowed for Flexbuilder Entitites.');
+ END; "
+END
+"BEGIN
+    raise_application_error(-20001, 
+                            'Upload is not allowed for Flexbuilder Entitites.');
+ END; "
+
+UPLOAD FB_PARAMETER
+"BEGIN
+    raise_application_error(-20001, 
+                            'Upload is not allowed for Flexbuilder Entitites.');
+ END; "
+
+UPLOAD FB_ASSIGNMENT
+"BEGIN
+    raise_application_error(-20001, 
+                            'Upload is not allowed for Flexbuilder Entitites.');
+ END; "

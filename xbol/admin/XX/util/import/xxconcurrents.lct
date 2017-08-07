@@ -1,0 +1,2182 @@
+#
+#
+#  CUSTOMIZACIONES
+#
+#    IMPORTANTE
+#
+#    SE DEBEG COPIAR EL ARCHIVO LCT afffload.lct  DE $FND_TOP/patch/115/import
+#
+#    Y MODIFICAR EL DOWNLOAD DE VALUE_SETS agregando 1 = 2 en la clausula WHERE
+#
+#    COMO EJEMPLO SE PUEDE BUSCAR LA LEYENDA "CUSTOMIZACIONES_ARGENTINA" EN ESTE
+#
+#    DOCUMENTO
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# $Header: afcpprog.lct 120.2.12010000.2 2008/11/21 14:26:27 jvalenti ship $
+#
+# <filename>.lct - <Entity description> Loader Configuration
+#
+# Entities -
+#
+#   PROGRAM 
+#     INCOMPATABILITY
+#
+# ----------BEGIN FLEX----------
+# 
+# Flex Entities -  [dual maintenance required with this file and flex]
+#
+#   Syncronized with afffload.lct 115.29 as of 24-JAN-2006.
+#      Except the following data model changes:
+#         FND_FLEX_VALUES        .ATTRIBUTE_SORT_ORDER
+#         FND_DESCRIPTIVE_FLEXS  .CONCATENATED_SEGS_VIEW_NAME
+#         FND_DESCRIPTIVE_FLEXS  .CONTEXT_SYNCHRONIZATION_FLAG
+#
+#   See $fnd/patch/115/import/afffload.lct for more details.
+#   
+#   DEFINE, and UPLOAD sections of following entities can
+#   be copied from afffload.lct file without any change.
+#
+#   DOWNLOAD part is modified to download only SRS related data.
+#   Additional filters are added to make sure non-SRS data is not downloaded.
+#
+#  VALUE_SET (non-MLS)                     -- Value sets
+#   |                                         - FND_FLEX_VALUE_SETS
+#   +--VSET_DEPENDS_ON (internal)          -- Ind/Dep Relationship
+#   |                                         - FND_FLEX_VALUE_SETS
+#   +--VSET_TABLE (no-TL)                  -- Table for 'F' value sets
+#   |                                         - FND_FLEX_VALIDATION_TABLES
+#   +--VSET_EVENT (no-TL)                  -- User exit for 'U/P' value sets
+#   |                                         - FND_FLEX_VALIDATION_EVENTS
+#   +--VSET_SECURITY_RULE (MLS)            -- Value Security Rules
+#   |   |                                     - FND_FLEX_VALUE_RULES
+#   |   |                                     - FND_FLEX_VALUE_RULES_TL
+#   |   +--VSET_SECURITY_LINE (no-TL)      -- Value Security Rule Lines
+#   |   |                                     - FND_FLEX_VALUE_RULE_LINES
+#   |   +--VSET_SECURITY_USAGE (no-TL)     -- Security Rule Assignments to
+#   |                                         Responsibilities
+#   |                                         - FND_FLEX_VALUE_RULE_USAGES
+#   +--VSET_ROLLUP_GROUP (MLS)             -- Value Set Rollup Groups
+#   |                                         - FND_FLEX_HIERARCHIES
+#   |                                         - FND_FLEX_HIERARCHIES_TL
+#   +--VSET_QUALIFIER (internal)           -- Value Set Dynamic Attributes
+#   |                                         - FND_FLEX_VALIDATION_QUALIFIERS
+#   +--VSET_VALUE (MLS)                    -- Values
+#       |                                     - FND_FLEX_VALUES
+#       |                                     - FND_FLEX_VALUES_TL
+#       +--VSET_VALUE_HIERARCHY (no-TL)    -- Value Normalized Hierarchies
+#       |                                     (Denormalized by FNDFFCHY)
+#       |                                     - FND_FLEX_VALUE_NORM_HIERARCHY
+#       |                                     - FND_FLEX_VALUE_HIERARCHIES
+#       |                                     - FND_FLEX_VALUE_HIER_ALL
+#       +--VSET_VALUE_QUAL_VALUE (no-TL)   -- Compiled Value Attributes
+#                                             (Dynamic Attributes)
+#                                             - FND_FLEX_VALUES
+#
+#  DESC_FLEX (MLS)                         -- Descriptive Flexfields
+#   |                                         - FND_DESCRIPTIVE_FLEXS
+#   |                                         - FND_DESCRIPTIVE_FLEXS_TL
+#   +--DFF_COLUMN (no-TL)                  -- Registered DFF Columns
+#   |                                         - FND_COLUMNS
+#   +--DFF_REF_FIELD (non-MLS)             -- Context Reference Fields
+#   |                                         - FND_DEFAULT_CONTEXT_FIELDS
+#   +--DFF_CONTEXT (MLS)                   -- DFF Contexts
+#       |                                     - FND_DESCR_FLEX_CONTEXS
+#       |                                     - FND_DESCR_FLEX_CONTEXS_TL
+#       +--DFF_SEGMENT (MLS)               -- DFF Segments
+#                                             - FND_DESCR_FLEX_COLUMN_USAGES
+#                                             - FND_DESCR_FLEX_COL_USAGE_TL
+#
+# ----------END FLEX----------
+#
+#
+#
+#
+# -- DEFINE SECTION --
+#
+#   Use this section to specify the structure of the entities.
+#
+#   ID column values are not portable.  Use an equivalent text value instead.
+#   For example, use APPLICATION_SHORT_NAME instead of APPLICATION_ID.
+# 
+#   DATE and NUMBER datatypes should be defined and stored as VARCHAR2(11)
+#   and VARCHAR2(50), respectively.
+#
+#   The OWNER field is used to store and determine the values of the 
+#   "WHO" columns.
+#
+
+# ==================================================
+# Executable
+# ==================================================
+COMMENT = "dbdrv: exec fnd bin FNDLOAD bin &phase=daa+56 checkfile:~PROD:~PATH:~FILE &ui_apps 0 Y UPLOAD @FND:patch/115/import/afcpprog.lct @~PROD:~PATH/~FILE" 
+DEFINE EXECUTABLE
+  KEY   EXECUTABLE_NAME         VARCHAR2(30)
+  KEY   APPLICATION_SHORT_NAME  VARCHAR2(50)
+  CTX   OWNER                   VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE	VARCHAR2(75)
+  BASE  EXECUTION_METHOD_CODE   VARCHAR2(1)
+  BASE  EXECUTION_FILE_NAME     VARCHAR2(61)
+  BASE  SUBROUTINE_NAME         VARCHAR2(30)
+  BASE  EXECUTION_FILE_PATH     VARCHAR2(510)
+  TRANS USER_EXECUTABLE_NAME    VARCHAR2(240)
+  TRANS DESCRIPTION             VARCHAR2(240)
+END EXECUTABLE
+
+# ----------BEGIN FLEX----------
+
+# ==================================================
+# Value Set.
+# ==================================================
+DEFINE VALUE_SET
+   KEY   FLEX_VALUE_SET_NAME            VARCHAR2(60)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  VALIDATION_TYPE                VARCHAR2(1)
+   BASE  PROTECTED_FLAG                 VARCHAR2(1)
+   BASE  SECURITY_ENABLED_FLAG          VARCHAR2(1)
+   BASE  LONGLIST_FLAG                  VARCHAR2(1)
+   BASE  FORMAT_TYPE                    VARCHAR2(1)
+   BASE  MAXIMUM_SIZE                   VARCHAR2(50)
+   BASE  NUMBER_PRECISION               VARCHAR2(50)
+   BASE  ALPHANUMERIC_ALLOWED_FLAG      VARCHAR2(1)
+   BASE  UPPERCASE_ONLY_FLAG            VARCHAR2(1)
+   BASE  NUMERIC_MODE_ENABLED_FLAG      VARCHAR2(1)
+   BASE  MINIMUM_VALUE                  VARCHAR2(150)
+   BASE  MAXIMUM_VALUE                  VARCHAR2(150)
+   BASE  PARENT_FLEX_VALUE_SET_NAME     VARCHAR2(60)
+   BASE  DEPENDANT_DEFAULT_VALUE        VARCHAR2(60)
+   BASE  DEPENDANT_DEFAULT_MEANING      VARCHAR2(240)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   # ==================================================
+   # Pointer to independent vset (I, X) from dependent vset (D, Y).
+   # ==================================================
+   DEFINE VSET_DEPENDS_ON
+      KEY   IND_FLEX_VALUE_SET_NAME        REFERENCES VALUE_SET AS IND_FLEX_VALUE_SET_NAME
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  IND_VALIDATION_TYPE            VARCHAR2(1)
+      BASE  DEP_VALIDATION_TYPE            VARCHAR2(1)
+   END VSET_DEPENDS_ON
+
+   # ==================================================
+   # Value Set Table for table validated vset (F).
+   # ==================================================
+   DEFINE VSET_TABLE
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  TABLE_APPLICATION_SHORT_NAME   VARCHAR2(50)
+      BASE  APPLICATION_TABLE_NAME         VARCHAR2(240)
+      BASE  SUMMARY_ALLOWED_FLAG           VARCHAR2(1)
+      BASE  VALUE_COLUMN_NAME              VARCHAR2(240)
+      BASE  VALUE_COLUMN_TYPE              VARCHAR2(1)
+      BASE  VALUE_COLUMN_SIZE              VARCHAR2(50)
+      BASE  ID_COLUMN_NAME                 VARCHAR2(240)
+      BASE  ID_COLUMN_TYPE                 VARCHAR2(1)
+      BASE  ID_COLUMN_SIZE                 VARCHAR2(50)
+      BASE  MEANING_COLUMN_NAME            VARCHAR2(240)
+      BASE  MEANING_COLUMN_TYPE            VARCHAR2(1)
+      BASE  MEANING_COLUMN_SIZE            VARCHAR2(50)
+      BASE  ENABLED_COLUMN_NAME            VARCHAR2(240)
+      BASE  COMPILED_ATTRIBUTE_COLUMN_NAME VARCHAR2(240)
+      BASE  HIERARCHY_LEVEL_COLUMN_NAME    VARCHAR2(240)
+      BASE  START_DATE_COLUMN_NAME         VARCHAR2(240)
+      BASE  END_DATE_COLUMN_NAME           VARCHAR2(240)
+      BASE  SUMMARY_COLUMN_NAME            VARCHAR2(240)
+      BASE  ADDITIONAL_WHERE_CLAUSE        VARCHAR2(32000)
+      BASE  ADDITIONAL_QUICKPICK_COLUMNS   VARCHAR2(240)
+   END VSET_TABLE
+
+   # ==================================================
+   # Value Set Event for user-exit validated vset (U, P).
+   # ==================================================
+   DEFINE VSET_EVENT
+      KEY   EVENT_CODE                     VARCHAR2(1)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  USER_EXIT                      VARCHAR2(32000)
+   END VSET_EVENT
+
+   # ==================================================
+   # Value Set Security Rule.
+   # ==================================================
+   DEFINE VSET_SECURITY_RULE
+      KEY   FLEX_VALUE_RULE_NAME           VARCHAR2(30)
+      KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      TRANS ERROR_MESSAGE                  VARCHAR2(240)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Value Set Security Rule Line.
+      # ==================================================
+      DEFINE VSET_SECURITY_LINE
+         KEY   INCLUDE_EXCLUDE_INDICATOR      VARCHAR2(1)
+         KEY   FLEX_VALUE_LOW                 VARCHAR2(60)
+         KEY   FLEX_VALUE_HIGH                VARCHAR2(60)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      END VSET_SECURITY_LINE
+
+      # ==================================================
+      # Value Set Security Rule Usage.
+      # ==================================================
+      DEFINE VSET_SECURITY_USAGE
+         KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+         KEY   RESPONSIBILITY_KEY             VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      END VSET_SECURITY_USAGE
+   END VSET_SECURITY_RULE
+
+   # ==================================================
+   # Value Set Rollup Group.
+   # ==================================================
+   DEFINE VSET_ROLLUP_GROUP
+      KEY   HIERARCHY_CODE                 VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      TRANS HIERARCHY_NAME                 VARCHAR2(30)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+   END VSET_ROLLUP_GROUP
+
+   # ==================================================
+   # Value Set Qualifier.
+   # ==================================================
+   DEFINE VSET_QUALIFIER
+      KEY   ID_FLEX_APPLICATION_SHORT_NAME VARCHAR2(50)
+      KEY   ID_FLEX_CODE                   VARCHAR2(4)
+      KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+      KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ASSIGNMENT_ORDER               VARCHAR2(50)
+      BASE  ASSIGNMENT_DATE                VARCHAR2(50)
+   END VSET_QUALIFIER
+
+   # ==================================================
+   # Value.
+   # ==================================================
+   DEFINE VSET_VALUE
+      KEY   PARENT_FLEX_VALUE_LOW          VARCHAR2(60)
+      KEY   FLEX_VALUE                     VARCHAR2(150)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ENABLED_FLAG                   VARCHAR2(1)
+      BASE  SUMMARY_FLAG                   VARCHAR2(1)
+      BASE  START_DATE_ACTIVE              VARCHAR2(50)
+      BASE  END_DATE_ACTIVE                VARCHAR2(50)
+      BASE  PARENT_FLEX_VALUE_HIGH         VARCHAR2(60)
+      BASE  ROLLUP_HIERARCHY_CODE          VARCHAR2(30)
+      BASE  HIERARCHY_LEVEL                VARCHAR2(50)
+      BASE  COMPILED_VALUE_ATTRIBUTES      VARCHAR2(2000)
+      BASE  VALUE_CATEGORY                 VARCHAR2(30)
+      BASE  ATTRIBUTE1                     VARCHAR2(240)
+      BASE  ATTRIBUTE2                     VARCHAR2(240)
+      BASE  ATTRIBUTE3                     VARCHAR2(240)
+      BASE  ATTRIBUTE4                     VARCHAR2(240)
+      BASE  ATTRIBUTE5                     VARCHAR2(240)
+      BASE  ATTRIBUTE6                     VARCHAR2(240)
+      BASE  ATTRIBUTE7                     VARCHAR2(240)
+      BASE  ATTRIBUTE8                     VARCHAR2(240)
+      BASE  ATTRIBUTE9                     VARCHAR2(240)
+      BASE  ATTRIBUTE10                    VARCHAR2(240)
+      BASE  ATTRIBUTE11                    VARCHAR2(240)
+      BASE  ATTRIBUTE12                    VARCHAR2(240)
+      BASE  ATTRIBUTE13                    VARCHAR2(240)
+      BASE  ATTRIBUTE14                    VARCHAR2(240)
+      BASE  ATTRIBUTE15                    VARCHAR2(240)
+      BASE  ATTRIBUTE16                    VARCHAR2(240)
+      BASE  ATTRIBUTE17                    VARCHAR2(240)
+      BASE  ATTRIBUTE18                    VARCHAR2(240)
+      BASE  ATTRIBUTE19                    VARCHAR2(240)
+      BASE  ATTRIBUTE20                    VARCHAR2(240)
+      BASE  ATTRIBUTE21                    VARCHAR2(240)
+      BASE  ATTRIBUTE22                    VARCHAR2(240)
+      BASE  ATTRIBUTE23                    VARCHAR2(240)
+      BASE  ATTRIBUTE24                    VARCHAR2(240)
+      BASE  ATTRIBUTE25                    VARCHAR2(240)
+      BASE  ATTRIBUTE26                    VARCHAR2(240)
+      BASE  ATTRIBUTE27                    VARCHAR2(240)
+      BASE  ATTRIBUTE28                    VARCHAR2(240)
+      BASE  ATTRIBUTE29                    VARCHAR2(240)
+      BASE  ATTRIBUTE30                    VARCHAR2(240)
+      BASE  ATTRIBUTE31                    VARCHAR2(240)
+      BASE  ATTRIBUTE32                    VARCHAR2(240)
+      BASE  ATTRIBUTE33                    VARCHAR2(240)
+      BASE  ATTRIBUTE34                    VARCHAR2(240)
+      BASE  ATTRIBUTE35                    VARCHAR2(240)
+      BASE  ATTRIBUTE36                    VARCHAR2(240)
+      BASE  ATTRIBUTE37                    VARCHAR2(240)
+      BASE  ATTRIBUTE38                    VARCHAR2(240)
+      BASE  ATTRIBUTE39                    VARCHAR2(240)
+      BASE  ATTRIBUTE40                    VARCHAR2(240)
+      BASE  ATTRIBUTE41                    VARCHAR2(240)
+      BASE  ATTRIBUTE42                    VARCHAR2(240)
+      BASE  ATTRIBUTE43                    VARCHAR2(240)
+      BASE  ATTRIBUTE44                    VARCHAR2(240)
+      BASE  ATTRIBUTE45                    VARCHAR2(240)
+      BASE  ATTRIBUTE46                    VARCHAR2(240)
+      BASE  ATTRIBUTE47                    VARCHAR2(240)
+      BASE  ATTRIBUTE48                    VARCHAR2(240)
+      BASE  ATTRIBUTE49                    VARCHAR2(240)
+      BASE  ATTRIBUTE50                    VARCHAR2(240)
+      TRANS FLEX_VALUE_MEANING             VARCHAR2(150)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Value Hierarchy.
+      # ==================================================
+      DEFINE VSET_VALUE_HIERARCHY
+         KEY   RANGE_ATTRIBUTE                VARCHAR2(1)
+         KEY   CHILD_FLEX_VALUE_LOW           VARCHAR2(60)
+         KEY   CHILD_FLEX_VALUE_HIGH          VARCHAR2(60)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  START_DATE_ACTIVE              VARCHAR2(50)
+         BASE  END_DATE_ACTIVE                VARCHAR2(50)
+      END VSET_VALUE_HIERARCHY
+
+      # ==================================================
+      # Value Qualifier Value.
+      # ==================================================
+      DEFINE VSET_VALUE_QUAL_VALUE
+         KEY   ID_FLEX_APPLICATION_SHORT_NAME VARCHAR2(50)
+         KEY   ID_FLEX_CODE                   VARCHAR2(4)
+         KEY   SEGMENT_ATTRIBUTE_TYPE         VARCHAR2(30)
+         KEY   VALUE_ATTRIBUTE_TYPE           VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  COMPILED_VALUE_ATTRIBUTE_VALUE VARCHAR2(2000)
+      END VSET_VALUE_QUAL_VALUE
+   END VSET_VALUE
+END VALUE_SET
+
+
+# ==================================================
+# Descriptive Flexfield.
+# ==================================================
+DEFINE DESC_FLEX
+   KEY   APPLICATION_SHORT_NAME         VARCHAR2(50)
+   KEY   DESCRIPTIVE_FLEXFIELD_NAME     VARCHAR2(40)
+   CTX   OWNER                          VARCHAR2(4000)
+   CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+   BASE  TABLE_APPLICATION_SHORT_NAME   VARCHAR2(50)
+   BASE  APPLICATION_TABLE_NAME         VARCHAR2(30)
+   BASE  CONTEXT_COLUMN_NAME            VARCHAR2(30)
+   BASE  CONTEXT_REQUIRED_FLAG          VARCHAR2(1)
+   BASE  CONTEXT_USER_OVERRIDE_FLAG     VARCHAR2(1)
+   BASE  CONCATENATED_SEGMENT_DELIMITER VARCHAR2(1)
+   BASE  FREEZE_FLEX_DEFINITION_FLAG    VARCHAR2(1)
+   BASE  PROTECTED_FLAG                 VARCHAR2(1)
+   BASE  DEFAULT_CONTEXT_FIELD_NAME     VARCHAR2(200)
+   BASE  DEFAULT_CONTEXT_VALUE          VARCHAR2(30)
+   BASE  CONTEXT_DEFAULT_TYPE           VARCHAR2(1)
+   BASE  CONTEXT_DEFAULT_VALUE          VARCHAR2(2000)
+   BASE  CONTEXT_OVERRIDE_VALUE_SET_NAM REFERENCES VALUE_SET AS CONTEXT_OVERRIDE_VALUE_SET_NAM
+   BASE  CONTEXT_RUNTIME_PROPERTY_FUNCT VARCHAR2(2000)
+   TRANS TITLE                          VARCHAR2(60)
+   TRANS FORM_CONTEXT_PROMPT            VARCHAR2(45)
+   TRANS DESCRIPTION                    VARCHAR2(240)
+
+   # ==================================================
+   # Descriptive Flexfield Column.
+   # ==================================================
+   DEFINE DFF_COLUMN
+      KEY   COLUMN_NAME                    VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  FLEXFIELD_USAGE_CODE           VARCHAR2(1)
+   END DFF_COLUMN
+
+   # ==================================================
+   # Descriptive Flexfield Reference Field.
+   # ==================================================
+   DEFINE DFF_REF_FIELD
+      KEY   DEFAULT_CONTEXT_FIELD_NAME     VARCHAR2(200)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+   END DFF_REF_FIELD
+
+   # ==================================================
+   # Descriptive Flexfield Context.
+   # ==================================================
+   DEFINE DFF_CONTEXT
+      KEY   DESCRIPTIVE_FLEX_CONTEXT_CODE  VARCHAR2(30)
+      CTX   OWNER                          VARCHAR2(4000)
+      CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+      BASE  ENABLED_FLAG                   VARCHAR2(1)
+      BASE  GLOBAL_FLAG                    VARCHAR2(1)
+      TRANS DESCRIPTIVE_FLEX_CONTEXT_NAME  VARCHAR2(80)
+      TRANS DESCRIPTION                    VARCHAR2(240)
+
+      # ==================================================
+      # Descriptive Flexfield Segment.
+      # ==================================================
+      DEFINE DFF_SEGMENT
+         KEY   END_USER_COLUMN_NAME           VARCHAR2(30)
+         KEY   APPLICATION_COLUMN_NAME        VARCHAR2(30)
+         CTX   OWNER                          VARCHAR2(4000)
+         CTX   LAST_UPDATE_DATE               VARCHAR2(50)
+         BASE  COLUMN_SEQ_NUM                 VARCHAR2(50)
+         BASE  ENABLED_FLAG                   VARCHAR2(1)
+         BASE  DISPLAY_FLAG                   VARCHAR2(1)
+         BASE  REQUIRED_FLAG                  VARCHAR2(1)
+         BASE  SECURITY_ENABLED_FLAG          VARCHAR2(1)
+         BASE  FLEX_VALUE_SET_NAME            REFERENCES VALUE_SET AS FLEX_VALUE_SET_NAME
+         BASE  DISPLAY_SIZE                   VARCHAR2(50)
+         BASE  MAXIMUM_DESCRIPTION_LEN        VARCHAR2(50)
+         BASE  CONCATENATION_DESCRIPTION_LEN  VARCHAR2(50)
+         BASE  RANGE_CODE                     VARCHAR2(1)
+         BASE  DEFAULT_TYPE                   VARCHAR2(1)
+         BASE  DEFAULT_VALUE                  VARCHAR2(2000)
+         BASE  RUNTIME_PROPERTY_FUNCTION      VARCHAR2(2000)
+         BASE  SRW_PARAM                      VARCHAR2(30)
+         TRANS FORM_LEFT_PROMPT               VARCHAR2(80)
+         TRANS FORM_ABOVE_PROMPT              VARCHAR2(80)
+         TRANS DESCRIPTION                    VARCHAR2(240)
+      END DFF_SEGMENT
+   END DFF_CONTEXT
+END DESC_FLEX
+
+# ----------END FLEX----------
+
+DEFINE PROGRAM 
+  KEY   CONCURRENT_PROGRAM_NAME      VARCHAR2(30)
+  KEY   APPLICATION_SHORT_NAME	     VARCHAR2(50)
+  CTX   OWNER                        VARCHAR2(4000)
+  BASE  LAST_UPDATE_DATE	     VARCHAR2(75)
+  TRANS USER_CONCURRENT_PROGRAM_NAME VARCHAR2(240)
+  BASE  EXEC			     REFERENCES EXECUTABLE 
+# BASE  EXECUTABLE_NAME              VARCHAR2(30)
+# BASE  EXEC_APPLICATION_SHORT_NAME  VARCHAR2(50)
+  BASE  EXECUTION_METHOD_CODE        VARCHAR2(1)
+  BASE  ARGUMENT_METHOD_CODE 	     VARCHAR2(1)
+  BASE  QUEUE_CONTROL_FLAG           VARCHAR2(1)
+  BASE  QUEUE_METHOD_CODE            VARCHAR2(1)
+  BASE  REQUEST_SET_FLAG             VARCHAR2(1)
+  BASE  ENABLED_FLAG                 VARCHAR2(1)
+  BASE  PRINT_FLAG                   VARCHAR2(1)
+  BASE  RUN_ALONE_FLAG               VARCHAR2(1)
+  BASE  SRS_FLAG                     VARCHAR2(1)
+  TRANS DESCRIPTION                  VARCHAR2(240)
+  BASE  CLASS_APPLICATION	     VARCHAR2(50)
+  BASE  CONCURRENT_CLASS_NAME        VARCHAR2(30)
+  BASE  EXECUTION_OPTIONS            VARCHAR2(250)
+  BASE  SAVE_OUTPUT_FLAG             VARCHAR2(1)
+  BASE  REQUIRED_STYLE               VARCHAR2(1)
+  BASE  OUTPUT_PRINT_STYLE           VARCHAR2(30)
+  BASE  PRINTER_NAME                 VARCHAR2(30)
+  BASE  MINIMUM_WIDTH                VARCHAR2(50)
+  BASE  MINIMUM_LENGTH               VARCHAR2(50)
+  BASE  REQUEST_PRIORITY             VARCHAR2(50)
+  BASE  ATTRIBUTE_CATEGORY           VARCHAR2(30)
+  BASE  ATTRIBUTE1                   VARCHAR2(150)
+  BASE  ATTRIBUTE2                   VARCHAR2(150)
+  BASE  ATTRIBUTE3                   VARCHAR2(150)
+  BASE  ATTRIBUTE4                   VARCHAR2(150)
+  BASE  ATTRIBUTE5                   VARCHAR2(150)
+  BASE  ATTRIBUTE6                   VARCHAR2(150)
+  BASE  ATTRIBUTE7                   VARCHAR2(150)
+  BASE  ATTRIBUTE8                   VARCHAR2(150)
+  BASE  ATTRIBUTE9                   VARCHAR2(150)
+  BASE  ATTRIBUTE10                  VARCHAR2(150)
+  BASE  ATTRIBUTE11                  VARCHAR2(150)
+  BASE  ATTRIBUTE12                  VARCHAR2(150)
+  BASE  ATTRIBUTE13                  VARCHAR2(150)
+  BASE  ATTRIBUTE14                  VARCHAR2(150)
+  BASE  ATTRIBUTE15                  VARCHAR2(150)
+  BASE  OUTPUT_FILE_TYPE             VARCHAR2(4)
+  BASE  RESTART                      VARCHAR2(1)
+  BASE  NLS_COMPLIANT                VARCHAR2(1)
+  BASE  CD_PARAMETER                 VARCHAR2(240)
+  BASE  INCREMENT_PROC               VARCHAR2(61)
+  BASE  MLS_EXEC                     REFERENCES EXECUTABLE AS ME_EX_ID, ME_AP_ID
+# BASE  MLS_EXECUTABLE_NAME          VARCHAR2(50)
+# BASE  MLS_EXECUTABLE_APPLICATION   VARCHAR2(50)
+  BASE  ENABLE_TIME_STATISTICS       VARCHAR2(1)
+  BASE  SECURITY_GROUP_NAME          VARCHAR2(30)
+  BASE  RESOURCE_CONSUMER_GROUP      VARCHAR2(30)
+  BASE  ROLLBACK_SEGMENT             VARCHAR2(30)
+  BASE  OPTIMIZER_MODE               VARCHAR2(30)
+  BASE  REFRESH_PORTLET              VARCHAR2(1)
+  BASE  ACTIVITY_SUMMARIZER 	     VARCHAR2(51) 
+  BASE  PROGRAM_TYPE     	     VARCHAR2(1) 
+  BASE  ALLOW_MULTIPLE_PENDING_REQUEST VARCHAR2(1)
+  BASE  SRS_FLEX                     REFERENCES DESC_FLEX AS AP_NM, DF_NM 
+  BASE  AUTO_ANNOTATION              VARCHAR2(32000)
+  BASE  TEMPLATE_APPL_SHORT_NAME     VARCHAR2(50)
+  BASE  TEMPLATE_CODE                VARCHAR2(80)
+  BASE  MULTI_ORG_CATEGORY           VARCHAR2(1)
+
+ 
+
+  DEFINE INCOMPATABILITY
+    KEY   CONCURRENT_PROGRAM_NAME2	VARCHAR2(30)
+    KEY   APPLICATION_SHORT_NAME2	VARCHAR2(50)
+    CTX   OWNER				VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE		VARCHAR2(75)
+    BASE  RUNNING_TYPE			VARCHAR2(1)
+    BASE  TO_RUN_TYPE			VARCHAR2(1)
+    BASE  INCOMPATIBILITY_TYPE          VARCHAR2(1)
+  END INCOMPATABILITY
+    
+  DEFINE ANNOTATION
+    KEY   CONCURRENT_PROGRAM_NAME3	VARCHAR2(30)
+    KEY   APPLICATION_SHORT_NAME3	VARCHAR2(50)
+    CTX   OWNER				VARCHAR2(4000)
+    BASE  LAST_UPDATE_DATE		VARCHAR2(75)
+    BASE  PROGRAM_ANNOTATION            VARCHAR2(32000)
+  END ANNOTATION
+    
+END PROGRAM 
+
+#
+# -- DOWNLOAD SECTION --
+#
+#   For each entity, specify the SQL statement to use to flesh out
+#   its entity definition.  SELECT columns must be in same order and
+#   datatype as the entity's attributes as defined above.
+#
+#   Convert dates to varchar2 using:
+#    	to_char(sysdate, 'DD/MM/YYYY')
+#
+#   Wrap parameter values with nvl() to support null parameter passing
+#
+
+
+# ==================================================
+# Executable
+# ==================================================
+
+DOWNLOAD EXECUTABLE
+  "select v.EXECUTABLE_NAME,
+          a.APPLICATION_SHORT_NAME,
+          fnd_load_util.OWNER_NAME(v.LAST_UPDATED_BY) OWNER,
+  	  to_char(v.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+          v.EXECUTION_METHOD_CODE,
+          v.EXECUTION_FILE_NAME,
+          v.SUBROUTINE_NAME,
+	  v.EXECUTION_FILE_PATH,
+          v.USER_EXECUTABLE_NAME,
+          v.DESCRIPTION
+   from   fnd_executables_vl v, fnd_application a
+          where ((:EXECUTABLE_NAME is null) or
+                 ((:EXECUTABLE_NAME is not null) and
+                  (v.EXECUTABLE_NAME like :EXECUTABLE_NAME)))
+   and          ((:APPLICATION_SHORT_NAME is null) or
+                 ((:APPLICATION_SHORT_NAME is not null) and
+                  (a.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+   and    a.APPLICATION_ID = v.APPLICATION_ID "
+
+
+# ----------BEGIN FLEX----------
+
+# ==================================================
+# Value Set.
+# ==================================================
+DOWNLOAD VALUE_SET
+"SELECT /* VALUE_SET */
+        fvs.flex_value_set_name,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvs.validation_type,
+        fvs.protected_flag,
+        fvs.security_enabled_flag,
+        fvs.longlist_flag,
+        fvs.format_type,
+        fvs.maximum_size,
+        fvs.number_precision,
+        fvs.alphanumeric_allowed_flag,
+        fvs.uppercase_only_flag,
+        fvs.numeric_mode_enabled_flag,
+        fvs.minimum_value,
+        fvs.maximum_value,
+        fvs_parent.flex_value_set_name,
+        fvs.dependant_default_value,
+        fvs.dependant_default_meaning,
+        fvs.description
+   FROM fnd_flex_value_sets fvs,
+        fnd_flex_value_sets fvs_parent
+  WHERE fvs.parent_flex_value_set_id = fvs_parent.flex_value_set_id(+)
+/*
+*    CUSTOMIZACIONES_ARGENTINA
+*    comentado para no bajar Value Sets
+*    los mismo sergan bajados por separado
+*/
+    AND 1=2
+    AND fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvs.flex_value_set_name NOT LIKE '$FLEX$.%'
+    AND fvs.flex_value_set_id in 
+        (SELECT dfcu.flex_value_set_id
+           FROM fnd_application fa,
+                fnd_concurrent_programs fcp,
+                fnd_descriptive_flexs df,
+                fnd_descr_flex_contexts dfc,
+                fnd_descr_flex_column_usages dfcu
+          WHERE fa.application_short_name LIKE Nvl(:APPLICATION_SHORT_NAME, '%')
+            AND fcp.application_id = fa.application_id
+            AND fcp.concurrent_program_name LIKE Nvl(:CONCURRENT_PROGRAM_NAME, '%')
+            AND df.application_id = fcp.application_id
+            AND df.descriptive_flexfield_name = '$SRS$.' || fcp.concurrent_program_name
+            AND dfc.application_id = df.application_id
+            AND dfc.descriptive_flexfield_name = df.descriptive_flexfield_name
+            AND dfc.descriptive_flex_context_code = 'Global Data Elements'
+            AND dfc.global_flag = 'Y'
+            AND dfcu.application_id = dfc.application_id
+            AND dfcu.descriptive_flexfield_name = dfc.descriptive_flexfield_name
+            AND dfcu.descriptive_flex_context_code = dfc.descriptive_flex_context_code)
+  ORDER BY decode(fvs.validation_type, 'N',1, 'I',2, 'D',3,
+                                              'X',4, 'Y',5,
+                                       'F',6, 'U',7, 'P',8, 9),
+           fvs.flex_value_set_name "
+
+DOWNLOAD VSET_DEPENDS_ON
+"SELECT /* VSET_DEPENDS_ON */
+        fvs_ind.flex_value_set_name ind_flex_value_set_name,
+        fnd_load_util.owner_name(fvs_dep.last_updated_by) owner,
+        to_char(fvs_dep.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvs_ind.validation_type,
+        fvs_dep.validation_type
+   FROM fnd_flex_value_sets fvs_dep,
+        fnd_flex_value_sets fvs_ind
+  WHERE fvs_dep.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvs_dep.validation_type IN ('D', 'Y')
+    AND fvs_ind.flex_value_set_id = fvs_dep.parent_flex_value_set_id "
+
+DOWNLOAD VSET_TABLE
+"SELECT /* VSET_TABLE */
+        fnd_load_util.owner_name(fvt.last_updated_by) owner,
+        to_char(fvt.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        a.application_short_name table_application_short_name,
+        fvt.application_table_name,
+        fvt.summary_allowed_flag,
+        fvt.value_column_name,
+        fvt.value_column_type,
+        fvt.value_column_size,
+        fvt.id_column_name,
+        fvt.id_column_type,
+        fvt.id_column_size,
+        fvt.meaning_column_name,
+        fvt.meaning_column_type,
+        fvt.meaning_column_size,
+        fvt.enabled_column_name,
+        fvt.compiled_attribute_column_name,
+        fvt.hierarchy_level_column_name,
+        fvt.start_date_column_name,
+        fvt.end_date_column_name,
+        fvt.summary_column_name,
+        fvt.additional_where_clause,
+        fvt.additional_quickpick_columns
+   FROM fnd_flex_validation_tables fvt,
+        fnd_application a
+  WHERE fvt.flex_value_set_id =
+        (SELECT flex_value_set_id
+           FROM fnd_flex_value_sets fvs
+          WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+            AND fvs.validation_type = 'F')
+    AND fvt.table_application_id = a.application_id(+) "
+
+DOWNLOAD VSET_EVENT
+"SELECT /* VSET_EVENT */
+        fve.event_code,
+        fnd_load_util.owner_name(fve.last_updated_by) owner,
+        to_char(fve.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fve.user_exit
+   FROM fnd_flex_validation_events fve
+  WHERE fve.flex_value_set_id =
+        (SELECT flex_value_set_id
+           FROM fnd_flex_value_sets fvs
+          WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+            AND fvs.validation_type in ('U', 'P'))
+  ORDER BY fve.event_code "
+
+DOWNLOAD VSET_SECURITY_RULE
+"SELECT /* VSET_SECURITY_RULE */
+        fvr.flex_value_rule_name,
+        fvr.parent_flex_value_low,
+        fnd_load_util.owner_name(fvr.last_updated_by) owner,
+        to_char(fvr.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvr.parent_flex_value_high,
+        fvr.error_message,
+        fvr.description
+   FROM fnd_flex_value_rules_vl fvr,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name LIKE Nvl(:FLEX_VALUE_RULE_NAME, '%')
+    AND Nvl(fvr.parent_flex_value_low,'%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fvs.validation_type IN ('I', 'D', 'F')
+    AND fvs.security_enabled_flag IN ('Y', 'H')
+    AND ((fvs.validation_type NOT IN ('D')) OR
+         (fvs.validation_type IN ('D') AND
+          fvr.parent_flex_value_low IS NOT NULL))
+    AND nvl(:P_VSET_DOWNLOAD_CHILDREN, 'Y') = 'Y'
+  ORDER BY fvr.parent_flex_value_low, fvr.flex_value_rule_name "
+
+DOWNLOAD VSET_SECURITY_LINE
+"SELECT /* VSET_SECURITY_LINE */
+        fvrl.include_exclude_indicator,
+        fvrl.flex_value_low,
+        fvrl.flex_value_high,
+        fnd_load_util.owner_name(fvrl.last_updated_by) owner,
+        to_char(fvrl.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvrl.parent_flex_value_high
+   FROM fnd_flex_value_rule_lines fvrl,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvrl.flex_value_set_id = fvr.flex_value_set_id
+    AND fvrl.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvrl.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+  ORDER BY decode(fvrl.include_exclude_indicator, 'I',1, 'E',2, 3),
+           fvrl.flex_value_low, fvrl.flex_value_high"
+
+DOWNLOAD VSET_SECURITY_USAGE
+"SELECT /* VSET_SECURITY_USAGE */
+        a.application_short_name,
+        r.responsibility_key,
+        fnd_load_util.owner_name(fvru.last_updated_by) owner,
+        to_char(fvru.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fvru.parent_flex_value_high
+   FROM fnd_flex_value_rule_usages fvru,
+        fnd_flex_value_rules fvr,
+        fnd_flex_value_sets fvs,
+        fnd_responsibility r,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvr.flex_value_set_id = fvs.flex_value_set_id
+    AND fvr.flex_value_rule_name = :FLEX_VALUE_RULE_NAME
+    AND Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW,'$FLEX$.NULL')
+    AND fvru.flex_value_set_id = fvr.flex_value_set_id
+    AND fvru.flex_value_rule_id = fvr.flex_value_rule_id
+    AND Nvl(fvru.parent_flex_value_low,'$FLEX$.NULL') = Nvl(fvr.parent_flex_value_low,'$FLEX$.NULL')
+    AND r.application_id = a.application_id
+    AND fvru.application_id = r.application_id
+    AND fvru.responsibility_id = r.responsibility_id
+  ORDER BY a.application_short_name, r.responsibility_key "
+
+DOWNLOAD VSET_ROLLUP_GROUP
+"SELECT /* VSET_ROLLUP_GROUP */
+        fh.hierarchy_code,
+        fnd_load_util.owner_name(fh.last_updated_by) owner,
+        to_char(fh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fh.hierarchy_name,
+        fh.description
+   FROM fnd_flex_hierarchies_vl fh,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fh.flex_value_set_id = fvs.flex_value_set_id
+    AND fh.hierarchy_code LIKE Nvl(:HIERARCHY_CODE, '%')
+    AND nvl(:P_VSET_DOWNLOAD_CHILDREN, 'Y') = 'Y'
+  ORDER BY fh.hierarchy_code "
+
+DOWNLOAD VSET_QUALIFIER
+"SELECT /* VSET_QUALIFIER */
+        a.application_short_name id_flex_application_short_name,
+        fvq.id_flex_code,
+        fvq.segment_attribute_type,
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fvs.last_updated_by) owner,
+        to_char(fvs.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        assignment_order,
+        to_char(fvq.assignment_date,'YYYY/MM/DD HH24:MI:SS') assignment_date
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND a.application_id = fvq.id_flex_application_id
+  ORDER BY fvq.assignment_order "
+
+DOWNLOAD VSET_VALUE
+"SELECT /* VSET_VALUE */
+        fv.parent_flex_value_low,
+        fv.flex_value,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        fv.enabled_flag,
+        fv.summary_flag,
+        to_char(fv.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fv.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active,
+        fv.parent_flex_value_high,
+        fh.hierarchy_code rollup_hierarchy_code,
+        fv.hierarchy_level,
+        fv.compiled_value_attributes,
+        fv.value_category,
+        fv.attribute1,
+        fv.attribute2,
+        fv.attribute3,
+        fv.attribute4,
+        fv.attribute5,
+        fv.attribute6,
+        fv.attribute7,
+        fv.attribute8,
+        fv.attribute9,
+        fv.attribute10,
+        fv.attribute11,
+        fv.attribute12,
+        fv.attribute13,
+        fv.attribute14,
+        fv.attribute15,
+        fv.attribute16,
+        fv.attribute17,
+        fv.attribute18,
+        fv.attribute19,
+        fv.attribute20,
+        fv.attribute21,
+        fv.attribute22,
+        fv.attribute23,
+        fv.attribute24,
+        fv.attribute25,
+        fv.attribute26,
+        fv.attribute27,
+        fv.attribute28,
+        fv.attribute29,
+        fv.attribute30,
+        fv.attribute31,
+        fv.attribute32,
+        fv.attribute33,
+        fv.attribute34,
+        fv.attribute35,
+        fv.attribute36,
+        fv.attribute37,
+        fv.attribute38,
+        fv.attribute39,
+        fv.attribute40,
+        fv.attribute41,
+        fv.attribute42,
+        fv.attribute43,
+        fv.attribute44,
+        fv.attribute45,
+        fv.attribute46,
+        fv.attribute47,
+        fv.attribute48,
+        fv.attribute49,
+        fv.attribute50,
+        Decode(fvs.validation_type, 'X', fv.flex_value_meaning,
+                                    'Y', fv.flex_value_meaning,
+                                    NULL) flex_value_meaning,
+        fv.description
+   FROM fnd_flex_values_vl fv,
+        fnd_flex_value_sets fvs,
+        fnd_flex_validation_tables fvt,
+        fnd_flex_hierarchies fh
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvs.flex_value_set_id = fvt.flex_value_set_id(+)
+    AND fv.flex_value_set_id = fvs.flex_value_set_id
+    AND Nvl(fv.parent_flex_value_low, '%') LIKE Nvl(:PARENT_FLEX_VALUE_LOW,'%')
+    AND fv.flex_value LIKE Nvl(:FLEX_VALUE,'%')
+    AND fv.flex_value_set_id = fh.flex_value_set_id(+)
+    AND fv.structured_hierarchy_level = fh.hierarchy_id(+)
+    AND fvs.validation_type IN ('I', 'D', 'X', 'Y', 'F')
+    AND ((fvs.validation_type <> 'F') OR
+         (fvs.validation_type = 'F' AND
+          fvt.summary_allowed_flag = 'Y'))
+    AND ((fvs.validation_type NOT IN ('D', 'Y')) OR
+         (fvs.validation_type IN ('D', 'Y') AND
+          fv.parent_flex_value_low IS NOT NULL))
+    AND nvl(:P_VSET_DOWNLOAD_CHILDREN, 'Y') = 'Y'
+  ORDER BY fv.parent_flex_value_low, fv.flex_value "
+
+DOWNLOAD VSET_VALUE_HIERARCHY
+"SELECT /* VSET_VALUE_HIERARCHY */
+        fvnh.range_attribute,
+        fvnh.child_flex_value_low,
+        fvnh.child_flex_value_high,
+        fnd_load_util.owner_name(fvnh.last_updated_by) owner,
+        to_char(fvnh.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        to_char(fvnh.start_date_active,'YYYY/MM/DD HH24:MI:SS') start_date_active,
+        to_char(fvnh.end_date_active,'YYYY/MM/DD HH24:MI:SS') end_date_active
+   FROM fnd_flex_value_norm_hierarchy fvnh,
+        fnd_flex_value_sets fvs
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvnh.flex_value_set_id = fvs.flex_value_set_id
+    AND fvnh.parent_flex_value = :FLEX_VALUE
+  ORDER BY fvnh.range_attribute,
+           fvnh.child_flex_value_low, fvnh.child_flex_value_high "
+
+DOWNLOAD VSET_VALUE_QUAL_VALUE
+"SELECT /* VSET_VALUE_QUAL_VALUE */
+        a.application_short_name id_flex_application_short_name,
+        fvq.id_flex_code,
+        fvq.segment_attribute_type,
+        fvq.value_attribute_type,
+        fnd_load_util.owner_name(fv.last_updated_by) owner,
+        to_char(fv.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        Substrb(fnd_flex_loader_apis.get_qualifier_value(fv.compiled_value_attributes, fvq.assignment_order),1,2000)
+   FROM (SELECT fvqx.flex_value_set_id,
+                fvqx.id_flex_application_id,
+                fvqx.id_flex_code,
+                fvqx.segment_attribute_type,
+                fvqx.value_attribute_type,
+                fvqx.assignment_date,
+                rank() over (partition by fvqx.flex_value_set_id
+                             order by fvqx.assignment_date,
+                                      fvqx.value_attribute_type) assignment_order
+           FROM fnd_flex_validation_qualifiers fvqx) fvq,
+        fnd_flex_value_sets fvs,
+        fnd_flex_values fv,
+        fnd_application a
+  WHERE fvs.flex_value_set_name = :FLEX_VALUE_SET_NAME
+    AND fvq.flex_value_set_id = fvs.flex_value_set_id
+    AND fv.flex_value_set_id = fvs.flex_value_set_id
+    AND Nvl(fv.parent_flex_value_low, '$FLEX$.NULL') = Nvl(:PARENT_FLEX_VALUE_LOW, '$FLEX$.NULL')
+    AND fv.flex_value = :FLEX_VALUE
+    AND a.application_id = fvq.id_flex_application_id
+  ORDER BY fvq.assignment_order "
+        
+# ==================================================
+# Descriptive Flexfield.
+# ==================================================
+DOWNLOAD DESC_FLEX
+"SELECT /* DESC_FLEX */
+        aa.application_short_name,
+        df.descriptive_flexfield_name,
+        fnd_load_util.owner_name(df.last_updated_by) owner,
+        to_char(df.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        at.application_short_name table_application_short_name,
+        df.application_table_name,
+        df.context_column_name,
+        df.context_required_flag,
+        df.context_user_override_flag,
+        df.concatenated_segment_delimiter,
+        df.freeze_flex_definition_flag,
+        df.protected_flag,
+        df.default_context_field_name,
+        df.default_context_value,
+        df.context_default_type,
+        df.context_default_value,
+        fvs.flex_value_set_name context_override_value_set_nam,
+        df.context_runtime_property_funct,
+        df.title,
+        df.form_context_prompt,
+        df.description
+   FROM fnd_descriptive_flexs_vl df,
+        fnd_application aa,
+        fnd_application at,
+        fnd_flex_value_sets fvs
+  WHERE aa.application_short_name = :APPLICATION_SHORT_NAME
+    AND df.application_id = aa.application_id
+    AND df.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND df.descriptive_flexfield_name LIKE '$SRS$.%'
+    AND at.application_id = df.table_application_id
+    AND df.context_override_value_set_id = fvs.flex_value_set_id(+)
+    AND (df.application_id, df.descriptive_flexfield_name) in
+        (SELECT fcp.application_id, '$SRS$.' || fcp.concurrent_program_name
+           FROM fnd_application fa,
+                fnd_concurrent_programs fcp
+          WHERE fa.application_short_name LIKE Nvl(:APPLICATION_SHORT_NAME, '%')
+            AND fcp.application_id = fa.application_id
+            AND fcp.concurrent_program_name LIKE Nvl(:CONCURRENT_PROGRAM_NAME, '%'))
+  ORDER BY aa.application_short_name, df.descriptive_flexfield_name "
+
+DOWNLOAD DFF_COLUMN
+"SELECT /* DFF_COLUMN */
+        c.column_name,
+        fnd_load_util.owner_name(c.last_updated_by) owner,
+        to_char(c.last_update_date, 'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        c.flexfield_usage_code
+   FROM fnd_columns c,
+        fnd_tables t,
+        fnd_descriptive_flexs df,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND df.application_id = a.application_id
+    AND df.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND df.descriptive_flexfield_name NOT LIKE '$SRS$.%'
+    AND t.application_id = df.table_application_id
+    AND t.table_name = df.application_table_name
+    AND c.application_id = t.application_id
+    AND c.table_id = t.table_id
+    AND c.flexfield_usage_code IN ('C', 'D')
+    AND c.flexfield_application_id = df.application_id
+    AND c.flexfield_name = df.descriptive_flexfield_name
+  ORDER BY decode(c.flexfield_usage_code, 'C',1, 'D',2, 3), c.column_name "
+
+DOWNLOAD DFF_REF_FIELD
+"SELECT /* DFF_REF_FIELD */
+        dcf.default_context_field_name,
+        fnd_load_util.owner_name(dcf.last_updated_by) owner,
+        to_char(dcf.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dcf.description
+   FROM fnd_default_context_fields dcf,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dcf.application_id = a.application_id
+    AND dcf.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND dcf.descriptive_flexfield_name NOT LIKE '$SRS$.%'
+    AND dcf.default_context_field_name LIKE Nvl(:DEFAULT_CONTEXT_FIELD_NAME, '%')
+  ORDER BY dcf.default_context_field_name "
+
+DOWNLOAD DFF_CONTEXT
+"SELECT /* DFF_CONTEXT */
+        dfc.descriptive_flex_context_code,
+        fnd_load_util.owner_name(dfc.last_updated_by) owner,
+        to_char(dfc.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dfc.enabled_flag,
+        dfc.global_flag,
+        dfc.descriptive_flex_context_name,
+        dfc.description
+   FROM fnd_descr_flex_contexts_vl dfc,
+        fnd_application a
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dfc.application_id = a.application_id
+    AND dfc.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND dfc.descriptive_flex_context_code LIKE Nvl(:DESCRIPTIVE_FLEX_CONTEXT_CODE, '%')
+  ORDER BY decode(dfc.global_flag, 'Y',1, 2),
+           dfc.descriptive_flex_context_code "
+
+DOWNLOAD DFF_SEGMENT
+"SELECT /* DFF_SEGMENT */
+        dfcu.end_user_column_name,
+        dfcu.application_column_name,
+        fnd_load_util.owner_name(dfcu.last_updated_by) owner,
+        to_char(dfcu.last_update_date,'YYYY/MM/DD HH24:MI:SS') last_update_date,
+        dfcu.column_seq_num,
+        dfcu.enabled_flag,
+        dfcu.display_flag,
+        dfcu.required_flag,
+        dfcu.security_enabled_flag,
+        fvs.flex_value_set_name,
+        dfcu.display_size,
+        dfcu.maximum_description_len,
+        dfcu.concatenation_description_len,
+        dfcu.range_code,
+        dfcu.default_type,
+        dfcu.default_value,
+        dfcu.runtime_property_function,
+        dfcu.srw_param,
+        dfcu.form_left_prompt,
+        dfcu.form_above_prompt,
+        dfcu.description
+   FROM fnd_descr_flex_col_usage_vl dfcu,
+        fnd_application a,
+        fnd_flex_value_sets fvs
+  WHERE a.application_short_name = :APPLICATION_SHORT_NAME
+    AND dfcu.application_id = a.application_id
+    AND dfcu.descriptive_flexfield_name = :DESCRIPTIVE_FLEXFIELD_NAME
+    AND dfcu.descriptive_flex_context_code = :DESCRIPTIVE_FLEX_CONTEXT_CODE
+    AND dfcu.flex_value_set_id = fvs.flex_value_set_id(+)
+    AND dfcu.end_user_column_name LIKE Nvl(:END_USER_COLUMN_NAME, '%')
+    AND dfcu.application_column_name LIKE Nvl(:APPLICATION_COLUMN_NAME, '%')
+  ORDER BY dfcu.column_seq_num, dfcu.end_user_column_name "
+
+# ----------END FLEX----------
+
+# PROGRAM 
+
+DOWNLOAD PROGRAM
+ "select v.CONCURRENT_PROGRAM_NAME,
+  a.APPLICATION_SHORT_NAME,
+  fnd_load_util.OWNER_NAME(v.LAST_UPDATED_BY) OWNER,
+  to_char(v.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+  v.USER_CONCURRENT_PROGRAM_NAME,
+  e.EXECUTABLE_NAME EXEC_EXECUTABLE_NAME,
+  ea.APPLICATION_SHORT_NAME EXEC_APPLICATION_SHORT_NAME,
+  v.EXECUTION_METHOD_CODE,
+  v.ARGUMENT_METHOD_CODE,
+  v.QUEUE_CONTROL_FLAG,
+  v.QUEUE_METHOD_CODE,
+  v.REQUEST_SET_FLAG,
+  v.ENABLED_FLAG,
+  v.PRINT_FLAG,
+  v.RUN_ALONE_FLAG,
+  v.SRS_FLAG,
+  v.DESCRIPTION,
+  ca.APPLICATION_SHORT_NAME CLASS_APPLICATION,
+  c.REQUEST_CLASS_NAME CONCURRENT_CLASS_NAME,
+  v.EXECUTION_OPTIONS,
+  v.SAVE_OUTPUT_FLAG,
+  v.REQUIRED_STYLE,
+  v.OUTPUT_PRINT_STYLE,
+  v.PRINTER_NAME,
+  v.MINIMUM_WIDTH,
+  v.MINIMUM_LENGTH,
+  v.REQUEST_PRIORITY,
+  v.ATTRIBUTE_CATEGORY,
+  v.ATTRIBUTE1,
+  v.ATTRIBUTE2,
+  v.ATTRIBUTE3,
+  v.ATTRIBUTE4,
+  v.ATTRIBUTE5,
+  v.ATTRIBUTE6,
+  v.ATTRIBUTE7,
+  v.ATTRIBUTE8,
+  v.ATTRIBUTE9,
+  v.ATTRIBUTE10,
+  v.ATTRIBUTE11,
+  v.ATTRIBUTE12,
+  v.ATTRIBUTE13,
+  v.ATTRIBUTE14,
+  v.ATTRIBUTE15,
+  v.OUTPUT_FILE_TYPE,
+  v.RESTART,
+  v.NLS_COMPLIANT,
+  v.CD_PARAMETER,
+  v.INCREMENT_PROC,
+  me.EXECUTABLE_NAME MLS_EXECUTABLE_NAME,
+  mea.APPLICATION_SHORT_NAME MLS_EXECUTABLE_APPLICATION,
+  v.ENABLE_TIME_STATISTICS,
+  s.SECURITY_GROUP_KEY,
+  v.RESOURCE_CONSUMER_GROUP,
+  v.ROLLBACK_SEGMENT,
+  v.OPTIMIZER_MODE,
+  v.REFRESH_PORTLET,
+  v.ACTIVITY_SUMMARIZER,
+  v.PROGRAM_TYPE,
+  v.ALLOW_MULTIPLE_PENDING_REQUEST,
+  a.APPLICATION_SHORT_NAME APPLICATION_SHORT_NAME,
+  '$SRS$.' || v.CONCURRENT_PROGRAM_NAME DESCRIPTIVE_FLEXFIELD_NAME,
+  'FNDLOAD_BIG_FN:FND_IREP_CP_PKG.GET_CP_PARAM_ANNOTATIONS(' || to_char(v.CONCURRENT_PROGRAM_ID) || ', ' || to_char(v.APPLICATION_ID
+  ) || ')',
+  v.TEMPLATE_APPL_SHORT_NAME,
+  v.TEMPLATE_CODE,
+  v.MULTI_ORG_CATEGORY
+
+  from   fnd_concurrent_programs_vl v,
+         fnd_executables me,
+         fnd_security_groups s,
+         fnd_application mea,
+         fnd_concurrent_request_class c,
+         fnd_application ca,
+         fnd_executables e,
+         fnd_application ea,
+         fnd_application a
+          where ((:CONCURRENT_PROGRAM_NAME is null) or
+                 ((:CONCURRENT_PROGRAM_NAME is not null) and
+                  (v.CONCURRENT_PROGRAM_NAME like :CONCURRENT_PROGRAM_NAME)))
+   and          ((:APPLICATION_SHORT_NAME is null) or
+                 ((:APPLICATION_SHORT_NAME is not null) and
+                  (a.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME)))
+    and  v.MLS_EXECUTABLE_ID = me.EXECUTABLE_ID(+)
+    and  v.MLS_EXECUTABLE_APP_ID = me.APPLICATION_ID(+)
+    and  v.SECURITY_GROUP_ID = s.SECURITY_GROUP_ID (+)
+    and  v.MLS_EXECUTABLE_APP_ID = mea.APPLICATION_ID (+)
+    and  c.request_class_id (+) = v.concurrent_class_id 
+    and  c.APPLICATION_ID (+) = v.CLASS_APPLICATION_ID
+    and  ca.APPLICATION_ID (+) = v.CLASS_APPLICATION_ID 
+    and  e.EXECUTABLE_ID =v. EXECUTABLE_ID
+    and  e.APPLICATION_ID = v.EXECUTABLE_APPLICATION_ID
+    and  ea.APPLICATION_ID = v.EXECUTABLE_APPLICATION_ID
+    and  a.APPLICATION_ID = v.APPLICATION_ID"
+
+# Incompatability
+
+DOWNLOAD INCOMPATABILITY
+"Select P2.CONCURRENT_PROGRAM_NAME CONCURRENT_PROGRAM_NAME2,
+	A2.APPLICATION_SHORT_NAME APPLICATION_SHORT_NAME2,
+        fnd_load_util.OWNER_NAME(v.LAST_UPDATED_BY) OWNER,
+  	to_char(v.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+        v.RUNNING_TYPE, v.TO_RUN_TYPE,
+        v.INCOMPATIBILITY_TYPE
+  from  FND_CONCURRENT_PROGRAM_SERIAL v,
+        fnd_application a1,
+	fnd_application a2,
+	FND_CONCURRENT_PROGRAMS p1,
+	FND_CONCURRENT_PROGRAMS p2
+  where :APPLICATION_SHORT_NAME = A1.APPLICATION_SHORT_NAME
+    and :CONCURRENT_PROGRAM_NAME = P1.CONCURRENT_PROGRAM_NAME
+    and ((:APPLICATION_SHORT_NAME2 is null)  or
+	 ((:APPLICATION_SHORT_NAME2 is not null) and
+	  (A2.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME2))) 
+    and ((:CONCURRENT_PROGRAM_NAME2 is null)  or
+         ((:CONCURRENT_PROGRAM_NAME2 is not null) and
+          (P2.CONCURRENT_PROGRAM_NAME like :CONCURRENT_PROGRAM_NAME2)))
+    and a1.application_id = v.running_application_id
+    and a1.application_id = p1.application_id
+    and a2.application_id = p2.application_id
+    and a2.application_id = v.to_run_application_id
+    and p1.CONCURRENT_PROGRAM_ID = v.running_CONCURRENT_PROGRAM_ID
+    and p2.CONCURRENT_PROGRAM_ID = v.to_run_CONCURRENT_PROGRAM_ID "
+
+# Annotation
+
+DOWNLOAD ANNOTATION
+"Select P1.CONCURRENT_PROGRAM_NAME CONCURRENT_PROGRAM_NAME3,
+	A1.APPLICATION_SHORT_NAME APPLICATION_SHORT_NAME3,
+        fnd_load_util.OWNER_NAME(cpa.LAST_UPDATED_BY) OWNER,
+  	to_char(cpa.LAST_UPDATE_DATE, 'YYYY/MM/DD') LAST_UPDATE_DATE,
+	'FNDLOAD_BIG_FN:FND_CONCURRENT_PROG_ANNO_PKG.GET_ANNOTATION('||to_char(p1.APPLICATION_ID)||','|| to_char(p1.CONCURRENT_PROGRAM_ID) ||')'
+  from  FND_CONC_PROG_ANNOTATIONS cpa,
+        fnd_application a1,
+	FND_CONCURRENT_PROGRAMS p1
+ where :APPLICATION_SHORT_NAME = A1.APPLICATION_SHORT_NAME
+    and :CONCURRENT_PROGRAM_NAME = P1.CONCURRENT_PROGRAM_NAME
+    and ((:APPLICATION_SHORT_NAME3 is null)  or
+	 ((:APPLICATION_SHORT_NAME3 is not null) and
+	  (A1.APPLICATION_SHORT_NAME like :APPLICATION_SHORT_NAME3))) 
+    and ((:CONCURRENT_PROGRAM_NAME3 is null)  or
+         ((:CONCURRENT_PROGRAM_NAME3 is not null) and
+          (P1.CONCURRENT_PROGRAM_NAME like :CONCURRENT_PROGRAM_NAME3)))
+    and a1.application_id = cpa.application_id
+    and a1.application_id = p1.application_id
+    and p1.CONCURRENT_PROGRAM_ID = cpa.CONCURRENT_PROGRAM_ID "
+
+#
+# -- UPLOAD section -- 
+# 
+#   For each entity, specify the pl/sql block to use to upload the 
+#   entity into the database.  Bind names must match DEFINE attribute names.
+#   If the relevant tables have table handlers defined, use the LOAD_ROW
+#   procedure.
+#   
+#   Non-leaf entities must include the BEGIN keyword.
+#
+#   Child entities may use bind names from their parents' definitions.
+# 
+#   Use command line parameters to control branching between desired behavior.
+#   For example, in the upload statement below, we use the parameter
+#   UPLOAD_MODE to specify whether we are doing a regular upload or a
+#   special upload of translated columns.
+#
+
+# ==================================================
+# Executable
+# ==================================================
+UPLOAD EXECUTABLE
+  "begin
+     if (:UPLOAD_MODE = 'NLS') then
+	fnd_executables_pkg.TRANSLATE_ROW (
+	  :EXECUTABLE_NAME,
+	  :APPLICATION_SHORT_NAME,
+	  :OWNER,
+	  :USER_EXECUTABLE_NAME,
+	  :DESCRIPTION,
+	  :CUSTOM_MODE,
+	  :LAST_UPDATE_DATE);
+
+     else 
+	fnd_executables_pkg.LOAD_ROW (
+	  :EXECUTABLE_NAME,
+	  :APPLICATION_SHORT_NAME,
+	  :OWNER,
+	  :EXECUTION_METHOD_CODE,
+	  :EXECUTION_FILE_NAME,
+	  :SUBROUTINE_NAME,
+	  :EXECUTION_FILE_PATH,
+	  :USER_EXECUTABLE_NAME,
+	  :DESCRIPTION,
+	  :CUSTOM_MODE,
+	  :LAST_UPDATE_DATE);
+      end if;
+  end;"
+
+# ----------BEGIN FLEX----------
+
+# ==================================================
+# Value Set.
+# ==================================================
+UPLOAD VALUE_SET
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_value_set
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_validation_type              => :validation_type,
+        p_protected_flag               => :protected_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_longlist_flag                => :longlist_flag,
+        p_format_type                  => :format_type,
+        p_maximum_size                 => :maximum_size,
+        p_number_precision             => :number_precision,
+        p_alphanumeric_allowed_flag    => :alphanumeric_allowed_flag,
+        p_uppercase_only_flag          => :uppercase_only_flag,
+        p_numeric_mode_enabled_flag    => :numeric_mode_enabled_flag,
+        p_minimum_value                => :minimum_value,
+        p_maximum_value                => :maximum_value,
+        p_parent_flex_value_set_name   => :parent_flex_value_set_name,
+        p_dependant_default_value      => :dependant_default_value,
+        p_dependant_default_meaning    => :dependant_default_meaning,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_value_set
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_validation_type              => :validation_type,
+        p_protected_flag               => :protected_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_longlist_flag                => :longlist_flag,
+        p_format_type                  => :format_type,
+        p_maximum_size                 => :maximum_size,
+        p_number_precision             => :number_precision,
+        p_alphanumeric_allowed_flag    => :alphanumeric_allowed_flag,
+        p_uppercase_only_flag          => :uppercase_only_flag,
+        p_numeric_mode_enabled_flag    => :numeric_mode_enabled_flag,
+        p_minimum_value                => :minimum_value,
+        p_maximum_value                => :maximum_value,
+        p_parent_flex_value_set_name   => :parent_flex_value_set_name,
+        p_dependant_default_value      => :dependant_default_value,
+        p_dependant_default_meaning    => :dependant_default_meaning,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_DEPENDS_ON
+"BEGIN
+    fnd_flex_loader_apis.up_vset_depends_on
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_ind_flex_value_set_name      => :ind_flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_ind_validation_type          => :ind_validation_type,
+        p_dep_validation_type          => :dep_validation_type);
+ END;"
+
+UPLOAD VSET_TABLE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_table
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_summary_allowed_flag         => :summary_allowed_flag,
+        p_value_column_name            => :value_column_name,
+        p_value_column_type            => :value_column_type,
+        p_value_column_size            => :value_column_size,
+        p_id_column_name               => :id_column_name,
+        p_id_column_type               => :id_column_type,
+        p_id_column_size               => :id_column_size,
+        p_meaning_column_name          => :meaning_column_name,
+        p_meaning_column_type          => :meaning_column_type,
+        p_meaning_column_size          => :meaning_column_size,
+        p_enabled_column_name          => :enabled_column_name,
+        p_compiled_attribute_column_na => :compiled_attribute_column_name,
+        p_hierarchy_level_column_name  => :hierarchy_level_column_name,
+        p_start_date_column_name       => :start_date_column_name,
+        p_end_date_column_name         => :end_date_column_name,
+        p_summary_column_name          => :summary_column_name,
+        p_additional_where_clause      => :additional_where_clause,
+        p_additional_quickpick_columns => :additional_quickpick_columns);
+ END; "
+
+UPLOAD VSET_EVENT
+"BEGIN
+    fnd_flex_loader_apis.up_vset_event
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_event_code                   => :event_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_user_exit                    => :user_exit);
+ END; "
+
+UPLOAD VSET_SECURITY_RULE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_rule
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_error_message                => :error_message,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_SECURITY_LINE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_line
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_include_exclude_indicator    => :include_exclude_indicator,
+        p_flex_value_low               => :flex_value_low,
+        p_flex_value_high              => :flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+UPLOAD VSET_SECURITY_USAGE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_security_usage
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_flex_value_rule_name         => :flex_value_rule_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_application_short_name       => :application_short_name,
+        p_responsibility_key           => :responsibility_key,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_parent_flex_value_high       => :parent_flex_value_high);
+ END; "
+
+UPLOAD VSET_ROLLUP_GROUP
+"BEGIN
+    fnd_flex_loader_apis.up_vset_rollup_group
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_hierarchy_code               => :hierarchy_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_hierarchy_name               => :hierarchy_name,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_QUALIFIER
+"BEGIN
+    fnd_flex_loader_apis.up_vset_qualifier
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_id_flex_application_short_na => :id_flex_application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_assignment_order             => :assignment_order,
+        p_assignment_date              => :assignment_date);
+ END; "
+
+UPLOAD VSET_VALUE
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_summary_flag                 => :summary_flag,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active,
+        p_parent_flex_value_high       => :parent_flex_value_high,
+        p_rollup_hierarchy_code        => :rollup_hierarchy_code,
+        p_hierarchy_level              => :hierarchy_level,
+        p_compiled_value_attributes    => :compiled_value_attributes,
+        p_value_category               => :value_category,
+        p_attribute1                   => :attribute1,
+        p_attribute2                   => :attribute2,
+        p_attribute3                   => :attribute3,
+        p_attribute4                   => :attribute4,
+        p_attribute5                   => :attribute5,
+        p_attribute6                   => :attribute6,
+        p_attribute7                   => :attribute7,
+        p_attribute8                   => :attribute8,
+        p_attribute9                   => :attribute9,
+        p_attribute10                  => :attribute10,
+        p_attribute11                  => :attribute11,
+        p_attribute12                  => :attribute12,
+        p_attribute13                  => :attribute13,
+        p_attribute14                  => :attribute14,
+        p_attribute15                  => :attribute15,
+        p_attribute16                  => :attribute16,
+        p_attribute17                  => :attribute17,
+        p_attribute18                  => :attribute18,
+        p_attribute19                  => :attribute19,
+        p_attribute20                  => :attribute20,
+        p_attribute21                  => :attribute21,
+        p_attribute22                  => :attribute22,
+        p_attribute23                  => :attribute23,
+        p_attribute24                  => :attribute24,
+        p_attribute25                  => :attribute25,
+        p_attribute26                  => :attribute26,
+        p_attribute27                  => :attribute27,
+        p_attribute28                  => :attribute28,
+        p_attribute29                  => :attribute29,
+        p_attribute30                  => :attribute30,
+        p_attribute31                  => :attribute31,
+        p_attribute32                  => :attribute32,
+        p_attribute33                  => :attribute33,
+        p_attribute34                  => :attribute34,
+        p_attribute35                  => :attribute35,
+        p_attribute36                  => :attribute36,
+        p_attribute37                  => :attribute37,
+        p_attribute38                  => :attribute38,
+        p_attribute39                  => :attribute39,
+        p_attribute40                  => :attribute40,
+        p_attribute41                  => :attribute41,
+        p_attribute42                  => :attribute42,
+        p_attribute43                  => :attribute43,
+        p_attribute44                  => :attribute44,
+        p_attribute45                  => :attribute45,
+        p_attribute46                  => :attribute46,
+        p_attribute47                  => :attribute47,
+        p_attribute48                  => :attribute48,
+        p_attribute49                  => :attribute49,
+        p_attribute50                  => :attribute50,
+        p_flex_value_meaning           => :flex_value_meaning,
+        p_description                  => :description);
+ END; "
+
+UPLOAD VSET_VALUE_HIERARCHY
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_hierarchy
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value            => :flex_value,
+        p_range_attribute              => :range_attribute,
+        p_child_flex_value_low         => :child_flex_value_low,
+        p_child_flex_value_high        => :child_flex_value_high,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_start_date_active            => :start_date_active,
+        p_end_date_active              => :end_date_active);
+ END; "
+
+UPLOAD VSET_VALUE_QUAL_VALUE
+"BEGIN
+    fnd_flex_loader_apis.up_vset_value_qual_value
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_parent_flex_value_low        => :parent_flex_value_low,
+        p_flex_value                   => :flex_value,
+        p_id_flex_application_short_na => :id_flex_application_short_name,
+        p_id_flex_code                 => :id_flex_code,
+        p_segment_attribute_type       => :segment_attribute_type,
+        p_value_attribute_type         => :value_attribute_type,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_compiled_value_attribute_val => :compiled_value_attribute_value);
+ END; "
+
+# ==================================================
+# Descriptive Flexfields.
+# ==================================================
+UPLOAD DESC_FLEX
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.set_debugging(:FLEX_DEBUG_FLAG);
+    fnd_flex_loader_apis.up_desc_flex
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_context_column_name          => :context_column_name,
+        p_context_required_flag        => :context_required_flag,
+        p_context_user_override_flag   => :context_user_override_flag,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_protected_flag               => :protected_flag,
+        p_default_context_field_name   => :default_context_field_name,
+        p_default_context_value        => :default_context_value,
+        p_context_default_type         => :context_default_type,
+        p_context_default_value        => :context_default_value,
+        p_context_override_value_set_n => :context_override_value_set_nam,
+        p_context_runtime_property_fun => :context_runtime_property_funct,
+        p_title                        => :title,
+        p_form_context_prompt          => :form_context_prompt,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_desc_flex           
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_table_application_short_name => :table_application_short_name,
+        p_application_table_name       => :application_table_name,
+        p_context_column_name          => :context_column_name,
+        p_context_required_flag        => :context_required_flag,
+        p_context_user_override_flag   => :context_user_override_flag,
+        p_concatenated_segment_delimit => :concatenated_segment_delimiter,
+        p_freeze_flex_definition_flag  => :freeze_flex_definition_flag,
+        p_protected_flag               => :protected_flag,
+        p_default_context_field_name   => :default_context_field_name,
+        p_default_context_value        => :default_context_value,
+        p_context_default_type         => :context_default_type,
+        p_context_default_value        => :context_default_value,
+        p_context_override_value_set_n => :context_override_value_set_nam,
+        p_context_runtime_property_fun => :context_runtime_property_funct,
+        p_title                        => :title,
+        p_form_context_prompt          => :form_context_prompt,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_COLUMN
+"BEGIN
+    fnd_flex_loader_apis.up_dff_column
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_column_name                  => :column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_flexfield_usage_code         => :flexfield_usage_code);
+ END; "
+
+UPLOAD DFF_REF_FIELD
+"BEGIN
+    fnd_flex_loader_apis.up_dff_ref_field
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_default_context_field_name   => :default_context_field_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_CONTEXT
+BEGIN
+"BEGIN
+    fnd_flex_loader_apis.up_dff_context
+       (p_upload_phase                 => 'BEGIN',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_global_flag                  => :global_flag,
+        p_descriptive_flex_context_nam => :descriptive_flex_context_name,
+        p_description                  => :description);
+ END; "
+END
+"BEGIN
+    fnd_flex_loader_apis.up_dff_context
+       (p_upload_phase                 => 'END',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_enabled_flag                 => :enabled_flag,
+        p_global_flag                  => :global_flag,
+        p_descriptive_flex_context_nam => :descriptive_flex_context_name,
+        p_description                  => :description);
+ END; "
+
+UPLOAD DFF_SEGMENT
+"BEGIN
+    fnd_flex_loader_apis.up_dff_segment
+       (p_upload_phase                 => 'LEAF',
+        p_upload_mode                  => :UPLOAD_MODE,
+        p_custom_mode                  => :CUSTOM_MODE,
+        p_application_short_name       => :application_short_name,
+        p_descriptive_flexfield_name   => :descriptive_flexfield_name,
+        p_descriptive_flex_context_cod => :descriptive_flex_context_code,
+        p_end_user_column_name         => :end_user_column_name,
+        p_application_column_name      => :application_column_name,
+        p_owner                        => :owner,
+        p_last_update_date             => :last_update_date,
+        p_column_seq_num               => :column_seq_num,
+        p_enabled_flag                 => :enabled_flag,
+        p_display_flag                 => :display_flag,
+        p_required_flag                => :required_flag,
+        p_security_enabled_flag        => :security_enabled_flag,
+        p_flex_value_set_name          => :flex_value_set_name,
+        p_display_size                 => :display_size,
+        p_maximum_description_len      => :maximum_description_len,
+        p_concatenation_description_le => :concatenation_description_len,
+        p_range_code                   => :range_code,
+        p_default_type                 => :default_type,
+        p_default_value                => :default_value,
+        p_runtime_property_function    => :runtime_property_function,
+        p_srw_param                    => :srw_param,
+        p_form_left_prompt             => :form_left_prompt,
+        p_form_above_prompt            => :form_above_prompt,
+        p_description                  => :description);
+ END; "
+
+# ----------END FLEX----------
+
+UPLOAD PROGRAM 
+  BEGIN
+  "begin  
+      if (:UPLOAD_MODE = 'NLS') then
+	fnd_concurrent_programs_pkg.TRANSLATE_ROW (
+	  :CONCURRENT_PROGRAM_NAME,
+	  :APPLICATION_SHORT_NAME,
+	  :OWNER,
+	  :USER_CONCURRENT_PROGRAM_NAME,
+	  :DESCRIPTION,	
+	  :CUSTOM_MODE,
+	  :LAST_UPDATE_DATE);
+      else
+        fnd_concurrent_programs_pkg.LOAD_ROW (
+	  :CONCURRENT_PROGRAM_NAME,
+	  :APPLICATION_SHORT_NAME,
+	  :OWNER,
+	  :USER_CONCURRENT_PROGRAM_NAME,
+	  :EXEC_EXECUTABLE_NAME,
+	  :EXEC_APPLICATION_SHORT_NAME, 
+	  :EXECUTION_METHOD_CODE,
+	  :ARGUMENT_METHOD_CODE,
+	  :QUEUE_CONTROL_FLAG,
+	  :QUEUE_METHOD_CODE,
+	  :REQUEST_SET_FLAG,
+	  :ENABLED_FLAG,
+	  :PRINT_FLAG,
+	  :RUN_ALONE_FLAG,
+	  :SRS_FLAG,
+	  :DESCRIPTION,
+	  :CLASS_APPLICATION,
+	  :CONCURRENT_CLASS_NAME,
+	  :EXECUTION_OPTIONS,
+	  :SAVE_OUTPUT_FLAG,
+	  :REQUIRED_STYLE,
+	  :OUTPUT_PRINT_STYLE,
+	  :PRINTER_NAME,
+	  :MINIMUM_WIDTH,
+	  :MINIMUM_LENGTH,
+	  :REQUEST_PRIORITY,
+	  :ATTRIBUTE_CATEGORY,
+	  :ATTRIBUTE1,
+	  :ATTRIBUTE2,
+	  :ATTRIBUTE3,
+	  :ATTRIBUTE4,
+	  :ATTRIBUTE5,
+	  :ATTRIBUTE6,
+	  :ATTRIBUTE7,
+	  :ATTRIBUTE8,
+	  :ATTRIBUTE9,
+	  :ATTRIBUTE10,
+	  :ATTRIBUTE11,
+	  :ATTRIBUTE12,
+	  :ATTRIBUTE13,
+	  :ATTRIBUTE14,
+	  :ATTRIBUTE15,
+	  :OUTPUT_FILE_TYPE,
+	  :RESTART,
+	  :NLS_COMPLIANT,
+	  :CD_PARAMETER,
+	  :INCREMENT_PROC,
+	  :ME_EX_ID,
+	  :ME_AP_ID,
+	  :ENABLE_TIME_STATISTICS,
+	  :SECURITY_GROUP_NAME,
+	  :RESOURCE_CONSUMER_GROUP,
+	  :ROLLBACK_SEGMENT,
+	  :OPTIMIZER_MODE,
+	  :SRS_FLEX,
+	  :CUSTOM_MODE,
+	  :LAST_UPDATE_DATE,
+	  :REFRESH_PORTLET,
+	  :ACTIVITY_SUMMARIZER,
+	  :PROGRAM_TYPE,
+	  :ALLOW_MULTIPLE_PENDING_REQUEST,  
+	  :TEMPLATE_APPL_SHORT_NAME,
+	  :TEMPLATE_CODE,
+          :MULTI_ORG_CATEGORY
+	  
+	  );
+
+      end if;
+    end;"
+
+
+UPLOAD INCOMPATABILITY
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      app_id1  number := 0;
+      app_id2  number := 0;
+      user_id  number := 0;
+      key_id1  number := 0;
+      key_id2  number := 0;
+
+     begin
+
+      begin
+        select application_id into app_id1
+        from   fnd_application
+        where  application_short_name = :APPLICATION_SHORT_NAME;
+
+        select application_id into app_id2
+        from   fnd_application
+        where  application_short_name = :APPLICATION_SHORT_NAME2;
+
+      
+        select CONCURRENT_PROGRAM_ID into key_id1
+        from fnd_concurrent_programs
+        where application_id = app_id1
+        and CONCURRENT_PROGRAM_NAME = :CONCURRENT_PROGRAM_NAME; 
+      
+        select CONCURRENT_PROGRAM_ID into key_id2
+        from fnd_concurrent_programs
+        where application_id = app_id2
+        and CONCURRENT_PROGRAM_NAME = :CONCURRENT_PROGRAM_NAME2;
+      
+      -- catch any exception here, if any of the above select statements
+      -- fail then we want to simply exit without errors
+      exception
+        when others then key_id1 := -1;
+      end;
+
+      if (:UPLOAD_MODE = 'NLS') OR (key_id1 <0) OR (key_id2 <0) then
+         null;
+      else
+
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+
+      begin
+        select LAST_UPDATED_BY, LAST_UPDATE_DATE
+        into db_luby, db_ludate
+	from FND_CONCURRENT_PROGRAM_SERIAL
+	where RUNNING_APPLICATION_ID = app_id1
+	and RUNNING_CONCURRENT_PROGRAM_ID = key_id1  
+	and TO_RUN_APPLICATION_ID = app_id2
+	and TO_RUN_CONCURRENT_PROGRAM_ID = key_id2;
+
+        -- Update record, honoring customization mode.
+        -- Record should be updated only if:
+        -- a. CUSTOM_MODE = FORCE, or
+        -- b. file owner is USER, db owner is SEED
+        -- c. owners are the same, and file_date > db_date
+        if (fnd_load_util.UPLOAD_TEST(
+                     p_file_id     => f_luby, 
+                     p_file_lud    => f_ludate,
+                     p_db_id       => db_luby, 
+                     p_db_lud      => db_ludate, 
+                     p_custom_mode => :CUSTOM_MODE)) 
+        then
+
+          update FND_CONCURRENT_PROGRAM_SERIAL
+          set   RUNNING_TYPE = :RUNNING_TYPE,  
+                TO_RUN_TYPE = :TO_RUN_TYPE,
+                LAST_UPDATE_DATE = f_ludate,  
+		LAST_UPDATED_BY = f_luby,
+                LAST_UPDATE_LOGIN = 0,
+                INCOMPATIBILITY_TYPE = :INCOMPATIBILITY_TYPE
+	  where RUNNING_APPLICATION_ID = app_id1
+	  and RUNNING_CONCURRENT_PROGRAM_ID = key_id1  
+	  and TO_RUN_APPLICATION_ID = app_id2
+	  and TO_RUN_CONCURRENT_PROGRAM_ID = key_id2;
+
+	  update FND_CONCURRENT_PROGRAM_SERIAL
+          set   RUNNING_TYPE = :RUNNING_TYPE,
+                TO_RUN_TYPE = :TO_RUN_TYPE,
+                LAST_UPDATE_DATE = f_ludate,
+                LAST_UPDATED_BY = f_luby,
+                LAST_UPDATE_LOGIN = 0,
+                INCOMPATIBILITY_TYPE = :INCOMPATIBILITY_TYPE 
+          where RUNNING_APPLICATION_ID = app_id2
+          and RUNNING_CONCURRENT_PROGRAM_ID = key_id2
+          and TO_RUN_APPLICATION_ID = app_id1
+          and TO_RUN_CONCURRENT_PROGRAM_ID = key_id1;
+        end if;
+      exception
+        when no_data_found then
+           insert into FND_CONCURRENT_PROGRAM_SERIAL 
+		(RUNNING_APPLICATION_ID, RUNNING_CONCURRENT_PROGRAM_ID, 
+		TO_RUN_APPLICATION_ID, TO_RUN_CONCURRENT_PROGRAM_ID, 
+		RUNNING_TYPE, TO_RUN_TYPE,
+                CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+		LAST_UPDATE_LOGIN, INCOMPATIBILITY_TYPE )
+	   values (app_id1,key_id1,app_id2,key_id2,
+		:RUNNING_TYPE,:TO_RUN_TYPE,
+		f_ludate, f_luby, f_ludate, f_luby, 0,
+                :INCOMPATIBILITY_TYPE);
+
+           insert into FND_CONCURRENT_PROGRAM_SERIAL 
+		(RUNNING_APPLICATION_ID, RUNNING_CONCURRENT_PROGRAM_ID, 
+		TO_RUN_APPLICATION_ID, TO_RUN_CONCURRENT_PROGRAM_ID, 
+		RUNNING_TYPE, TO_RUN_TYPE,
+                CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE, LAST_UPDATED_BY,
+                LAST_UPDATE_LOGIN, INCOMPATIBILITY_TYPE)
+            (SELECT app_id2, key_id2, app_id1, key_id1, 
+		    :TO_RUN_TYPE, :RUNNING_TYPE, 
+                    f_ludate, f_luby, f_ludate, f_luby, 0,
+                    :INCOMPATIBILITY_TYPE  
+               from dual 
+               where not exists (select 1 from FND_CONCURRENT_PROGRAM_SERIAL
+                                 where RUNNING_APPLICATION_ID=app_id2 and
+                                       TO_RUN_APPLICATION_ID=app_id1 and
+                                       RUNNING_CONCURRENT_PROGRAM_ID=key_id2 and
+                                       TO_RUN_CONCURRENT_PROGRAM_ID=key_id1));
+       end;
+
+     end if; --(:UPLOAD_MODE = 'NLS') OR (key_id1 <0) OR (key_id2 <0)
+
+   end;
+ end;"
+
+UPLOAD ANNOTATION
+"begin
+     declare
+      f_luby    number;  -- entity owner in file 
+      f_ludate  date;    -- entity update date in file
+      db_luby   number;  -- entity owner in db
+      db_ludate date;    -- entity update date in db
+      app_id1  number := 0;
+      user_id  number := 0;
+      key_id1  number := 0;
+      l_clob clob ;
+
+     begin
+
+      begin
+        select application_id into app_id1
+        from   fnd_application
+        where  application_short_name = :APPLICATION_SHORT_NAME;
+
+        select CONCURRENT_PROGRAM_ID into key_id1
+        from fnd_concurrent_programs
+        where application_id = app_id1
+        and CONCURRENT_PROGRAM_NAME = :CONCURRENT_PROGRAM_NAME; 
+      
+      -- catch any exception here, if any of the above select statements
+      -- fail then we want to simply exit without errors
+      exception
+        when others then key_id1 := -1;
+      end;
+
+      if (:UPLOAD_MODE = 'NLS') OR (key_id1 <0)  then
+         null;
+      else
+
+      -- Translate owner to file_last_updated_by
+      f_luby := fnd_load_util.OWNER_ID(:OWNER);
+ 
+      -- Translate char last_update_date to date
+      f_ludate := nvl(to_date(:LAST_UPDATE_DATE, 'YYYY/MM/DD'), sysdate);
+     
+
+      begin
+        select LAST_UPDATED_BY, LAST_UPDATE_DATE
+        into db_luby, db_ludate
+	from FND_CONC_PROG_ANNOTATIONS
+	where APPLICATION_ID = app_id1
+	and CONCURRENT_PROGRAM_ID = key_id1;  
+
+        -- Update record, honoring customization mode.
+        -- Record should be updated only if:
+        -- a. CUSTOM_MODE = FORCE, or
+        -- b. file owner is USER, db owner is SEED
+        -- c. owners are the same, and file_date > db_date
+        if (fnd_load_util.UPLOAD_TEST(
+                     p_file_id     => f_luby, 
+                     p_file_lud    => f_ludate,
+                     p_db_id       => db_luby, 
+                     p_db_lud      => db_ludate, 
+                     p_custom_mode => :CUSTOM_MODE)) 
+        then
+          --first PROGRAM_ANNOTATION is updated by empty_clob and then append the data using dbms_lob package
+          update FND_CONC_PROG_ANNOTATIONS
+          set   PROGRAM_ANNOTATION =  empty_clob(),
+		LAST_UPDATED_BY   = f_luby,
+		LAST_UPDATE_DATE  = f_ludate,
+		LAST_UPDATE_LOGIN = 0
+		
+          where application_id = app_id1
+                and  CONCURRENT_PROGRAM_ID = key_id1   	
+                 
+          return  PROGRAM_ANNOTATION into l_clob;
+               
+              dbms_lob.open(l_clob , dbms_lob.lob_readwrite);
+          begin
+              if(:PROGRAM_ANNOTATION is not null) then
+                  dbms_lob.writeappend(l_clob, LENGTH(:PROGRAM_ANNOTATION),  :PROGRAM_ANNOTATION);
+              end if;
+              dbms_lob.close(l_clob);
+
+          exception when others then
+              dbms_lob.close(l_clob);
+              raise;
+          end;	
+
+        end if;
+      exception
+        when no_data_found then
+           --first empty_clob is inserted PROGRAM_ANNOTATION column and then append the data using dbms_lob package
+           insert into FND_CONC_PROG_ANNOTATIONS
+                 (APPLICATION_ID, CONCURRENT_PROGRAM_ID,
+                  CREATION_DATE, CREATED_BY, LAST_UPDATE_DATE,
+                  LAST_UPDATED_BY, LAST_UPDATE_LOGIN, PROGRAM_ANNOTATION)
+            values (app_id1,
+                   key_id1,
+                   f_ludate, f_luby, f_ludate,f_luby, 0, empty_clob()
+                  ) 
+            returning PROGRAM_ANNOTATION into l_clob ;
+
+            dbms_lob.open(l_clob , dbms_lob.lob_readwrite);
+            begin
+                if(:PROGRAM_ANNOTATION is not null) then
+                    dbms_lob.writeappend(l_clob, LENGTH(:PROGRAM_ANNOTATION), :PROGRAM_ANNOTATION);
+                end if;
+			
+                dbms_lob.close(l_clob);
+            exception when others then
+                dbms_lob.close(l_clob);
+                raise;
+            end;
+       end;
+
+     end if; --(:UPLOAD_MODE = 'NLS') OR (key_id1 <0) OR (key_id2 <0)
+
+   end;
+ end;"
+
