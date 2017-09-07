@@ -10,7 +10,7 @@
 --  Description: 
 -- 
 --  Modification History:
---     17-MAY-2017 - Amalatesta - Created
+--     17-MAY-2017 - AMalatesta - Created
 -- 
 -- parameters :
 --
@@ -31,6 +31,7 @@
 -- 26-JUN-2017 AMALATESTA [Despegar]              Modified - Adding gateway and logical by hotel for Flag Not Reimbursement
 -- 21-JUL-2017 AMALATESTA [Despegar]              Modified - Adding logical conditions for segments accounts
 -- 28-JUL-2017 AMALATESTA [Despegar]              Modified - Adding new parameters for creation date field
+-- 07-SEP-2017 AMALATESTA [Despegar]              Modified - Change the logic to get not reimbursement flag
 -- *****************************************************************************
 set serveroutput on size 1000000
 whenever sqlerror exit failure
@@ -47,17 +48,37 @@ declare
     select rct.purchase_order
           ,rctl.attribute9
           ,rctl.attribute8
-          ,nvl((select max(pl.attribute12)
-                from   po.po_headers_all ph
-                      ,po.po_lines_all   pl
-                where  ph.po_header_id       = pl.po_header_id
-                and    ph.reference_num      = rct.purchase_order
-                and    pl.attribute_category = '0002'),
-               (select max(pl.attribute12)
-                from   po.po_headers_all ph
-                      ,po.po_lines_all   pl
-                where  ph.po_header_id       = pl.po_header_id
-                and    ph.reference_num      = rct.purchase_order)) attribute12
+      ,decode( (select max(xaeal_1.attribute40) --1 Search in OM records
+                from   bolinf.xx_all_extra_attributes xaeal_1
+                      ,ont.oe_order_lines_all         ool_1
+                      ,ar.ra_customer_trx_lines_all   rctl_1
+                      ,ar.ra_customer_trx_all         rct_1
+                where  rct_1.customer_trx_id                       = rctl_1.customer_trx_id
+                and    to_number(rctl_1.interface_line_attribute6) = ool_1.line_id
+                and    rctl_1.org_id                               = ool_1.org_id
+                and    to_char(ool_1.line_id)                      = xaeal_1.source_id_char1
+                and    ool_1.context                               = xaeal_1.source_attribute_category
+                and    'OE_ORDER_LINES'                            = xaeal_1.source_table
+                and    rct_1.org_id                                = rct.org_id
+                and    rct_1.purchase_order                        = rct.purchase_order)
+              ,'Y','OM_Y'
+              ,'N','OM_N'
+              ,null,decode((select max(pl.attribute12) --2 If not records found in OM, search in PO records for hotels
+                            from   po.po_headers_all ph
+                                  ,po.po_lines_all   pl
+                            where  ph.po_header_id       = pl.po_header_id
+                            and    ph.reference_num      = rct.purchase_order
+                            and    pl.attribute_category = '0002')
+                           ,'Y','POH_Y'
+                           ,'N','POH_N'
+                           ,null,decode( (select max(pl.attribute12) --3 Search in PO records for all products
+                                          from   po.po_headers_all ph
+                                                ,po.po_lines_all   pl
+                                          where  ph.po_header_id       = pl.po_header_id
+                                          and    ph.reference_num      = rct.purchase_order)
+                                        ,'Y','PO_Y'
+                                        ,'N','PO_N'
+                                        ,null))) attribute40
           ,rctl.attribute11
           ,rct.invoice_currency_code
           ,sum(rctl.extended_amount) extended_amount
@@ -131,7 +152,7 @@ declare
             ,gcc.segment10
             ,gcc.segment11;
   -- ---------------------------------------------------------------------------
-  -- Parametros de programa.
+  -- Program parameters.
   -- ---------------------------------------------------------------------------
   p_op_unit        number          := '&&1';
   p_date_from      date            := to_date('&&2','YYYY/MM/DD HH24:MI:SS');
@@ -141,7 +162,7 @@ declare
   p_debug_flag     varchar2(32767) := '&&6';
   p_char_delim     varchar2(32767) := '&&7';
   -- ---------------------------------------------------------------------------
-  -- Definicion de variables.
+  -- Variable definition
   -- ---------------------------------------------------------------------------
   v_dummy      boolean;
   /*--------------------------------------------------------------------------*/
@@ -196,11 +217,11 @@ declare
                 ||p_chardelim||'Futuro 2');
   end print_header;
 /*----------------------------------------------------------------------------*/
-/*Main                                                                        */
+/*Main section                                                                */
 /*----------------------------------------------------------------------------*/
 begin
   print_trace(p_debug=>p_debug_flag,p_str=>'--Begin');
-  print_trace(p_debug=>p_debug_flag,p_str=>'--  Parametros(+)');
+  print_trace(p_debug=>p_debug_flag,p_str=>'--  Parameters(+)');
   print_trace(p_debug=>p_debug_flag,p_str=>'--    1-p_op_unit........: '||p_op_unit||'.');
   print_trace(p_debug=>p_debug_flag,p_str=>'--    2-p_date_from......: '||p_date_from||'.');
   print_trace(p_debug=>p_debug_flag,p_str=>'--    3-p_date_to........: '||p_date_to||'.');
@@ -208,7 +229,7 @@ begin
   print_trace(p_debug=>p_debug_flag,p_str=>'--    5-p_prod_excl_code.: '||p_prod_excl_code||'.');
   print_trace(p_debug=>p_debug_flag,p_str=>'--    6-p_debug..........: '||p_debug_flag||'.');
   print_trace(p_debug=>p_debug_flag,p_str=>'--    7-p_char_delim.....: '||p_char_delim||'.');
-  print_trace(p_debug=>p_debug_flag,p_str=>'--  Parametros(-)');
+  print_trace(p_debug=>p_debug_flag,p_str=>'--  Parameters(-)');
   print_trace(p_debug=>p_debug_flag,p_str=>'--  print_header(+)');
   print_header(p_debug=>p_debug_flag,p_chardelim=>p_char_delim);
   print_trace(p_debug=>p_debug_flag,p_str=>'--  print_header(-)');
@@ -223,7 +244,7 @@ begin
                 ,p_str=>c_data.purchase_order
                 ||p_char_delim||c_data.attribute9
                 ||p_char_delim||c_data.attribute8
-                ||p_char_delim||c_data.attribute12
+                ||p_char_delim||c_data.attribute40
                 ||p_char_delim||c_data.attribute11
                 ||p_char_delim||c_data.invoice_currency_code
                 ||p_char_delim||c_data.extended_amount
