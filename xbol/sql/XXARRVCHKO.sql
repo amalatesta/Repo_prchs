@@ -31,7 +31,7 @@
 -- 26-JUN-2017 AMALATESTA [Despegar]              Modified - Adding gateway and logical by hotel for Flag Not Reimbursement
 -- 21-JUL-2017 AMALATESTA [Despegar]              Modified - Adding logical conditions for segments accounts
 -- 28-JUL-2017 AMALATESTA [Despegar]              Modified - Adding new parameters for creation date field
--- 06-SEP-2017 AMALATESTA [Despegar]              Modified - Change the logic to get not reimbursement flag
+-- 07-SEP-2017 AMALATESTA [Despegar]              Modified - Change the logic to get not reimbursement flag
 -- *****************************************************************************
 set serveroutput on size 1000000
 whenever sqlerror exit failure
@@ -48,7 +48,7 @@ declare
     select rct.purchase_order
           ,rctl.attribute9
           ,rctl.attribute8
-          ,nvl((select max(xaeal_1.attribute40) --1 Search in OM records
+      ,decode( (select max(xaeal_1.attribute40) --1 Search in OM records
                 from   bolinf.xx_all_extra_attributes xaeal_1
                       ,ont.oe_order_lines_all         ool_1
                       ,ar.ra_customer_trx_lines_all   rctl_1
@@ -61,17 +61,24 @@ declare
                 and    'OE_ORDER_LINES'                            = xaeal_1.source_table
                 and    rct_1.org_id                                = rct.org_id
                 and    rct_1.purchase_order                        = rct.purchase_order)
-              ,(nvl((select max(pl.attribute12) --2 If not records found in OM, search in PO records for hotels
-                    from   po.po_headers_all ph
-                          ,po.po_lines_all   pl
-                    where  ph.po_header_id       = pl.po_header_id
-                    and    ph.reference_num      = rct.purchase_order
-                    and    pl.attribute_category = '0002'),
-                   (select max(pl.attribute12) --3 Search in PO records for all cases
-                    from   po.po_headers_all ph
-                          ,po.po_lines_all   pl
-                    where  ph.po_header_id       = pl.po_header_id
-                    and    ph.reference_num      = rct.purchase_order)))) attribute12
+              ,'Y','OM_Y'
+              ,'N','OM_N'
+              ,null,decode((select max(pl.attribute12) --2 If not records found in OM, search in PO records for hotels
+                            from   po.po_headers_all ph
+                                  ,po.po_lines_all   pl
+                            where  ph.po_header_id       = pl.po_header_id
+                            and    ph.reference_num      = rct.purchase_order
+                            and    pl.attribute_category = '0002')
+                           ,'Y','POH_Y'
+                           ,'N','POH_N'
+                           ,null,decode( (select max(pl.attribute12) --3 Search in PO records for all products
+                                          from   po.po_headers_all ph
+                                                ,po.po_lines_all   pl
+                                          where  ph.po_header_id       = pl.po_header_id
+                                          and    ph.reference_num      = rct.purchase_order)
+                                        ,'Y','PO_Y'
+                                        ,'N','PO_N'
+                                        ,null))) attribute40
           ,rctl.attribute11
           ,rct.invoice_currency_code
           ,sum(rctl.extended_amount) extended_amount
@@ -237,7 +244,7 @@ begin
                 ,p_str=>c_data.purchase_order
                 ||p_char_delim||c_data.attribute9
                 ||p_char_delim||c_data.attribute8
-                ||p_char_delim||c_data.attribute12
+                ||p_char_delim||c_data.attribute40
                 ||p_char_delim||c_data.attribute11
                 ||p_char_delim||c_data.invoice_currency_code
                 ||p_char_delim||c_data.extended_amount
