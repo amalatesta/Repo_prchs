@@ -162,7 +162,7 @@ BEGIN
      -------------------------------------------------
      -- Comienza recorrido del cursor
      -------------------------------------------------
-     FOR l_mkt_c  IN cur_mkt_item LOOP
+     FOR l_mkt_c IN cur_mkt_item LOOP
          l_mkt := l_mkt_c.mkt;
      END LOOP;
 
@@ -178,7 +178,7 @@ BEGIN
          l_rc_pr_dt := l_rc_pr_dt_c.rc_pr_dt;
      END LOOP;
      
-     if (l_mkt != null and l_fa !=  null and l_rc_dt !=  null and l_rc_pr_dt !=  null) then --20170913 --akrajcsik@despegar.com
+     if (l_mkt is not null and l_fa is not null and l_rc_dt is not null and l_rc_pr_dt is not null) then --20170913 --akrajcsik@despegar.com
      /*IF (l_mkt != NULL or l_fa !=  NULL or l_rc_dt !=  NULL or l_rc_pr_dt !=  NULL) THEN */
      RETURN '1001';
      ELSE RETURN '1000';
