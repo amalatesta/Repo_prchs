@@ -178,7 +178,8 @@ BEGIN
          l_rc_pr_dt := l_rc_pr_dt_c.rc_pr_dt;
      END LOOP;
      
-     IF (l_mkt != NULL or l_fa !=  NULL or l_rc_dt !=  NULL or l_rc_pr_dt !=  NULL) THEN 
+     if (l_mkt != null and l_fa !=  null and l_rc_dt !=  null and l_rc_pr_dt !=  null) then --20170913 --akrajcsik@despegar.com
+     /*IF (l_mkt != NULL or l_fa !=  NULL or l_rc_dt !=  NULL or l_rc_pr_dt !=  NULL) THEN */
      RETURN '1001';
      ELSE RETURN '1000';
      END IF;
@@ -201,7 +202,8 @@ IS
      -- Cursores
    ----------------------
        cursor cur_sc_sol is
-                SELECT preparer_ID sol
+                select 1 sol --20170913 --akrajcsik@despegar.com
+                /*SELECT preparer_ID sol*/
                 FROM apps.po_requisition_headers_all 
                 WHERE requisition_header_id= p_transaction_id
                 and preparer_ID not in (select distinct lookup_code 
