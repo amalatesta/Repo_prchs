@@ -16,6 +16,7 @@ REM |    Oracle Financials                                                 |
 REM |                                                                      |
 REM |  HISTORY                                                             |
 REM |    07-SEP-17 - AKrajcsik - DSP - Created                             |
+REM |    14-SEP-17 - EBotta - DSP - Modified                               |
 REM |                                                                      |
 REM | NOTES                                                                |
 REM |                                                                      |
@@ -30,7 +31,7 @@ prompt =====================================================================
 prompt creando paquete XX_PO_AME_UTIL_PK
 
 create or replace PACKAGE XX_PO_AME_UTIL_PK AS
-/* $Header: XX_PO_AME_UTILS_PK.sql 1.0 2017-09-07 14:30:00 akrajcsik@despegar.com $ */
+/* $Header: XX_PO_AME_UTILS_PK.sql 3.0 2017-09-14 14:30:00 ebotta@despegar.com $ */
 /*+======================================================================+*/
 /*|           Copyright (c) 2017 Oracle Argentina, Buenos Aires          |*/
 /*|                         All rights reserved.                         |*/
@@ -49,6 +50,7 @@ create or replace PACKAGE XX_PO_AME_UTIL_PK AS
 /*|                                                                      |*/
 /*|  HISTORY                                                             |*/
 /*|    07-SEP-17 - AKrajcsik - DSP - Created                             |*/
+/*|    14-SEP-17 - EBotta - DSP - Modified                               |*/
 /*|                                                                      |*/
 /*| NOTES                                                                |*/
 /*|                                                                      |*/
@@ -56,11 +58,38 @@ create or replace PACKAGE XX_PO_AME_UTIL_PK AS
 
 /*=========================================================================+
 |                                                                          |
-| name    : Get_PO_BR_EXCEPTIONS                                           |
+| name    : Get_PO_BR_ITEM_MKT                                           |
 | purpose : Traer las excepciones a las reglas AME BR                      |
 |                                                                          |
 +=========================================================================*/
-FUNCTION Get_PO_BR_EXCEPTIONS (p_transaction_id IN NUMBER)
+FUNCTION Get_PO_BR_ITEM_MKT (p_transaction_id IN NUMBER)
+RETURN VARCHAR2;
+
+/*=========================================================================+
+|                                                                          |
+| name    : Get_PO_BR_ITEM_FA                                           |
+| purpose : Traer las excepciones a las reglas AME BR                      |
+|                                                                          |
++=========================================================================*/
+FUNCTION Get_PO_BR_ITEM_FA (p_transaction_id IN NUMBER)
+RETURN VARCHAR2;
+
+/*=========================================================================+
+|                                                                          |
+| name    : Get_PO_BR_RC_DT                                           |
+| purpose : Traer las excepciones a las reglas AME BR                      |
+|                                                                          |
++=========================================================================*/
+FUNCTION Get_PO_BR_RC_DT   (p_transaction_id IN NUMBER)
+RETURN VARCHAR2;
+
+/*=========================================================================+
+|                                                                          |
+| name    : Get_PO_BR_RC_PR_DT                                           |
+| purpose : Traer las excepciones a las reglas AME BR                      |
+|                                                                          |
++=========================================================================*/
+FUNCTION Get_PO_BR_RC_PR_DT   (p_transaction_id IN NUMBER)
 RETURN VARCHAR2;
 
 /*=========================================================================+
