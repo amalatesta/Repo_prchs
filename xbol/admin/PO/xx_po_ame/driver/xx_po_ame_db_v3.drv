@@ -1,0 +1,44 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_po_ame_db_v3.drv                                                |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script driver para paquete xx_po_ame_util_pk                       |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    14-SEP-2017 - 3.0 - AKrajcsik - DSP - Created                      |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_po_ame_db_v3
+
+  begin patch_info
+  release  3
+  server   DB
+  language US
+  end patch_info
+
+  copy xbol /admin/PO/xx_po_ame/driver xx_po_ame_db_v3.drv
+
+  copy xbol /admin/PO/xx_po_ame/driver buildpatch_db_v3.sh
+
+  copy xbol /admin/PO/xx_po_ame/sql XX_PO_AME_UTILS_PK.sql
+
+  copy xbol /admin/PO/xx_po_ame/sql XX_PO_AME_UTILB_PK.sql
+
+  begin connection apps
+
+    sql xbol $XBOL_TOP/admin/PO/xx_po_ame/sql XX_PO_AME_UTILS_PK.sql
+
+    sql xbol $XBOL_TOP/admin/PO/xx_po_ame/sql XX_PO_AME_UTILB_PK.sql
+
+  end connection apps
+
+end patch xx_po_ame_db_v3
