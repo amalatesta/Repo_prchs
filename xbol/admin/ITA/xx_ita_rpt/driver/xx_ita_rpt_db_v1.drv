@@ -1,0 +1,40 @@
+# +=======================================================================+
+# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xx_ita_rpt_db_v1.drv                                               |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script driver para paquete xx_reportes_auditoria_pkg               |
+# |                                                                       |
+# | PRODUCT                                                               |
+# |    Oracle Financials                                                  |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    15-SEP-2017 - 1.0 - DVartabedian - DSP - Created                   |
+# |                                                                       |
+# | NOTES                                                                 |
+# |                                                                       |
+# +=======================================================================+
+begin patch xx_ita_rpt_db_v1
+
+  begin patch_info
+  release  1
+  server   DB
+  language US
+  end patch_info
+
+  copy xbol /admin/ITA/xx_ita_rpt/driver xx_ita_rpt_db_v1.drv
+
+  copy xbol /admin/ITA/xx_ita_rpt/driver buildpatch_db_v1.sh
+
+  copy xbol /admin/ITA/xx_ita_rpt/sql XX_REPORTES_AUDITORIAB_PK.sql
+
+  begin connection apps
+
+    sql xbol $XBOL_TOP/admin/ITA/xx_ita_rpt/sql XX_REPORTES_AUDITORIAB_PK.sql
+
+  end connection apps
+
+end patch xx_ita_rpt_db_v1
