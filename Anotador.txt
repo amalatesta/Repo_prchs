@@ -1,33 +1,3 @@
-Crear branck local
-git checkout –b <nombre_del_branch>
-Relacionar el local y crear un remoto
-git push --set-upstream origin <nombre_del_branch>
-
-
-#Ruta para ejecutar parches
-/u01/app/oracle/apps/apps_st/appl/xbol/12.0.0/bin/xxadpatch
-o
-$XBOL_TOP/bin/xxadpatch
-
-tar -xvf 
-
---Comandos git
-----Para borrar:
-------Deleting a remote branch:
-git push origin --delete <branch>  # Git version 1.7.0 or newer
-git push origin :<branch>          # Git versions older than 1.7.0
-------Deleting a local branch:
-git branch --delete <branch>
-git branch -d <branch> # Shorter version
-git branch -D <branch> # Force delete un-merged branches
-------Deleting a local remote-tracking branch:
-git branch --delete --remotes <remote>/<branch>
-git branch -dr <remote>/<branch> # Shorter
-git fetch <remote> --prune # Delete multiple obsolete tracking branches
-git fetch <remote> -p      # Shorter
-
-Ejemplo:
-Branch Remoto
-git push origin --delete FS-507
-Branch local
-git branch -D FS-507
+version https://git-lfs.github.com/spec/v1
+oid sha256:b1fabb0fe99240c5331476f6211d773362837d6fe52cee8cc7c130d0a6981d1d
+size 993

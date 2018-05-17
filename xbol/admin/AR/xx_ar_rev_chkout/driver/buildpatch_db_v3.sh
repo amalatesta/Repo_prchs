@@ -1,29 +1,3 @@
-#/*======================================================================+
-#|  Copyright (c) 2017 Oracle Corporation, Buenos Aires, Argentina       |
-#|                         ALL rights reserved.                          |
-#+=======================================================================+
-#|                                                                       |
-#| FILENAME                                                              |
-#|     buildpatch_db_v3.sh                                               |
-#|                                                                       |
-#| DESCRIPTION                                                           |
-#|     Script para crear el patch.                                       |
-#|                                                                       |
-#| HISTORY                                                               |
-#|     21-JUL-2017 - 3.0 - AMalatesta - DSP - Modified                   |
-#|                                                                       |
-#+=======================================================================*/
-
-rm -rf $XBOL_TOP/patches/xx_ar_rev_chkout_db_v3
-rm -rf $XBOL_TOP/patches/xx_ar_rev_chkout_db_v3.tar
-
-# Creo el patch con el driver
-echo 'Creando el patch con el driver'
-$XBOL_TOP/bin/xxbuildpatch xx_ar_rev_chkout_db_v3.drv xx_ar_rev_chkout_db_v3
-
-sleep 1
-
-# Armo el tar
-echo 'Armando el tar'
-cd $XBOL_TOP/patches
-tar -cvf xx_ar_rev_chkout_db_v3.tar xx_ar_rev_chkout_db_v3
+version https://git-lfs.github.com/spec/v1
+oid sha256:42c4aa730e96317f5c54bb48940628b1c816d345f2c231cb1b72e5c33372b0e2
+size 1528

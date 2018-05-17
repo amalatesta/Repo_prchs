@@ -1,29 +1,3 @@
-#/*======================================================================+
-#|  Copyright (c) 2017 Oracle Corporation, Buenos Aires, Argentina       |
-#|                         ALL rights reserved.                          |
-#+=======================================================================+
-#|                                                                       |
-#| FILENAME                                                              |
-#|     buildpatch_db_v3.sh                                               |
-#|                                                                       |
-#| DESCRIPTION                                                           |
-#|     Script para crear el patch.                                       |
-#|                                                                       |
-#| HISTORY                                                               |
-#|     14-SEP-2017 - 3.0 - AKrajcsik - DSP - Created                     |
-#|                                                                       |
-#+=======================================================================*/
-
-rm -rf $XBOL_TOP/patches/xx_po_ame_db_v3
-rm -rf $XBOL_TOP/patches/xx_po_ame_db_v3.tar
-
-# Creo el patch con el driver
-echo 'Creando el patch con el driver'
-$XBOL_TOP/bin/xxbuildpatch xx_po_ame_db_v3.drv xx_po_ame_db_v3
-
-sleep 1
-
-# Armo el tar
-echo 'Armando el tar'
-cd $XBOL_TOP/patches
-tar -cvf xx_po_ame_db_v3.tar xx_po_ame_db_v3
+version https://git-lfs.github.com/spec/v1
+oid sha256:83f31a19b8db644e792393501013acd993e23b4a433f1297b0f390a79f691afc
+size 1486

@@ -1,29 +1,3 @@
-#/*======================================================================+
-#|  Copyright (c) 2016 Oracle Corporation, Buenos Aires, Argentina       |
-#|                         ALL rights reserved.                          |
-#+=======================================================================+
-#|                                                                       |
-#| FILENAME                                                              |
-#|     buildpatch_db_v1.sh                                               |
-#|                                                                       |
-#| DESCRIPTION                                                           |
-#|     Script para crear el patch.                                       |
-#|                                                                       |
-#| HISTORY                                                               |
-#|     09-NOV-2016    AMalatesta     Created                             |
-#|                                                                       |
-#+=======================================================================*/
-
-rm -rf $XBOL_TOP/patches/xx_om_trg_afil_db_v1
-rm -rf $XBOL_TOP/patches/xx_om_trg_afil_db_v1.tar
-
-# Creo el patch con el driver
-echo 'Creando el patch con el driver'
-$XBOL_TOP/bin/xxbuildpatch xx_om_trg_afil_db_v1.drv xx_om_trg_afil_db_v1
-
-sleep 1
-
-# Armo el tar
-echo 'Armando el tar'
-cd $XBOL_TOP/patches
-tar -cvf xx_om_trg_afil_db_v1.tar xx_om_trg_afil_db_v1
+version https://git-lfs.github.com/spec/v1
+oid sha256:9e945cc3fbe84c16fb788079576e20faf62924aaf1e908c7f389013cda7d7e0d
+size 1516
