@@ -1,34 +1,3 @@
-# +=======================================================================+
-# |    Copyright (c) 2017 Oracle Argentina, Buenos Aires                  |
-# |                         All rights reserved.                          |
-# +=======================================================================+
-# | FILENAME                                                              |
-# |    xx_ar_rev_chkout_db_v3.drv                                         |
-# |                                                                       |
-# | DESCRIPTION                                                           |
-# |    Script drivers para reporte SQL                                    |
-# |                                                                       |
-# | PRODUCT                                                               |
-# |    Oracle Financials                                                  |
-# |                                                                       |
-# | HISTORY                                                               |
-# |    21-JUl-2017 - 3.0 - AMalatesta - DSP - Modified                    |
-# |                                                                       |
-# | NOTES                                                                 |
-# |                                                                       |
-# +=======================================================================+
-begin patch xx_ar_rev_chkout_db_v3
-
-  begin patch_info
-  release  3
-  server   DB
-  language US
-  end patch_info
-
-  copy xbol /admin/AR/xx_ar_rev_chkout/driver xx_ar_rev_chkout_db_v3.drv
-
-  copy xbol /admin/AR/xx_ar_rev_chkout/driver buildpatch_db_v3.sh
-
-  copy xbol /sql XXARRVCHKO.sql
-
-end patch xx_ar_rev_chkout_db_v3
+version https://git-lfs.github.com/spec/v1
+oid sha256:76740bc26ca79e19c71e1dd86125bdca1ea9d3c1490d63fd5f87970c2db866ac
+size 1799

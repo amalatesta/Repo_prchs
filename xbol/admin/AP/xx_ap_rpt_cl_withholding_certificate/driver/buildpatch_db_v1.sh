@@ -1,29 +1,3 @@
-#/*======================================================================+
-#|  Copyright (c) 2017 Oracle Corporation, Buenos Aires, Argentina       |
-#|                         ALL rights reserved.                          |
-#+=======================================================================+
-#|                                                                       |
-#| FILENAME                                                              |
-#|     buildpatch_db_v1.sh                                               |
-#|                                                                       |
-#| DESCRIPTION                                                           |
-#|     Script para crear el patch.                                       |
-#|                                                                       |
-#| HISTORY                                                               |
-#|     20-ENE-2017 - 1.0 - AMalatesta - DSP - Created                    |
-#|                                                                       |
-#+=======================================================================*/
-
-rm -rf $XBOL_TOP/patches/xx_ap_rpt_cl_withholding_certificate_db_v1
-rm -rf $XBOL_TOP/patches/xx_ap_rpt_cl_withholding_certificate_db_v1.tar
-
-# Creo el patch con el driver
-echo 'Creando el patch con el driver'
-$XBOL_TOP/bin/xxbuildpatch xx_ap_rpt_cl_withholding_certificate_db_v1.drv xx_ap_rpt_cl_withholding_certificate_db_v1
-
-sleep 1
-
-# Armo el tar
-echo 'Armando el tar'
-cd $XBOL_TOP/patches
-tar -cvf xx_ap_rpt_cl_withholding_certificate_db_v1.tar xx_ap_rpt_cl_withholding_certificate_db_v1
+version https://git-lfs.github.com/spec/v1
+oid sha256:e9269de89970e64416e7a634f809b8fa18bb80b7647a53d587220a5702756b21
+size 1648

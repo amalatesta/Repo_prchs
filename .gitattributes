@@ -1,1 +1,17 @@
 *.pls lockable
+*.sh filter=lfs diff=lfs merge=lfs -text lockable
+*.txt filter=lfs diff=lfs merge=lfs -text lockable
+*.idx filter=lfs diff=lfs merge=lfs -text lockable
+*.ctl filter=lfs diff=lfs merge=lfs -text lockable
+*.sql filter=lfs diff=lfs merge=lfs -text lockable
+*.SQL filter=lfs diff=lfs merge=lfs -text lockable
+*.fmb filter=lfs diff=lfs merge=lfs -text lockable
+*.rdf filter=lfs diff=lfs merge=lfs -text lockable
+*.rtf filter=lfs diff=lfs merge=lfs -text lockable
+*.xls filter=lfs diff=lfs merge=lfs -text lockable
+*.xml filter=lfs diff=lfs merge=lfs -text lockable
+*.drv filter=lfs diff=lfs merge=lfs -text lockable
+*.pll filter=lfs diff=lfs merge=lfs -text lockable
+*.vw filter=lfs diff=lfs merge=lfs -text lockable
+*.bdy filter=lfs diff=lfs merge=lfs -text lockable
+*.spc filter=lfs diff=lfs merge=lfs -text lockable

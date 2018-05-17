@@ -1,29 +1,3 @@
-select 'export NLS_LANG="'||nls_language
-      ||'_'||nls_territory
-      ||'.'||nls_codeset||'"' valor_export
-from   fnd_languages
-where  1=1
-and    nls_territory = 'AMERICA'
-and    language_code = 'US'
-union all
-select 'export NLS_LANG="'||nls_language
-      ||'_'||nls_territory
-      ||'.'||nls_codeset||'"' valor_export
-from   fnd_languages
-where  1=1
-and    nls_territory = 'AMERICA'
-and    language_code = 'ESA'
-union all
-select 'export NLS_LANG="'||nls_language
-      ||'_'||nls_territory
-      ||'.'||nls_codeset||'"' valor_export
-from   fnd_languages
-where  1=1
-and    nls_territory = 'BRAZIL'
-and    language_code = 'PTB'
-;
-/*
-export NLS_LANG="AMERICAN_AMERICA.US7ASCII"
-export NLS_LANG="LATIN AMERICAN SPANISH_AMERICA.WE8ISO8859P1"
-export NLS_LANG="BRAZILIAN PORTUGUESE_BRAZIL.WE8ISO8859P1"
-*/
+version https://git-lfs.github.com/spec/v1
+oid sha256:42f806e6423fa1525f02183da143d3785d03985800c829d26a2272d52da34154
+size 833

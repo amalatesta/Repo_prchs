@@ -1,11 +1,3 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<xapi:requestset xmlns:xapi="http://xmlns.oracle.com/oxp/xapi" type="bursting">
-<xapi:request select="/XXARPETRXP/LIST_G_INVOICE_HEADER/G_INVOICE_HEADER">
-<xapi:delivery>
-<xapi:filesystem id="FILE_DELIVERY" output="${XX_AR_TRX_PE_OUT_PRC_DIR}/${CUSTOMER_TRX_ID}-${CONC_REQUEST_ID}.pdf"/>
-</xapi:delivery>
-<xapi:document key="${CUSTOMER_TRX_ID}" output-type="pdf"  delivery="FILE_DELIVERY">
-    <xapi:template type="rtf" location="xdo://XBOL.XXARPETRXP.en.US/?getSource=true" filter=".//G_INVOICE_HEADER[/XXARPETRXP/LIST_G_INVOICE_HEADER/G_INVOICE_HEADER/COUNTRY='PE']"/>
-</xapi:document>
- </xapi:request>
-</xapi:requestset>
+version https://git-lfs.github.com/spec/v1
+oid sha256:1c5602b4e04b653207f5b758b86cc7f31d78b415bac31b5ab85e8b0f5c489a78
+size 677
