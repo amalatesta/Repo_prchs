@@ -1,3 +1,9 @@
+Crear branck local
+git checkout –b <nombre_del_branch>
+Relacionar el local y crear un remoto
+git push --set-upstream origin <nombre_del_branch>
+
+
 #Ruta para ejecutar parches
 /u01/app/oracle/apps/apps_st/appl/xbol/12.0.0/bin/xxadpatch
 o
