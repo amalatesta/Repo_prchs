@@ -3,6 +3,8 @@
 o
 $XBOL_TOP/bin/xxadpatch
 
+tar -xvf 
+
 --Comandos git
 ----Para borrar:
 ------Deleting a remote branch:
