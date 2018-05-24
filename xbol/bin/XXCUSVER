@@ -1,0 +1,82 @@
+#!/bin/ksh
+#
+# +==========================================================================+
+# | Copyright (c) 2003,2004 Oracle Corporation, Redwood Shores, California, USA
+# |                       All Rights Reserved
+# |                      Application Division
+# +==========================================================================+
+# |
+# | FILENAME
+# |   XXTEST
+# |
+# | DESCRIPTION
+# |   XX Version Customizaciones 
+# |
+# | INPUT
+# |   NONE 
+# |
+# | OUTPUT
+# |   Version del Paquete de Customs
+# |
+# | HISTORY
+# |   08/09/2000     JBARROS     Create Basic information
+# |
+# +==========================================================================+
+
+############################################################################
+# Nombre: imprimirLinea
+# Descripcion: despliega por pantallas los mensajes solicitados
+############################################################################
+ImprimirLinea()
+{
+  echo ""
+  echo $1
+  echo ""
+}
+
+############################################################################
+# Nombre: versionCustoms
+# Descripcion: Muestra la version del paquete de customizaciones
+############################################################################
+versionCustoms() {
+   ImprimirLinea "Customizaciones de Argentina compatilbe con 11.5.10"
+   ImprimirLinea "Parametros: $1"
+}
+
+############################################################################
+# Nombre: validarComandosCustoms
+# Descripcion: Valida que los comandos customs se encuentre en el path
+############################################################################
+validarComandosCustoms() {
+    # Validar Comandos
+#
+#    XXADPATCH=`whence xxadpatch`
+#    if [ $? != 0 ]; then ImprimirLinea "Error: el comando xxadpatch no se ecuentra en el path"; exit 1; fi
+#
+#    XXBUILDPATCH=`whence xxbuildpatch`
+#    if [ $? != 0 ]; then ImprimirLinea "Error: el comando xxbuildpatch no se encuentra en el path"; exit 1; fi
+#
+#    XXMERGERLIB=`whence xxmergelib`
+#    if [ $? != 0 ]; then ImprimirLinea "Error: el comando xxmergelib no se encuentra en el path"; exit 1; fi
+
+    PERL=`whence perl`
+    if [ $? != 0 ]; then ImprimirLinea "Error: el comando perl no se encuentra en el path"; exit 1; fi
+
+    JAVA=`whence java`
+    if [ $? != 0 ]; then ImprimirLinea "Error: el comando java no se encuentra en el path"; exit 1; fi
+}
+
+############################################################################
+# Programa Principal 
+############################################################################
+
+#Imprimir la version de las customizaciones
+versionCustoms "$1"
+
+# Validar Caampos
+validarComandosCustoms
+if [[ $? -ne 0 ]]
+then
+  ImprimirLinea "Please make the command shown above available."
+fi
+

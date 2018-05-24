@@ -1,0 +1,85 @@
+#!/bin/ksh
+#
+# +==========================================================================+
+# | Copyright (c) 2003,2004 Oracle Corporation, Redwood Shores, California, USA
+# |                       All Rights Reserved
+# |                      Application Division
+# +==========================================================================+
+# |
+# | FILENAME
+# |   XXTEST
+# |
+# | DESCRIPTION
+# |   XX Copia Customizaciones 
+# |
+# | INPUT
+# |   NONE 
+# |
+# | OUTPUT
+# |   Version del Paquete de Customs
+# |
+# | HISTORY
+# |   08/09/2000     JBARROS     Create Basic information
+# |
+# +==========================================================================+
+
+############################################################################
+# Nombre: imprimirLinea
+# Descripcion: despliega por pantallas los mensajes solicitados
+############################################################################
+ImprimirLinea()
+{
+  echo ""
+  echo $1
+  echo ""
+}
+
+############################################################################
+# Nombre: EjecutarCopia
+# Descripcion: Valida que los comandos customs se encuentre en el path
+############################################################################
+EjecutarCopia() 
+{
+   archivo_origen=$1;
+   archivo_destino=$2;
+  
+
+
+   ImprimirLinea "Valido destino $archivo_destino "
+#   if [ ! -f $dir_destino ]
+#   then
+#     ImprimirLinea "No existe el directorio. $dir_destino"
+#     exit 1;
+#   fi
+
+   ImprimirLinea "Valido origen $archivo_origen "
+   if [ -f $archivo_origen ]
+   then
+     ImprimirLinea "Voy a copiar $archivo_origen a $archivo_destino"
+     cp $archivo_origen  $archivo_destino;
+   else
+     ImprimirLinea "No existe el archivo. $archivo_origen"
+     exit 1;
+   fi
+   exit 0;
+}
+
+############################################################################
+# Programa Principal 
+############################################################################
+
+SED=`whence sed`
+if [ $? != 0 ]; then PrintMsg "Error: sed command not found in the path"; exit 1; fi
+AWK=`whence awk`
+if [ $? != 0 ]; then PrintMsg "Error: awk command not found in the path"; exit 1; fi
+
+# Obtener parametros archivo_origen y dir_destino
+archivo_origen=`echo $1|$AWK -F" " '{print $9}'|$SED 's/\"//g'`
+dir_destino=`echo $1|$AWK -F" " '{print $10}'|$SED 's/\"//g'`
+
+# EjecutarCopia
+EjecutarCopia  $archivo_origen $dir_destino
+
+if [ $? -ne 0 ]; then ImprimirLinea "Error copiando archivos."; exit 1; fi
+
+exit 0;

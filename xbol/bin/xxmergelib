@@ -1,0 +1,1143 @@
+#! /usr/bin/perl -w
+# +=======================================================================+
+# |          Copyright (c) 2004 Oracle Argentina, Buenos Aires            |
+# |                         All rights reserved.                          |
+# +=======================================================================+
+# | FILENAME                                                              |
+# |    xxmergelib                                                         |
+# |                                                                       |
+# | DESCRIPTION                                                           |
+# |    Script para fusionar librerias de Forms                            |
+# |    Este shell script toma las dos librerias origen recibidas como     |
+# |    argumento y las fusiona generando la libreria destino.             |
+# |    La fusion consiste en generar una nueva libreria conteniendo las   |
+# |    "program units" existentes en ambas librerias origen. En caso      |
+# |    de conflicto, es decir que una misma "program unit" exista en      |
+# |    ambas librerias origen, siempre tiene mayor precedencia la         |
+# |    libreria origen primaria.                                          |
+# |                                                                       |
+# | VERSION                                                               |
+# |    3.0                                                                |
+# |                                                                       |
+# | HISTORY                                                               |
+# |    01-OCT-2004    Gaston Martino    Creado                            |
+# |    15-JUN-2005    Gaston Martino    Liberada v2.0                     |
+# |    23-FEB-2006    Fernando Barros   Liberada v3.0                     |
+# |    23-JUL-2011    Fernando Barros   Liberada v4.0                     |
+# |                        Se agrega un ENTER antes y despues del HANDLER |
+# |                                                                       |
+# +=======================================================================+
+
+
+
+# ------------------------------------------------------------------------
+# Definicion de variables de entorno genericas
+# ------------------------------------------------------------------------
+$L_PROGRAM_NAME="xxmergelib";
+$EXIT_CODE_OK=0;
+$EXIT_CODE_ERROR=1;
+
+$ARGUMENT_ERROR_FLAG="N";
+
+$GENERIC_FORM_NAME="GENERIC";
+$REVISION_PU_NAME="";
+
+
+# ------------------------------------------------------------------------
+# Definicion de variables para almacenar los parametros
+# ------------------------------------------------------------------------
+$HANDLER_FLAG="N";
+$HANDLER_NAME="NULL";
+$PURGE_PU_FLAG="N";
+$PURGE_PU_NAME="NULL";
+$LIBSOURCE1="";
+$LIBSOURCE2="";
+$LIBTARGET="";
+$DBUSERPASSWORD="";
+
+
+
+
+# ---------------------------------------------------------------------- #
+#                                                                        #
+#                     R U T I N A S    L O C A L E S                     #
+#                                                                        #
+# ---------------------------------------------------------------------- #
+
+
+
+
+# --------------------------------------------------------------
+#
+# Routine    : PrintLog
+# Purpose    : Graba en el Log y en Salida Standard
+# Parameters : l_text
+#
+# --------------------------------------------------------------
+sub PrintLog  {
+   my($p_text) = @_;
+   print " $p_text\n";
+   print LOGFH " $p_text\n";
+}
+
+# --------------------------------------------------------------
+#
+# Routine    : ShowUsage
+# Purpose    : Muestra la sintaxis de uso del shell script
+# Parameters : PROGRAM_NAME: Nombre del shell script
+#
+# --------------------------------------------------------------
+sub ShowUsage  {
+   print " \n";
+   print "Uso: $L_PROGRAM_NAME [<opciones>] <lib origen1> <lib origen2> <lib destino> \n";
+   print " \n";
+   print "En donde <opciones> pueden ser:\n";
+   print "  -u <user/password>: Usuario de base de datos y password (requerido)\n";
+   print "  -l <archivo log>  : Archivo de log del proceso (opcional)\n";
+   print "  -t <dir. temporal>: Directorio para archivos temporales (opcional)\n";
+   print "  -h <nom_handler>  : Nombre del handler a generar (opcional)\n";
+   print "  -p <program_unit> : Nombre de la program unit a depurar (opcional)\n";
+   print " \n";
+   print "Y los argumentos son:\n";
+   print "  <lib origen1>     : Libreria origen primaria\n";
+   print "  <lib origen2>     : Libreria origen secundaria\n";
+   print "  <lib destino>     : Libreria destino de la fusion\n";
+   print " \n";
+}
+
+
+
+# ---------------------------------------------------------------------- #
+#                                                                        #
+#                  P R O G R A M A    P R I N C I P A L                  #
+#                                                                        #
+# ---------------------------------------------------------------------- #
+
+
+# ------------------------------------------------------------------------
+#
+# PASO 1:
+# OBTENCION Y VALIDACION DE LOS ARGUMENTOS
+# Recuperacion y validacion de cada uno de los argumentos recibidos
+# como parametro
+#   
+# ------------------------------------------------------------------------
+
+$i = 0;
+
+# --------------------------------------------------------------------------
+# Recupero los argumentos recibidos como parametro
+# --------------------------------------------------------------------------
+while ( $ARGV[$i] ) {
+
+   if ($ARGV[$i] eq "-u")  {
+
+      if ( $LIBSOURCE1 ) {
+         $ARGUMENT_ERROR_FLAG="Y";
+         $i = $i + 2 ;
+      } else {
+            $DBUSERPASSWORD=$ARGV[$i+1];
+            $DB_USR_NAME="$ARGV[$i+1]";
+            $DB_USR_NAME=~s/\/.*//;
+            $DB_USR_PWD="$ARGV[$i+1]";
+            $DB_USR_PWD=~s/.*\///;
+
+            if ( ! $DB_USR_NAME ) {
+
+                $ARGUMENT_ERROR_FLAG="Y";
+            }
+            if ( ! $DB_USR_PWD ) {
+                $ARGUMENT_ERROR_FLAG="Y";
+            }
+            if ( $DB_USR_NAME eq $ARGV[$i+1]) {
+
+                $ARGUMENT_ERROR_FLAG="Y";
+            }
+            $i = $i + 2 ;
+      }
+   } elsif  ($ARGV[$i] eq "-h") {
+
+      if ( ! $LIBSOURCE1 ) {
+                $HANDLER_FLAG="Y";
+                $HANDLER_NAME=$ARGV[$i+1];
+      } else {
+
+                $ARGUMENT_ERROR_FLAG="Y";
+      }
+      $i = $i + 2 ;
+  } elsif  ($ARGV[$i] eq "-p") {
+
+      if ( !$LIBSOURCE1 ) {
+                $PURGE_PU_FLAG="Y";
+                $PURGE_PU_NAME=$ARGV[$i+1];
+      } else {
+                $ARGUMENT_ERROR_FLAG="Y";
+      }
+      $i = $i + 2 ;
+  } elsif  ($ARGV[$i] eq "-l") {
+      if ( ! $LIBSOURCE1 ) {
+                $LOGFILE=$ARGV[$i+1];
+      } else {
+                $ARGUMENT_ERROR_FLAG="Y";
+      }
+      $i = $i + 2 ;
+  } elsif  ($ARGV[$i] eq "-t") {
+      if ( ! $LIBSOURCE1 ) {
+                $TMP_DIR=$ARGV[$i+1];
+      } else {
+                $ARGUMENT_ERROR_FLAG="Y";
+      }
+      $i = $i + 2 ;
+  } else  {
+
+      if ( !$LIBSOURCE1) {
+                $LIBSOURCE1=$ARGV[$i];
+      } else {
+           if ( ! $LIBSOURCE2 ) {
+                $LIBSOURCE2=$ARGV[$i];
+           } else {
+                    if ( ! $LIBTARGET ) {
+                        $LIBTARGET=$ARGV[$i];
+                    } else {
+
+                        $ARGUMENT_ERROR_FLAG="Y";
+                    }
+           }
+      }
+      $i++;  
+           
+  }
+}
+
+
+
+# ------------------------------------------------------------------------
+# Verifico que los argumentos pasados sean correctos
+# ------------------------------------------------------------------------
+if ( $ARGUMENT_ERROR_FLAG eq "Y") {
+   print "$L_PROGRAM_NAME: ERROR: Los argumentos recibidos son invalidos.\n";
+   ShowUsage();
+   exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: LOG FILE NAME
+# Definicion del archivo para logs
+# ------------------------------------------------------------------------
+if ( ! $LOGFILE ) {
+    $LOGFILE=$L_PROGRAM_NAME.".log";
+}
+
+if ( ! -f $LOGFILE ) {
+    open (LOGFH, ">$LOGFILE") || die "ERROR: No se pudo crear el archivo de log Archivo Log: $LOGFILE\n";
+} else {
+    open (LOGFH, ">>$LOGFILE") || die "ERROR: No se pudo crear el archivo de log Archivo Log: $LOGFILE\n";
+}
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: TEMPORARY DIRECTORY
+# Definicion del directorio para almacenar los archivos temporales
+# ------------------------------------------------------------------------
+if ( ! $TMP_DIR ) {
+    if ( $ENV{"APPLTMP"} ) {
+        $TMP_DIR=$ENV{"APPLTMP"};
+        if ( ! -d $TMP_DIR) {
+            $TMP_DIR="/tmp";
+        }
+    } else {
+        $TMP_DIR="/tmp";
+    }
+}
+if ( ! -d $TMP_DIR) {
+    print "ERROR: No se pudo definir el directorio temporal";
+    print "Directorio: $TMP_DIR";
+    exit $EXIT_CODE_ERROR;
+}
+$TMPFILE="$TMP_DIR/$L_PROGRAM_NAME.$$";
+open (TMPFH, "> $TMPFILE") || die "Error al abrir archivo temporal $TMPFILE\n" ;
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: LIBRERIA ORIGEN PRIMARIA
+# Verifico que exista la libreria origen primaria
+# ------------------------------------------------------------------------
+if ( ! $LIBSOURCE1 ) {
+    print "ERROR: No se especifico la libreria de origen primaria\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+if ( ! -f $LIBSOURCE1) {
+    print "ERROR: No existe la libreria origen primaria\n";
+    print "Libreria: $LIBSOURCE1\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: LIBRERIA ORIGEN SECUNDARIA
+# Verifico que exista la libreria origen secundaria
+# ------------------------------------------------------------------------
+if ( ! $LIBSOURCE2 ) {
+    print "ERROR: No se especifico la libreria de origen secundaria\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+if ( ! -f $LIBSOURCE2) {
+    print "ERROR: No existe la libreria origen secundaria\n";
+    print "Libreria: $LIBSOURCE2\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: LIBRERIA DESTINO
+# Verifico que se haya definido la libreria destino
+# ------------------------------------------------------------------------
+if ( ! $LIBTARGET ) {
+    print "ERROR: No se especifico la libreria de destino\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+if ( ! $REVISION_PU_NAME ) {
+    chomp($REVISION_PU_NAME=`basename $LIBTARGET .pll`);
+    $REVISION_PU_NAME=$REVISION_PU_NAME."_REVISION";
+}
+
+
+
+# ------------------------------------------------------------------------
+# PARAMETRO: USUARIO Y PASSWORD DE LA BASE DE DATOS
+# Verifico los datos del usuario y la password
+# ------------------------------------------------------------------------
+if ( ! $DBUSERPASSWORD ) {
+    print "ERROR: No se especificaron los datos del usuario y password\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+$l_result = system ("
+ sqlplus -s $DBUSERPASSWORD > /dev/null << END_OF_SQL
+ $DBUSERPASSWORD
+ $DBUSERPASSWORD
+ EXIT 0;
+END_OF_SQL
+");
+
+if ( $l_result ) {
+    print "ERROR: Usuario y password invalidos\n";
+    ShowUsage();
+    exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# Imprimo encabezado en el log del proceso
+# ------------------------------------------------------------------------
+PrintLog( " ");
+PrintLog( " INICIANDO FUSION DE LIBRERIAS " );
+PrintLog( " " );
+
+
+
+# ------------------------------------------------------------------------
+# Convierto a texto la libreria origen primaria
+# ------------------------------------------------------------------------
+
+chomp($BASELIBSOURCE1=`basename $LIBSOURCE1 .pll`);
+$OUTLIBSOURCE1="$TMP_DIR"."/"."$BASELIBSOURCE1.pri.$$.pld";
+PrintLog("- Convirtiendo a texto libreria origen primaria ... $OUTLIBSOURCE1");
+
+$l_result = system("frmcmp_batch module=$LIBSOURCE1 userid=$DBUSERPASSWORD module_type=library batch=yes compile_all=special script=yes output_file=$OUTLIBSOURCE1");
+
+if ( $l_result ) {
+    PrintLog( "ERROR: No se pudo convertir a texto la libreria origen primaria "); 
+    PrintLog( "Libreria: $LIBSOURCE1"); 
+    exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# Convierto a texto la libreria origen secundaria
+# ------------------------------------------------------------------------
+chomp($BASELIBSOURCE2=`basename $LIBSOURCE2 .pll`);
+$OUTLIBSOURCE2="$TMP_DIR"."/"."$BASELIBSOURCE2\.sec\.$$\.pld";
+PrintLog( "- Convirtiendo a texto libreria origen secundaria ... $OUTLIBSOURCE2" );
+
+$l_result = system("frmcmp_batch module=$LIBSOURCE2 userid=$DBUSERPASSWORD module_type=library batch=yes compile_all=special script=yes output_file=$OUTLIBSOURCE2");
+if ( $l_result ) {
+    PrintLog ( "ERROR: No se pudo convertir a texto la libreria origen secundaria " );
+    PrintLog ( "Libreria: $LIBSOURCE2"); 
+    exit $EXIT_CODE_ERROR;
+}
+
+
+
+# ------------------------------------------------------------------------
+# Genero la libreria destino de texto unicamente con los attachments
+# ------------------------------------------------------------------------
+chomp($BASELIBTARGET=`basename $LIBTARGET .pll`);
+$OUTLIBTARGET="$TMP_DIR"."/"."$BASELIBTARGET.new.$$.pld";
+
+PrintLog ( "- Inicializando libreria de texto destino ... $OUTLIBTARGET" );
+
+open (OUTLIBTFH, ">$OUTLIBTARGET") || die "No se puede escribir archivo Temporal $OUTLIBTARGET";
+
+
+open (LSFH, "$OUTLIBSOURCE1" ) || die "Error al abrir el archivo $OUTLIBSOURCE1\n";
+while (defined ($line = <LSFH>)) {
+
+      if ($line =~ /\.attach./) {
+
+          if ( ! exists $v_libraries{$line}) {
+
+             $v_libraries{$line} = "";
+
+          }
+      }
+} 
+close (LSFH);
+
+open (LS2FH, "$OUTLIBSOURCE2" ) || die "Error al abrir el archivo $OUTLIBSOURCE2\n";
+while (defined ($line = <LS2FH>)) {
+
+      if ($line =~ /\.attach./) {
+          if ( ! exists $v_libraries{$line}) {
+             $v_libraries{$line} = "";
+
+          }
+      }
+}
+close (LS2FH);
+
+print OUTLIBTFH keys(%v_libraries);
+
+close (OUTLIBTFH);
+
+
+# ------------------------------------------------------------------------
+# Genero el encabezado del script con las rutinas a utilizar
+# ------------------------------------------------------------------------
+print TMPFH "#!/usr/bin/perl -w
+
+# -------------------------------------------------------------
+#
+# Routine    : PrintLine
+# Purpose    : Imprime un texto por pantalla y en el log
+# Parameters : p_text : Texto a imprimir
+#              LOGFH  : Debe estar abierto el Log File Handler
+#
+# -------------------------------------------------------------
+sub PrintLine {
+    my( \$p_text ) = shift;
+    print \"\$p_text \\n\";
+    if ( \$LOGFILE ) {
+        print \$LOGFH \"\$p_text \\n\";
+    }
+}
+";
+
+
+print TMPFH "
+# --------------------------------------------------------------
+#
+# Routine    : AddProgramUnit
+# Purpose    : Extrae el codigo de la program unit indicada de
+#              la libraria origen y lo agrega en la libreria
+#              destino (al final).
+# Parameters : OUTLIBSOURCE : Libreria texto origen
+#              PROGRAMUNIT  : Nombre del program unit
+# Utiliza las siguientes variables globales
+#              OUTLIBTARGET : Libreria texto destino
+#              LOGFILE      : Archivo de log
+#
+# --------------------------------------------------------------
+sub AddProgramUnit {
+        my \$p_libsource = shift;
+        my \$p_program_unit = shift;
+
+        \$printflag='N';
+        print lib_target_fh \" \\n\";
+        print lib_target_fh \" \\n\";
+        print lib_target_fh \" \\n\";
+
+
+   \$NR = 0;
+   open (lib_source_fh, \$p_libsource) || die \"Error al abrir el archivo \$p_libsource\\n\";
+   while (defined (\$line = <lib_source_fh>)) {
+
+#FGBM
+# Eliminar Blancos al principio de la linea
+#      \$line=~s/^ *//;
+
+      # dividir la linea en campos de un vector separador=' '
+      \@vline = split /\\s+/ , \$line;
+      \$NF = \@vline;
+      \$NR++;
+
+      if (\$NF) {
+             # valido si es comienza el package pasado como parametro
+             if (\$line =~ /^\\s*PACKAGE\\s+BODY\\s+\$p_program_unit./i 
+              || \$line =~ /^\\s*PACKAGE\\s+\$p_program_unit./i ) { 
+                        \$printflag='Y';
+             } 
+
+             if (\$printflag eq 'Y') {
+                 print lib_target_fh \"\$line\";
+             }
+
+             if (\$line =~ /^END.\$p_program_unit./i 
+                  || \$line =~ /^END\\s*;./i ) {
+                     \$printflag='N';
+             }
+      } 
+    }
+   close (lib_source_fh);
+
+   if ( \$NR == 0 ) {
+       PrintLine( \"Error extrayendo la program unit de la librera origen.\");
+       PrintLine( \" Program Unit=\$p_program_unit\");
+       PrintLine( \" Libreria Origen=\$p_libsource\");
+       PrintLine( \" Libreria Destino=\$OUTLIBTARGET\");
+   }
+}
+";
+
+
+
+
+# ------------------------------------------------------------------------
+# Ejecuto el comando AWK para generar el shell script principal
+# ------------------------------------------------------------------------
+PrintLog ( "- Generando archivo de comandos para fusion ... " );
+
+$HANDLER_NAME  =~ tr/a-z/A-Z/;
+$PURGE_PU_FLAG =~ tr/a-z/A-Z/;
+$PURGE_PU_NAME =~ tr/a-z/A-Z/;
+$REVISION_PU_NAME =~ tr/a-z/A-Z/;
+$H_PACKAGES = "";
+
+   $NR = 0;
+   open (lib_source_fh, $OUTLIBSOURCE1) || die 'Error al abrir el archivo $OUTLIBSOURCE1\n';
+   while (defined ($line = <lib_source_fh>)) {
+      # Eliminar Blancos al principio de la linea
+      $line=~s/^ *//;
+
+      # dividir la linea en campos de un vector separador=' '
+      @vline = split /\s+/ , $line;
+      $NF = @vline;
+      $NR++;
+
+      if ($NF) {
+             $printlineflag ="Y";
+             if ($line =~ /PACKAGE*/i ) { 
+                if (! ($line =~ /PACKAGE\s+BODY./i )) { 
+                     if ($HANDLER_FLAG eq 'Y' && 
+                         $line =~ /.$HANDLER_NAME./i ) { 
+                         $printlineflag="N";
+                     }
+                     if ($PURGE_PU_FLAG eq "Y" &&
+                         $line =~ /.$PURGE_PU_NAME./i ) { 
+                         $printlineflag="N";
+                     }
+                     if ( $line =~ /.\s+$REVISION_PU_NAME./i) {
+                         $printlineflag="N";
+                     }
+                     if ($printlineflag eq "Y") {
+                          $H_PACKAGES{"$vline[1] 1 $OUTLIBSOURCE1"}= "";
+                     }
+                 }
+             }
+      } 
+
+   }
+   close (lib_source_fh);
+
+   $NR = 0;
+   open (lib_source_fh, $OUTLIBSOURCE2) || die 'Error al abrir el archivo \$OUTLIBSOURCE2\n';
+   while (defined ($line = <lib_source_fh>)) {
+      
+      # Eliminar Blancos al principio de la linea
+      $line    =~ s/^\s*//;
+
+      # dividir la linea en campos de un vector separador=' '
+      @vline = split /\s+/ , $line;
+      $NF = @vline;
+      $NR++;
+
+      if ($NF) {
+
+             $printlineflag="Y";
+             if ($line =~ /^PACKAGE*/i ) { 
+
+                if ( !($line =~ /^PACKAGE\s+BODY./i) ) { 
+
+                     if ($HANDLER_FLAG eq 'Y' && 
+                         $line =~ /.\s+$HANDLER_NAME./i ) { 
+
+                         $printlineflag="N";
+                     }
+                     if ($PURGE_PU_FLAG eq "Y" &&
+                         $line =~ /.\s+$PURGE_PU_NAME./i ) { 
+
+                         $printlineflag="N";
+                     }
+                     if ( $line =~ /.\s+$REVISION_PU_NAME./i) {
+                         $printlineflag="N";
+                     }
+                     if ($printlineflag eq "Y") {
+
+                          $H_PACKAGES{"$vline[1] 2 $OUTLIBSOURCE2"}= "";
+                     }
+                 }
+             }
+      } 
+   }
+
+   close (lib_source_fh);
+
+
+print TMPFH "
+#--------------------------------------------
+# Definiendo variables para el procesamiento 
+#--------------------------------------------
+\$OUTLIBTARGET=\"$OUTLIBTARGET\";
+\$LOGFILE=\"$LOGFILE\";
+\$EXIT_CODE_OK=\"$EXIT_CODE_OK\";
+\$EXIT_CODE_ERROR=\"$EXIT_CODE_ERROR\";
+\$L_PROGRAM_NAME=\"xxmergelib\";
+
+# ------------------------------------------------------------------------
+# PARAMETRO: LOG FILE NAME
+# Definicion del archivo para logs
+# ------------------------------------------------------------------------
+if ( ! \$LOGFILE ) {
+    \$LOGFILE=\$L_PROGRAM_NAME.'.log';
+}
+
+if ( ! -f \$LOGFILE ) {
+    open (LOGFH, \">\$LOGFILE\") || die \"ERROR: No se pudo crear el archivo de log Archivo Log: \$LOGFILE\\n\";
+} else {
+    open (LOGFH, \">>$LOGFILE\") || die \"ERROR: No se pudo crear el archivo de log Archivo Log: \$LOGFILE\\n\";
+}
+
+#--------------------------------------------
+# Inicio del procesamiento 
+#--------------------------------------------
+if ( ! -f \$OUTLIBTARGET ) {
+    \$l_result = open (lib_target_fh, \">\$OUTLIBTARGET\") ;
+    if (!\$l_result) {
+       print LOGFH \"ERROR: No se pudo abrir el archivo: \$OUTLIBTARGET\\n\";
+       exit \$EXIT_CODE_ERROR;
+    }
+} else {
+    \$l_result = open (lib_target_fh, \">>\$OUTLIBTARGET\") ;
+    if (!\$l_result) {
+       print LOGFH \"ERROR: No se pudo abrir el archivo: \$OUTLIBTARGET\\n\";
+       exit \$EXIT_CODE_ERROR;
+    }
+}
+
+";
+
+$prevpuname="xxxxxxxxxxxxx";
+$NR = 0;
+
+foreach $line_pkg (sort keys %H_PACKAGES) {
+
+      @vline = split /\s+/ , $line_pkg;
+      if ($prevpuname ne $line_pkg) {
+                   $l_program_unit = $vline[0];
+                   $l_program_unit =~ tr/a-z/A-Z/;
+                   print TMPFH "# ------------------------------------------------------\n";
+                   print TMPFH "# Agrego el Package \"$vline[0]\" de la libreria \"$l_program_unit\"\n";
+                   print TMPFH "# ------------------------------------------------------\n";
+                   print TMPFH "AddProgramUnit(\"$vline[2]\", \"$l_program_unit\");\n";
+                   print TMPFH " \n";
+                   print TMPFH " \n";
+                   $prevpuname=$vline[0];
+      }
+      $NR++;
+}
+
+print    TMPFH  "close (lib_target_fh);\n";
+print    TMPFH  "exit \$EXIT_CODE_OK;\n";
+print    TMPFH  "# Fin Agregar Program Unit \n";
+
+if ( $NR == 0 ) {
+    PrintLog( "ERROR: No se pudo encontrar paquetes para agregar." );
+    PrintLog( "Scrip: $TMPFILE"); 
+    exit $EXIT_CODE_ERROR;
+}
+
+# ------------------------------------------------------------------------ 
+# Cierro el archivo Temporal y el Log
+# ------------------------------------------------------------------------
+close (TMPFH);
+
+# ------------------------------------------------------------------------ 
+# Ejecuto el shell script creado anteriormente
+# ------------------------------------------------------------------------
+PrintLog( "- Fusionando librerias de texto ... " );
+
+chmod 0777, "$TMPFILE" ;
+
+$l_result = system ("$TMPFILE");
+#rm $TMPFILE
+if ( $l_result ) {
+    PrintLog ("ERROR: No se pudo fusionar las librerias." );
+    exit $EXIT_CODE_ERROR;
+}
+
+sub GetArgumentList(){
+    local($paramlist) = @_;
+
+
+
+    # Inicializo en nulo la lista de argumentos formateada
+    $formattedarglist = '';
+    # En primer lugar, elimino los parentesis
+    $ncount1 = ($s = "\\(", $paramlist =~ s/$s//g);
+    $ncount2 = ($s = "\\)", $paramlist =~ s/$s//g);
+
+    if ( ! $ncount1 && ! $ncount2 ) {
+        return $formattedarglist;
+        # Obtengo en un vector cada uno de los parametros de la lista
+        ;
+    }
+
+
+
+    # Obtengo en un vector cada uno de los parametros de la lista
+    $paramnum = (@paramarray = split(/,/, $paramlist, 9999));
+
+
+
+
+    for ($j = 0; $j <= $paramnum-1; $j++) {
+        $argpos = (@argumentvalue = split(' ', $paramarray[$j], 9999));
+
+
+        for ($k = 0; $k <= $argpos - 1; $k++) {
+            if ($argumentvalue[$k] ne "" && $argumentvalue[$k] ne "\t") {
+                $paramarray[$j] = $argumentvalue[$k];
+                last;
+            }
+        }
+    }
+
+
+    # Formateo cada argumento de la lista con el nombre que aplique
+    for ($j = 0; $j <= $paramnum -1; $j++) {
+
+        if ($paramarray[$j] =~ /EVENT./i ) {
+            $formattedarglist .= 'p_event_name';
+        }
+        else {
+            if ($paramarray[$j] =~ /BLOCK./i ) {
+                $formattedarglist .= 'l_block_name';
+            }
+            else {
+                if ($paramarray[$j] =~ /ITEM./i ) {
+                    $formattedarglist .= 'l_item_name';
+                }
+                else {
+                    $formattedarglist .= 'null';
+                }
+            }
+        }
+        if ($j < $paramnum - 1) {
+            $formattedarglist .= ', ';
+        }
+    }
+
+    # Agrego los parentesis a la lista de argumentos
+    if ($paramnum > 0) {
+        $formattedarglist = '(' . $formattedarglist . ')';
+    }
+
+    # Retorno la lista de argumentos formateada
+
+
+    $formattedarglist;
+
+}
+
+# ------------------------------------------------------------------------ 
+# Generacion de la rutina "handler"
+# ------------------------------------------------------------------------
+if ( $HANDLER_FLAG eq "Y" ) {
+
+   PrintLog ("- Generando rutina handler de la libreria ... " );
+
+#
+#  OUTLIBTARGET
+# 
+$formnameposition=1;
+$packagenamelength=3;
+$printflag="N";
+$currentpackagename="";
+$currentformname="";
+$withinevent="N";
+$withinzoom="N";
+$PKG_H="";
+
+
+   $NR = 0;
+   open (lib_target_fh, $OUTLIBTARGET) || die 'Error al abrir el archivo $OUTLIBTARGET\n';
+   while (defined ($line = <lib_target_fh>)) {
+      # Eliminar Blancos al principio de la linea
+      $line=~s/^ *//;
+
+      # dividir la linea en campos de un vector separador=' '
+      @vline = split /\s+/ , $line;
+      $NF = @vline;
+      $NR++;
+
+      if ($NF) {
+
+             $initialargument=1;
+             if ($line =~ /^PACKAGE*/i ) {
+
+                if (! ($line =~ /^PACKAGE\s+BODY./i) ) {
+
+                     if ( !( $line =~ /^\s*PACKAGE\s*$HANDLER_NAME/i) ) {
+
+                         @pnames =split /_/, $vline[1];
+                         $npos   = @pnames;
+                         if ($npos >= $formnameposition &&
+                             $npos >= $packagenamelength) {
+                           $printflag = "Y";
+                           $currentpackagename = $vline[1];
+                           $currentformname = $pnames[$formnameposition];
+                           $currentformname =~ tr/a-z/A-Z/;
+                         }
+                         else {
+                           $printflag = "N";
+                           $currentpackagename = "";
+                           $currentformname = "";
+                         }
+                     }
+                 } else {
+                     $printflag = "N";
+                 }
+             }
+             # Si printflag y es una linea de procedure
+             if ($printflag eq "Y" && $line =~ /\s*PROCEDURE./i) {
+
+                 if ( $line =~ /\s*PROCEDURE\s+EVENT./i )  {
+
+                    $withinevent="Y";
+                    $argumentlist="";
+                    $initialargument=3;
+
+                    if (length($vline[1]) > 5) {
+                        $nextchar = substr($vline[1], 5, 1);
+                        if ($nextchar ne " "  &&
+                            $nextchar ne "("  &&
+                            $nextchar ne "\t" &&
+                            $nextchar ne ";") {
+                            $withinevent="N";
+                        }
+                        else {
+                           $argumentlist=substr($vline[1], 5);
+                        }
+                    }
+                 }
+             }
+             if ($printflag eq "Y" && $line =~ /\s*FUNCTION./i) {
+
+                 if ( $line =~ /\s*FUNCTION\s*ZOOM_AVAILABLE./i ) { 
+
+                    $withinzoom="Y";
+                    $argumentlist="";
+                    $initialargument=3;
+                    if (length($vline[1]) > 14) {
+                        $nextchar = substr($vline[1], 15, 1);
+                        if ($nextchar ne " "  &&
+                            $nextchar ne "("  &&
+                            $nextchar ne "\t" &&
+                            $nextchar ne ";") {
+                            $withinzoom = "N";
+                        }
+                        else {
+                           $argumentlist=substr($2, 15);
+                        }
+                    }
+                 }
+             }
+             if ($printflag eq "Y" && 
+                 ($withinevent eq "Y" || $withinzoom eq "Y")) {
+
+                 for ($i=$initialargument; $i<=$NF; $i++) {
+
+                     $argumentlist = $argumentlist . " " . $vline[$i-1];
+                 }
+
+                 for ($i=1; $i<=length($argumentlist); $i++) {
+
+                     if (substr($argumentlist, $i, 1) eq ";") {
+                         $argumentlist=substr($argumentlist, 1, $i-1);
+                         if ($withinzoom eq "Y") {
+                             $firsttag="1_ZOOM";
+                         } else {
+
+                             $firsttag="2_EVENT";
+                         }
+
+                         $curr_arg = &GetArgumentList($argumentlist);
+
+
+                         $l_key = $firsttag . " " . $currentformname . " " . $currentpackagename . " " . $curr_arg;
+                         $PKG_H{$l_key} = "";
+                         $withinevent="N";
+                         $withinzoom="N";
+                         $argumentlist="";
+                         last;
+                     }
+                 }
+             }
+          }
+   } 
+
+close (lib_target_fh);
+
+open (lib_target_fh, ">>$OUTLIBTARGET") || die "ERROR: No se pudo crear el archivo de log\n Archivo: $OUTLIBTARGET\n";
+#   | sort | $AWKCMD ' BEGIN 
+
+#
+# Incializacion de variables
+#
+$linesprinted="N";
+$existszoomfunctions="N";
+$previousform="primero";
+$firsttime="Y";
+$openifflag="N";
+#
+# Impresion del encabezado del "handler"
+#
+print lib_target_fh "\n";
+print lib_target_fh "PACKAGE " . $HANDLER_NAME . " IS\n";
+print lib_target_fh " \n";
+print lib_target_fh "    FUNCTION zoom_available RETURN BOOLEAN;\n";
+print lib_target_fh " \n";
+print lib_target_fh "    PROCEDURE event(p_event_name IN VARCHAR2); \n";
+print lib_target_fh " \n";
+print lib_target_fh "END " . $HANDLER_NAME . ";\n";
+print lib_target_fh " \n";
+print lib_target_fh " \n";
+print lib_target_fh " \n";
+print lib_target_fh "PACKAGE BODY " . $HANDLER_NAME . " IS\n";
+print lib_target_fh " \n";
+print lib_target_fh "FUNCTION zoom_available RETURN BOOLEAN\n";
+print lib_target_fh "IS\n";
+print lib_target_fh "   l_form_name  VARCHAR2(240) := NAME_IN('system.current_form');\n";
+print lib_target_fh "   l_block_name VARCHAR2(240) := NAME_IN('system.current_block');\n";
+print lib_target_fh "   l_item_name  VARCHAR2(240) := NAME_IN('system.current_item');\n";
+print lib_target_fh "   l_return     BOOLEAN      := FALSE;\n";
+print lib_target_fh "BEGIN\n";
+
+foreach $line_pkg (sort keys %PKG_H) {
+      @vline = split /\s+/ , $line_pkg;
+      $NF = @vline;
+
+        
+              if ($vline[0] eq "1_ZOOM") {
+                 $existszoomfunctions="Y";
+                 if ($vline[1] ne $previousform ) {
+                     if ($previousform ne "primero") {
+                         if ($openifflag eq "Y") {
+                             $openifflag = "N";
+                             print lib_target_fh "  END IF;\n";
+                         }
+                         print lib_target_fh " \n";
+                     }
+                     $previousform=$vline[1];
+                     if (!($vline[1] =~ /$GENERIC_FORM_NAME/i )) {
+                         $openifflag="Y";
+                         $form_up = $vline[1];
+                         $form_up =~ tr/a-z/A-Z/;
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  -- Rutina para manejar zoom de la pantalla  $form_up \n";
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  IF (l_form_name = '$form_up') THEN\n";
+                     }
+                     else {
+                         $openifflag="N";
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  -- Rutina para manejar zooms genericos\n";
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                     }
+                 }
+                 $argumentlist="";
+                 for ($j=3; $j<=$NF-1; $j++) {
+                     $argumentlist .= " " . $vline[$j];
+                 }
+                 if ($openifflag eq "Y") {
+                     $indentspace="     ";
+                 } else {
+                     $indentspace="  ";
+                 }
+                 print lib_target_fh "$indentspace IF ( $vline[2]\.zoom_available $argumentlist ) THEN\n";
+                 print lib_target_fh "$indentspace     l_return := TRUE;\n";
+                 print lib_target_fh "$indentspace END IF;\n";
+
+              } else {
+                 if ($firsttime eq "Y") {
+                    if ($existszoomfunctions eq "Y") {
+                        if ($openifflag eq "Y") {
+                            $openifflag="N";
+                            print lib_target_fh "  END IF;\n";
+                        }
+                        print lib_target_fh " ";
+                    }
+                    print lib_target_fh "  RETURN l_return; \n";
+                    print lib_target_fh "  \n" ;
+                    print lib_target_fh "END zoom_available; \n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "PROCEDURE event(p_event_name IN VARCHAR2)\n";
+                    print lib_target_fh "IS\n";
+                    print lib_target_fh "  l_form_name  VARCHAR2(240) := NAME_IN('system.current_form');\n";
+                    print lib_target_fh "  l_block_name VARCHAR2(240) := NAME_IN('system.current_block');\n";
+                    print lib_target_fh "  l_item_name  VARCHAR2(240) := NAME_IN('system.current_item');\n";
+                    print lib_target_fh "BEGIN\n";
+                    $firsttime = "N";
+                    $previousform = "primero";
+                 }
+                 if ($vline[1] ne $previousform ) {
+                     if ($previousform ne "primero") {
+                        if ($openifflag eq "Y") {
+                            $openifflag="N";
+                            print lib_target_fh "  END IF;\n";
+                        }
+                        print lib_target_fh " \n";
+                     }
+                     $previousform=$vline[1];
+                     if (!($vline[1] =~ /$GENERIC_FORM_NAME/i)) {
+                         $openifflag="Y";
+                         $form_up = $vline[1];
+                         $form_up =~ tr/a-z/A-Z/;
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  -- Rutina para manejar eventos de la pantalla $form_up  \n" ;
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  IF (l_form_name = '$form_up') THEN\n";
+                     }
+                     else {
+                         $openifflag = "N";
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                         print lib_target_fh "  -- Rutina para manejar eventos genericos\n";
+                         print lib_target_fh "  --------------------------------------------------------------\n";
+                     }
+                 }
+                 $linesprinted="Y";
+                 $argumentlist=" ";
+
+                 for ($j=3; $j<=$NF-1; $j++) {
+                     $argumentlist .= " " . $vline[$j];
+                 }
+                 if ($openifflag eq "Y")  {
+                     $indentspace="    ";
+                 } else {
+                     $indentspace="  ";
+                 }
+
+                 print lib_target_fh "$indentspace" . "$vline[2]" . ".event " . "$argumentlist ;\n";
+              }
+}
+          if ($existszoomfunctions eq "N" && $linesprinted eq "N" ) {
+                    print lib_target_fh "  RETURN l_return;\n";
+                    print lib_target_fh " \n";
+                    print lib_target_fh "END zoom_available;\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "PROCEDURE event(p_event_name IN VARCHAR2)\n";
+                    print lib_target_fh "IS\n";
+                    print lib_target_fh "  l_form_name  VARCHAR2(240) := NAME_IN('system.current_form');\n";
+                    print lib_target_fh "  l_block_name VARCHAR2(240) := NAME_IN('system.current_block');\n";
+                    print lib_target_fh "  l_item_name  VARCHAR2(240) := NAME_IN('system.current_item');\n";
+                    print lib_target_fh "BEGIN\n";
+                    print lib_target_fh "  NULL;\n";
+          }
+
+          if ($existszoomfunctions eq "Y" && $linesprinted eq "N") {
+                    if ($openifflag eq "Y") {
+                        $openifflag="N";
+                        print lib_target_fh "  END IF;\n";
+                    }
+                    print lib_target_fh " \n";
+                    print lib_target_fh "  RETURN l_return;\n";
+                    print lib_target_fh " \n";
+                    print lib_target_fh "END zoom_available;\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "\n";
+                    print lib_target_fh "PROCEDURE event(p_event_name IN VARCHAR2)\n";
+                    print lib_target_fh "IS\n";
+                    print lib_target_fh "  l_form_name  VARCHAR2(240) := NAME_IN('system.current_form');\n";
+                    print lib_target_fh "  l_block_name VARCHAR2(240) := NAME_IN('system.current_block');\n";
+                    print lib_target_fh "  l_item_name  VARCHAR2(240) := NAME_IN('system.current_item');\n";
+                    print lib_target_fh "BEGIN\n";
+                    print lib_target_fh "  NULL;\n";
+          }
+          if ($linesprinted eq "Y") {
+                  if ($openifflag eq "Y") {
+                      $openifflag="N";
+                      print lib_target_fh "  END IF;\n";
+                  }
+          }
+          print lib_target_fh " \n";
+          print lib_target_fh "END event;\n";
+          print lib_target_fh " \n";
+          print lib_target_fh "END $HANDLER_NAME ;\n";
+          print lib_target_fh " \n";
+
+   close (lib_target_fh);
+# Fin HANDLER_FLAG = Y
+}
+
+
+# ------------------------------------------------------------------------ 
+# Finalmente, convierto la libreria de texto destino en la pll
+# ------------------------------------------------------------------------
+PrintLog ( "- Validando libreria final fusionada ... ");
+
+$l_result = system("frmcmp_batch module=$OUTLIBTARGET userid=$DBUSERPASSWORD module_type=library batch=yes compile_all=special parse=yes output_file=$LIBTARGET");
+
+if ( $l_result ) {
+    PrintLog ("ERROR: No se pudo generar la libreria fusionada." );
+    PrintLog ("Libreria: $LIBTARGET" );
+    exit $EXIT_CODE_ERROR;
+}
+
+# ------------------------------------------------------------------------ 
+# Borro archivos temporales
+# ------------------------------------------------------------------------
+#system("rm $TMPFILE");
+#system("rm $OUTLIBSOURCE1");
+#system("rm $OUTLIBSOURCE2");
+#system("rm $OUTLIBTARGET");
+
+# ------------------------------------------------------------------------
+# Imprimo fin en el log del proceso
+# ------------------------------------------------------------------------
+PrintLog( " " );
+PrintLog( " " );
+PrintLog( " FUSION DE LIBRERIAS FINALIZADA" );
+PrintLog( " " );
+PrintLog( " " );
+
+close (LOGFH);
+
+
