@@ -1,0 +1,5 @@
+XBOL_TOP=$PWD/xbol
+
+export XBOL_TOP
+
+echo $XBOL_TOP
