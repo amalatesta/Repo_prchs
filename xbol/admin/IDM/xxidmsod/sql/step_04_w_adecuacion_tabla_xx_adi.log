@@ -1,0 +1,11 @@
+=====================================================================
+Script step_04_w_adecuacion_tabla_xx_adi.sql
+=====================================================================
+BEGIN
+*
+ERROR at line 1:
+ORA-00904: "FIRST_NAME": invalid identifier 
+ORA-06512: at line 3 
+
+
+No errors.

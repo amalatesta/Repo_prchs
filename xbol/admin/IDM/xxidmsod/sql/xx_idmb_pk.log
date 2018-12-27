@@ -1,0 +1,33 @@
+=====================================================================
+Script xx_idmb_pk.sql - Body de package xx_idm_pkg
+=====================================================================
+
+Warning: Package Body created with compilation errors.
+
+Errors for PACKAGE BODY APPS.XX_IDM_PKG:
+
+LINE/COL ERROR                                                                  
+-------- -----------------------------------------------------------------      
+954/5    PL/SQL: SQL Statement ignored                                          
+973/12   PL/SQL: ORA-00904: "SUPERV_EMAIL": invalid identifier                  
+1238/5   PL/SQL: SQL Statement ignored                                          
+1248/12  PL/SQL: ORA-00904: "USER_ID": invalid identifier                       
+1307/7   PL/SQL: Statement ignored                                              
+1307/46  PLS-00302: component 'EMAIL_ADDRESS' must be declared                  
+1420/15  PL/SQL: SQL Statement ignored                                          
+1421/22  PL/SQL: ORA-00904: "OPERATION": invalid identifier                     
+1529/9   PL/SQL: SQL Statement ignored                                          
+1532/49  PL/SQL: ORA-00904: "RADI"."WORKER_ID": invalid identifier              
+1532/54  PLS-00302: component 'WORKER_ID' must be declared                      
+
+LINE/COL ERROR                                                                  
+-------- -----------------------------------------------------------------      
+1543/12  PL/SQL: Statement ignored                                              
+1543/81  PLS-00302: component 'WORKER_ID' must be declared                      
+1604/9   PL/SQL: Statement ignored                                              
+1604/66  PLS-00302: component 'SUPERV_EMAIL' must be declared                   
+1670/11  PL/SQL: Statement ignored                                              
+1687/68  PLS-00302: component 'EMAIL_ADDRESS' must be declared                  
+1999/23  PL/SQL: SQL Statement ignored                                          
+1999/93  PL/SQL: ORA-00904: "RADI"."WORKER_ID": invalid identifier              
+1999/98  PLS-00302: component 'WORKER_ID' must be declared                      
